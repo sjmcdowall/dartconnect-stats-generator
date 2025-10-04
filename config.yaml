@@ -1,0 +1,36 @@
+# DartConnect Statistics Generator Configuration
+
+# Data processing settings
+data_processing:
+  date_format: '%Y-%m-%d'
+  decimal_places: 2
+  min_games_threshold: 5
+
+# PDF report configurations
+pdf_reports:
+  report1:
+    title: 'League Statistics Report'
+    page_size: 'A4'
+    font_family: 'Helvetica'
+    font_size: 10
+    include_charts: true
+    
+  report2:
+    title: 'Player Performance Report'
+    page_size: 'A4'
+    font_family: 'Helvetica'
+    font_size: 10
+    include_charts: true
+
+# Statistics calculation settings
+statistics:
+  calculate_averages: true
+  calculate_percentiles: true
+  calculate_trends: true
+  rolling_window_games: 10
+
+# League-specific settings (customize as needed)
+league:
+  name: 'Dart League'
+  season: '2024'
+  contact_info: 'league@example.com'
