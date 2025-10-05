@@ -128,6 +128,11 @@ Cricket QPs require combining marks + bulls:
 2. Use `3B`, `4B`, `5B`, `6B` columns for bull-only QPs
 3. For combinations (marks + bulls), we may need to estimate or use the `5M+` and `7M+` aggregates
 4. The `HT` (High Turn) column might give us the maximum and help validate
+5. **If needed for complex combinations**: Parse the `Report Link` URL from By_Leg export
+   - Each leg has a `Report Link` field with URL to turn-by-turn HTML detail
+   - Example: `https://recap.dartconnect.com/history/report/match/68aba095f978cb217a4c5457`
+   - This provides throw-by-throw data for exact QP calculation
+   - Can be used as fallback for complex Cricket QP combinations
 
 ---
 
@@ -199,9 +204,36 @@ RATING:
 
 ### Recommendations:
 1. **Start Simple**: Use the direct field mappings first (pure marks, pure turns)
-2. **Estimate Complex QPs**: Use statistical methods for combinations
-3. **Request Additional Exports**: If DartConnect can provide match-level detail, QP calculation becomes exact
+2. **Use Leaderboard Files**: The aggregated 5M, 6M, 7M, 8M, 9M, 3B, 4B, 5B, 6B columns provide counts
+3. **Advanced (If Needed)**: Parse `Report Link` URLs from By_Leg export for turn-by-turn detail
+   - This HTML page shows each individual turn's marks and bulls
+   - Allows exact calculation of complex combinations (2B+2H, 3H+1B, etc.)
+   - Can be scraped/parsed if higher accuracy is required
 4. **Manual QP Entry**: For edge cases, allow manual QP input to supplement automated calculation
+
+### Turn-by-Turn Data Access
+
+**From By_Leg Export:**
+Each row includes a `Report Link` field with URL format:
+```
+https://recap.dartconnect.com/history/report/match/{match_id}
+```
+
+This URL provides:
+- Complete throw-by-throw detail for that leg
+- Exact marks and bulls per turn
+- Score/mark progression
+- Can be fetched via HTTP request and parsed
+
+**When to Use:**
+- For precise Cricket QP combinations that can't be inferred from aggregates
+- For validation/audit of QP calculations
+- For special achievements tracking (if not in summary stats)
+
+**Implementation Note:**
+- Start with simpler aggregated stats
+- Only fetch detailed reports if accuracy requires it
+- Consider caching to avoid repeated HTTP requests
 
 ---
 
