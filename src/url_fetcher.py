@@ -78,8 +78,10 @@ class DartConnectURLFetcher:
             parsed = urlparse(url)
             return (
                 parsed.netloc == 'recap.dartconnect.com' and
-                parsed.path.startswith('/games/') and
-                len(parsed.path.split('/')) >= 3
+                (
+                    (parsed.path.startswith('/games/') and len(parsed.path.split('/')) >= 3) or
+                    (parsed.path.startswith('/history/report/match/') and len(parsed.path.split('/')) >= 5)
+                )
             )
         except Exception:
             return False

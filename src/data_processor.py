@@ -6,8 +6,10 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 import logging
+from urllib.parse import urlparse
 
 from .config import Config
+from .url_fetcher import DartConnectURLFetcher
 
 
 class DataProcessor:
@@ -24,6 +26,7 @@ class DataProcessor:
         self.data_config = config.get_data_processing_config()
         self.stats_config = config.get_statistics_config()
         self.logger = logging.getLogger(__name__)
+        self.url_fetcher = DartConnectURLFetcher()
     
     def process_file(self, file_path: str) -> Dict[str, Any]:
         """
@@ -49,10 +52,14 @@ class DataProcessor:
         # Generate derived metrics
         derived_metrics = self._calculate_derived_metrics(df)
         
+        # Process URLs if available
+        enhanced_data = self._process_dartconnect_urls(df)
+        
         return {
             'raw_data': df,
             'statistics': statistics,
             'derived_metrics': derived_metrics,
+            'enhanced_data': enhanced_data,
             'summary': self._generate_summary(df, statistics),
             'processed_at': datetime.now().isoformat()
         }
@@ -77,17 +84,29 @@ class DataProcessor:
     
     def _clean_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Clean and validate the data."""
-        # Remove rows with missing essential data
-        essential_columns = ['player_name', 'game_date']
-        
         # Check if essential columns exist (flexible column names)
         column_mapping = self._map_columns(df.columns)
         
         # Rename columns to standard names
         df = df.rename(columns=column_mapping)
         
+        # Create full player name if we have separate first/last names
+        if 'player_name' not in df.columns and 'last_name' in df.columns:
+            first_name = df.get('player_name', '') if 'player_name' in df.columns else ''
+            last_name = df.get('last_name', '') if 'last_name' in df.columns else ''
+            # For DartConnect exports, often the last name column contains "Last, F" format
+            # Check what the actual first name column is called after mapping
+            first_name_col = 'player_name' if 'player_name' in df.columns else 'First Name'
+            df['player_name'] = df.apply(lambda row: 
+                self._create_full_name(row.get('last_name', ''), row.get(first_name_col, '')), axis=1)
+        
         # Remove rows with missing essential data
-        df = df.dropna(subset=['player_name', 'game_date'])
+        essential_columns = ['player_name'] if 'player_name' in df.columns else []
+        if 'game_date' in df.columns:
+            essential_columns.append('game_date')
+        
+        if essential_columns:
+            df = df.dropna(subset=essential_columns)
         
         # Convert date column to datetime
         try:
@@ -110,12 +129,18 @@ class DataProcessor:
         
         # Common DartConnect column patterns
         patterns = {
-            'player_name': ['player', 'name', 'player_name', 'playername'],
+            'player_name': ['player', 'name', 'player_name', 'playername', 'first name'],
+            'last_name': ['last name, fi', 'lastname', 'last_name'],
             'game_date': ['date', 'game_date', 'gamedate', 'match_date'],
-            'score': ['score', 'total_score', 'points'],
-            'average': ['avg', 'average', 'dart_average'],
+            'score': ['score', 'total_score', 'points', 'pts/marks'],
+            'average': ['avg', 'average', 'dart_average', '3da'],
             'checkout_percentage': ['checkout', 'checkout_pct', 'checkout_percentage'],
-            'games_played': ['games', 'games_played', 'matches']
+            'games_played': ['games', 'games_played', 'matches'],
+            'game_name': ['game name', 'game_name', 'game_type'],
+            'win': ['win', 'result', 'w/l'],
+            'darts': ['darts', 'dart_count'],
+            'report_url': ['report link', 'report_link', 'report_url'],
+            'event_url': ['event link', 'event_link', 'event_url']
         }
         
         for standard_name, possible_names in patterns.items():
@@ -270,3 +295,142 @@ class DataProcessor:
         }
         
         return summary
+    
+    def _create_full_name(self, last_name_field: str, first_name_field: str) -> str:
+        """Create full name from DartConnect name fields."""
+        if not last_name_field and not first_name_field:
+            return ''
+        
+        # Handle "Last, F" format common in DartConnect exports
+        if last_name_field and ',' in last_name_field:
+            parts = last_name_field.split(',')
+            last_name = parts[0].strip()
+            first_initial = parts[1].strip() if len(parts) > 1 else ''
+            
+            # Use full first name if available, otherwise use initial
+            if first_name_field.strip():
+                return f"{first_name_field.strip()} {last_name}"
+            else:
+                return f"{first_initial} {last_name}" if first_initial else last_name
+        
+        # Standard first + last name combination
+        first = first_name_field.strip() if first_name_field else ''
+        last = last_name_field.strip() if last_name_field else ''
+        return f"{first} {last}".strip()
+    
+    def _process_dartconnect_urls(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """Process DartConnect URLs to fetch detailed game data."""
+        enhanced_data = {
+            'urls_processed': 0,
+            'urls_failed': 0,
+            'enhanced_games': [],
+            'cricket_qp_data': [],
+            'enhanced_statistics': {}
+        }
+        
+        if 'report_url' not in df.columns:
+            self.logger.info("No report URLs found in data")
+            return enhanced_data
+        
+        # Get unique URLs to avoid duplicate fetching
+        unique_urls = df[df['report_url'].notna()]['report_url'].unique()
+        
+        self.logger.info(f"Processing {len(unique_urls)} unique DartConnect URLs")
+        
+        url_to_game_data = {}
+        
+        # Fetch detailed data for each URL
+        for url in unique_urls:
+            try:
+                # Convert match report URL to game URL format if needed
+                game_url = self._convert_to_game_url(url)
+                game_data = self.url_fetcher.fetch_game_data(game_url)
+                
+                if game_data:
+                    url_to_game_data[url] = game_data
+                    enhanced_data['urls_processed'] += 1
+                    
+                    # Extract Cricket games for enhanced QP calculation
+                    cricket_games = self.url_fetcher.extract_cricket_stats(game_data)
+                    if cricket_games:
+                        enhanced_data['cricket_qp_data'].extend(cricket_games)
+                else:
+                    enhanced_data['urls_failed'] += 1
+                    
+            except Exception as e:
+                self.logger.error(f"Failed to process URL {url}: {e}")
+                enhanced_data['urls_failed'] += 1
+        
+        # Enhanced quality point calculations for Cricket games
+        if enhanced_data['cricket_qp_data']:
+            enhanced_data['enhanced_statistics'] = self._calculate_enhanced_qp_stats(
+                df, enhanced_data['cricket_qp_data']
+            )
+        
+        # Store enhanced games data
+        enhanced_data['enhanced_games'] = list(url_to_game_data.values())
+        
+        self.logger.info(f"Enhanced data processing complete: "
+                        f"{enhanced_data['urls_processed']} successful, "
+                        f"{enhanced_data['urls_failed']} failed")
+        
+        return enhanced_data
+    
+    def _convert_to_game_url(self, report_url: str) -> str:
+        """Convert DartConnect report URL to game URL format."""
+        if '/history/report/match/' in report_url:
+            # Extract match ID from report URL
+            match_id = report_url.split('/history/report/match/')[-1]
+            # Convert to game URL format expected by url_fetcher
+            return f"https://recap.dartconnect.com/games/{match_id}"
+        return report_url
+    
+    def _calculate_enhanced_qp_stats(self, df: pd.DataFrame, cricket_games: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Calculate enhanced quality point statistics using detailed game data."""
+        enhanced_stats = {
+            'cricket_enhanced_qp': {},
+            'player_enhanced_stats': {},
+            'qp_distribution': {}
+        }
+        
+        # Create player QP tracking
+        player_qp_totals = {}
+        
+        for game in cricket_games:
+            for player_stats in game.get('players', []):
+                player_name = player_stats.get('name')
+                if not player_name:
+                    continue
+                
+                # Calculate enhanced Cricket QP using detailed data
+                qp = self.url_fetcher.calculate_cricket_qp(player_stats)
+                
+                if player_name not in player_qp_totals:
+                    player_qp_totals[player_name] = {
+                        'total_qp': 0,
+                        'cricket_games': 0,
+                        'enhanced_games': 0
+                    }
+                
+                player_qp_totals[player_name]['total_qp'] += qp
+                player_qp_totals[player_name]['cricket_games'] += 1
+                player_qp_totals[player_name]['enhanced_games'] += 1
+        
+        # Calculate QP distribution
+        qp_values = [stats['total_qp'] for stats in player_qp_totals.values()]
+        if qp_values:
+            enhanced_stats['qp_distribution'] = {
+                'mean': np.mean(qp_values),
+                'std': np.std(qp_values),
+                'min': np.min(qp_values),
+                'max': np.max(qp_values),
+                'percentiles': {
+                    '25th': np.percentile(qp_values, 25),
+                    '50th': np.percentile(qp_values, 50),
+                    '75th': np.percentile(qp_values, 75)
+                }
+            }
+        
+        enhanced_stats['cricket_enhanced_qp'] = player_qp_totals
+        
+        return enhanced_stats
