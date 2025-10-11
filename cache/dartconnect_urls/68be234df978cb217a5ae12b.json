@@ -1,0 +1,2539 @@
+{
+  "url": "https://recap.dartconnect.com/games/68be234df978cb217a5ae12b",
+  "cached_at": "2025-10-11T15:55:11.079562",
+  "game_data": {
+    "errors": {},
+    "auth": {
+      "user": null
+    },
+    "ziggy": {
+      "url": "https://recap.dartconnect.com",
+      "port": null,
+      "defaults": [],
+      "routes": {
+        "horizon.stats.index": {
+          "uri": "horizon/api/stats",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.workload.index": {
+          "uri": "horizon/api/workload",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.masters.index": {
+          "uri": "horizon/api/masters",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.monitoring.index": {
+          "uri": "horizon/api/monitoring",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.monitoring.store": {
+          "uri": "horizon/api/monitoring",
+          "methods": [
+            "POST"
+          ]
+        },
+        "horizon.monitoring-tag.paginate": {
+          "uri": "horizon/api/monitoring/{tag}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "tag"
+          ]
+        },
+        "horizon.monitoring-tag.destroy": {
+          "uri": "horizon/api/monitoring/{tag}",
+          "methods": [
+            "DELETE"
+          ],
+          "wheres": {
+            "tag": ".*"
+          },
+          "parameters": [
+            "tag"
+          ]
+        },
+        "horizon.jobs-metrics.index": {
+          "uri": "horizon/api/metrics/jobs",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.jobs-metrics.show": {
+          "uri": "horizon/api/metrics/jobs/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.queues-metrics.index": {
+          "uri": "horizon/api/metrics/queues",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.queues-metrics.show": {
+          "uri": "horizon/api/metrics/queues/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs-batches.index": {
+          "uri": "horizon/api/batches",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.jobs-batches.show": {
+          "uri": "horizon/api/batches/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs-batches.retry": {
+          "uri": "horizon/api/batches/retry/{id}",
+          "methods": [
+            "POST"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.pending-jobs.index": {
+          "uri": "horizon/api/jobs/pending",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.completed-jobs.index": {
+          "uri": "horizon/api/jobs/completed",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.silenced-jobs.index": {
+          "uri": "horizon/api/jobs/silenced",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.failed-jobs.index": {
+          "uri": "horizon/api/jobs/failed",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.failed-jobs.show": {
+          "uri": "horizon/api/jobs/failed/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.retry-jobs.show": {
+          "uri": "horizon/api/jobs/retry/{id}",
+          "methods": [
+            "POST"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs.show": {
+          "uri": "horizon/api/jobs/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.index": {
+          "uri": "horizon/{view?}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "wheres": {
+            "view": "(.*)"
+          },
+          "parameters": [
+            "view"
+          ]
+        },
+        "sanctum.csrf-cookie": {
+          "uri": "sanctum/csrf-cookie",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "ignition.healthCheck": {
+          "uri": "_ignition/health-check",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "ignition.executeSolution": {
+          "uri": "_ignition/execute-solution",
+          "methods": [
+            "POST"
+          ]
+        },
+        "ignition.updateConfig": {
+          "uri": "_ignition/update-config",
+          "methods": [
+            "POST"
+          ]
+        },
+        "login": {
+          "uri": "login",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "logout": {
+          "uri": "logout",
+          "methods": [
+            "POST"
+          ]
+        },
+        "matches.show": {
+          "uri": "matches/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "games.show": {
+          "uri": "games/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "players.show": {
+          "uri": "players/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "counts.show": {
+          "uri": "counts/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        }
+      },
+      "location": "https://recap.dartconnect.com/games/68be234df978cb217a5ae12b"
+    },
+    "matchInfo": {
+      "recapv1_url": "https://recapv1.dartconnect.com/history/report/match/68be234df978cb217a5ae12b",
+      "mergedmatch_url": "https://recapv1.dartconnect.com/history/report/event/800981",
+      "away_label": "Just the Tips",
+      "competition_title": "Winston Salem Sunday Night Dart League",
+      "der": 88,
+      "division_standings_url": "https://tv.dartconnect.com/leaguestandings/WinSSNDL/17423/66062",
+      "event_title": "Fall/Winter 2025",
+      "division_title": "Division: Winston",
+      "report_dart_avg_units": "PPR",
+      "game_time": "01:07",
+      "has_01": true,
+      "has_cricket": true,
+      "home_label": "Slop Counts",
+      "league_id": "WinSSNDL",
+      "board_type": null,
+      "id": "68be234df978cb217a5ae12b",
+      "league_match_id": 6689029,
+      "tournament_id": null,
+      "remote_play": 0,
+      "bracket_match_id": null,
+      "tournament_match": null,
+      "leaderboard_url": "https://leaderboard.dartconnect.com/leaderboard#l-6ncb_17423_all-all_01-all-all-all-all-all",
+      "match_end_date": "8:21 PM",
+      "match_length": "01:16",
+      "match_start_date": "7:04 PM",
+      "more_darts_url": "https://tv.dartconnect.com/leaguemenu/WinSSNDL",
+      "mpr": "1.3",
+      "opponents": [
+        {
+          "darts_thrown_mpr": "123",
+          "darts_thrown_ppr": "143",
+          "league_points": 1,
+          "league_standings_points": 1,
+          "leg_wins": 3,
+          "marks_scored": "54",
+          "mpr": "1.3",
+          "name": "Slop Counts",
+          "points_scored_mpr": "0",
+          "points_scored_ppr": "1,469",
+          "ppr": "30.82",
+          "score": 1,
+          "set_wins": 1
+        },
+        {
+          "darts_thrown_mpr": "123",
+          "darts_thrown_ppr": "142",
+          "league_points": 1,
+          "league_standings_points": 1,
+          "leg_wins": 2,
+          "marks_scored": "49",
+          "mpr": "1.2",
+          "name": "Just the Tips",
+          "points_scored_mpr": "0",
+          "points_scored_ppr": "1,487",
+          "ppr": "31.42",
+          "score": 1,
+          "set_wins": 1
+        }
+      ],
+      "page_title": "e12b",
+      "ppr_01": "31.12",
+      "server_match_start_date": "Sun, 7-Sep-2025",
+      "total_01_darts_thrown": "285",
+      "total_cricket_darts_thrown": "246",
+      "total_darts_thrown": "531",
+      "total_games": 5,
+      "total_marks_scored": "103",
+      "total_matches": 1,
+      "total_points_scored": "2,956",
+      "total_sets": 2,
+      "match_winner": null,
+      "points_style": "Award SET WIN Points according to Team Size",
+      "standings_points_style": null,
+      "bonus_points": "",
+      "notes": {
+        "pub_notes": null,
+        "sets": [],
+        "games": []
+      }
+    },
+    "segments": {
+      "": [
+        [
+          {
+            "set_index": 1,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "501 SIDO",
+            "winner_index": 0,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "13:06",
+            "out_format": "DO",
+            "score_type": "P",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "34.16",
+              "mpr": "0.0",
+              "darts_thrown": 44,
+              "ending_points": 0,
+              "ending_marks": null
+            },
+            "away": {
+              "ppr": "32.33",
+              "mpr": "0.0",
+              "darts_thrown": null,
+              "ending_points": 16,
+              "ending_marks": null
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 426,
+                  "color": null,
+                  "turn_score": 75
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 437,
+                  "color": null,
+                  "turn_score": 64
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 395,
+                  "color": null,
+                  "turn_score": 31
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 380,
+                  "color": null,
+                  "turn_score": 57
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 376,
+                  "color": null,
+                  "turn_score": 19
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 355,
+                  "color": null,
+                  "turn_score": 25
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 349,
+                  "color": null,
+                  "turn_score": 27
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 338,
+                  "color": null,
+                  "turn_score": 17
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 304,
+                  "color": null,
+                  "turn_score": 45
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 253,
+                  "color": null,
+                  "turn_score": 85
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 261,
+                  "color": null,
+                  "turn_score": 43
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": 133,
+                  "name": "Cissy Mealin",
+                  "current_score": 120,
+                  "color": "TON 33",
+                  "turn_score": 133
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "98",
+                  "name": "Jodi Koment",
+                  "current_score": 163,
+                  "color": "98!",
+                  "turn_score": 98
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 96,
+                  "color": null,
+                  "turn_score": 24
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "97",
+                  "name": "Jodi Koment",
+                  "current_score": 66,
+                  "color": "97!",
+                  "turn_score": 97
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 66,
+                  "color": null,
+                  "turn_score": 30
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": 46
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 32,
+                  "color": null,
+                  "turn_score": 34
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 20,
+                  "color": "BUST",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 32,
+                  "color": "BUST",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 10,
+                  "color": null,
+                  "turn_score": 10
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 32,
+                  "color": "BUST",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 10,
+                  "color": "BUST",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 16,
+                  "color": null,
+                  "turn_score": 16
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 5,
+                  "color": null,
+                  "turn_score": 5
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 16,
+                  "color": "BUST",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 5,
+                  "color": "BUST",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 16,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "DO (2)",
+                  "name": "Jodi Koment",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": 5
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 16,
+                  "color": "BUST",
+                  "turn_score": null
+                }
+              }
+            ]
+          },
+          {
+            "set_index": 1,
+            "set_game_number": 2,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "501 SIDO",
+            "winner_index": 1,
+            "starting_opponent_index": 0,
+            "cork_winner": null,
+            "duration": "08:40",
+            "out_format": "DO",
+            "score_type": "P",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "43.36",
+              "mpr": "0.0",
+              "darts_thrown": null,
+              "ending_points": 24,
+              "ending_marks": null
+            },
+            "away": {
+              "ppr": "48.48",
+              "mpr": "0.0",
+              "darts_thrown": 31,
+              "ending_points": 0,
+              "ending_marks": null
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 448,
+                  "color": null,
+                  "turn_score": 53
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 488,
+                  "color": null,
+                  "turn_score": 13
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 443,
+                  "color": null,
+                  "turn_score": 5
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 450,
+                  "color": null,
+                  "turn_score": 38
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 381,
+                  "color": null,
+                  "turn_score": 62
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": 117,
+                  "name": "Cissy Mealin",
+                  "current_score": 333,
+                  "color": "TON 17",
+                  "turn_score": 117
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 342,
+                  "color": null,
+                  "turn_score": 39
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 298,
+                  "color": null,
+                  "turn_score": 35
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 337,
+                  "color": null,
+                  "turn_score": 5
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 257,
+                  "color": null,
+                  "turn_score": 41
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 287,
+                  "color": null,
+                  "turn_score": 50
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 200,
+                  "color": null,
+                  "turn_score": 57
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": 102,
+                  "name": "Jodi Koment",
+                  "current_score": 185,
+                  "color": "TON 2",
+                  "turn_score": 102
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 176,
+                  "color": null,
+                  "turn_score": 24
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 140,
+                  "color": null,
+                  "turn_score": 45
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 116,
+                  "color": null,
+                  "turn_score": 60
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 99,
+                  "color": null,
+                  "turn_score": 41
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 72,
+                  "color": null,
+                  "turn_score": 44
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 24,
+                  "color": null,
+                  "turn_score": 75
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 16,
+                  "color": null,
+                  "turn_score": 56
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 24,
+                  "color": "BUST",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "DO (1)",
+                  "name": "Cissy Mealin",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": 16
+                }
+              }
+            ]
+          },
+          {
+            "set_index": 1,
+            "set_game_number": 3,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "501 SIDO",
+            "winner_index": 1,
+            "starting_opponent_index": 0,
+            "cork_winner": null,
+            "duration": "19:27",
+            "out_format": "DO",
+            "score_type": "P",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "22.32",
+              "mpr": "0.0",
+              "darts_thrown": null,
+              "ending_points": 10,
+              "ending_marks": null
+            },
+            "away": {
+              "ppr": "22.77",
+              "mpr": "0.0",
+              "darts_thrown": 66,
+              "ending_points": 0,
+              "ending_marks": null
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 475,
+                  "color": null,
+                  "turn_score": 26
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 466,
+                  "color": null,
+                  "turn_score": 35
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 417,
+                  "color": null,
+                  "turn_score": 58
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 426,
+                  "color": null,
+                  "turn_score": 40
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 377,
+                  "color": null,
+                  "turn_score": 40
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 381,
+                  "color": null,
+                  "turn_score": 45
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 360,
+                  "color": null,
+                  "turn_score": 17
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 346,
+                  "color": null,
+                  "turn_score": 35
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 319,
+                  "color": null,
+                  "turn_score": 41
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 325,
+                  "color": null,
+                  "turn_score": 21
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 297,
+                  "color": null,
+                  "turn_score": 22
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 293,
+                  "color": null,
+                  "turn_score": 32
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 280,
+                  "color": null,
+                  "turn_score": 17
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 254,
+                  "color": null,
+                  "turn_score": 39
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 231,
+                  "color": null,
+                  "turn_score": 49
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 209,
+                  "color": null,
+                  "turn_score": 45
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 212,
+                  "color": null,
+                  "turn_score": 19
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 152,
+                  "color": null,
+                  "turn_score": 57
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 151,
+                  "color": null,
+                  "turn_score": 61
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 126,
+                  "color": null,
+                  "turn_score": 26
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 117,
+                  "color": null,
+                  "turn_score": 34
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 84,
+                  "color": null,
+                  "turn_score": 42
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 81,
+                  "color": null,
+                  "turn_score": 36
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 30,
+                  "color": null,
+                  "turn_score": 54
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 30,
+                  "color": null,
+                  "turn_score": 51
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 28,
+                  "color": null,
+                  "turn_score": 2
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 30,
+                  "color": "BUST",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 14,
+                  "color": null,
+                  "turn_score": 14
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 30,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 14,
+                  "color": "BUST",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 30,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 14,
+                  "color": "BUST",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 30,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 14,
+                  "color": "BUST",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 10,
+                  "color": null,
+                  "turn_score": 20
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 14,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 10,
+                  "color": "BUST",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 14,
+                  "color": "BUST",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 10,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 14,
+                  "color": "BUST",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 10,
+                  "color": "BUST",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 4,
+                  "color": null,
+                  "turn_score": 10
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jodi Koment",
+                  "current_score": 10,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "DO (3)",
+                  "name": "Cissy Mealin",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": 4
+                }
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "set_index": 2,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "Cricket",
+            "winner_index": 0,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "13:19",
+            "out_format": null,
+            "score_type": "M",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "0.00",
+              "mpr": "1.2",
+              "darts_thrown": 62,
+              "ending_points": null,
+              "ending_marks": 72
+            },
+            "away": {
+              "ppr": "0.00",
+              "mpr": "1.1",
+              "darts_thrown": null,
+              "ending_points": null,
+              "ending_marks": 68
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20x2, S18"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S19x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S18"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S18x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 19,
+                  "color": null,
+                  "turn_score": "S19, S18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "S20, S18"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 38,
+                  "color": null,
+                  "turn_score": "S20x2, S19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "S19"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 38,
+                  "color": null,
+                  "turn_score": "D17, S17"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "T19"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 38,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "S16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 38,
+                  "color": null,
+                  "turn_score": "S16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "S16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 55,
+                  "color": null,
+                  "turn_score": "S17"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 52,
+                  "color": null,
+                  "turn_score": "D16, S16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 55,
+                  "color": null,
+                  "turn_score": "S16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 68,
+                  "color": null,
+                  "turn_score": "S16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 55,
+                  "color": null,
+                  "turn_score": "S16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 68,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 72,
+                  "color": null,
+                  "turn_score": "S17"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 68,
+                  "color": null,
+                  "turn_score": "S17x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 72,
+                  "color": null,
+                  "turn_score": "S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 68,
+                  "color": null,
+                  "turn_score": "S17, S15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 72,
+                  "color": null,
+                  "turn_score": "S15x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 68,
+                  "color": null,
+                  "turn_score": "S15x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 72,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 68,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 72,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 68,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 72,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 68,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 72,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 68,
+                  "color": null,
+                  "turn_score": "SBx2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 72,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 68,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 72,
+                  "color": null,
+                  "turn_score": "DB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 68,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              }
+            ]
+          },
+          {
+            "set_index": 2,
+            "set_game_number": 2,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "Cricket",
+            "winner_index": 0,
+            "starting_opponent_index": 0,
+            "cork_winner": null,
+            "duration": "12:36",
+            "out_format": null,
+            "score_type": "M",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "0.00",
+              "mpr": "1.4",
+              "darts_thrown": 61,
+              "ending_points": null,
+              "ending_marks": 152
+            },
+            "away": {
+              "ppr": "0.00",
+              "mpr": "1.3",
+              "darts_thrown": null,
+              "ending_points": null,
+              "ending_marks": 102
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20, S18"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Danny Jones",
+                  "current_score": 0,
+                  "color": "BIG HIT",
+                  "turn_score": "S20, T18, S19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S19x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S19x2, S17"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 17,
+                  "color": null,
+                  "turn_score": "S17x3"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S17"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 51,
+                  "color": null,
+                  "turn_score": "S19, S17x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 72,
+                  "color": null,
+                  "turn_score": "D18, S18x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 85,
+                  "color": null,
+                  "turn_score": "S17x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 92,
+                  "color": null,
+                  "turn_score": "S20"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 102,
+                  "color": null,
+                  "turn_score": "S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 92,
+                  "color": null,
+                  "turn_score": "S17"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 102,
+                  "color": null,
+                  "turn_score": "S20, S18"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 112,
+                  "color": null,
+                  "turn_score": "S20"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 102,
+                  "color": null,
+                  "turn_score": "S16x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 112,
+                  "color": null,
+                  "turn_score": "S16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 102,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 112,
+                  "color": null,
+                  "turn_score": "S16x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 102,
+                  "color": null,
+                  "turn_score": "S15x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 127,
+                  "color": null,
+                  "turn_score": "T15, S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 102,
+                  "color": null,
+                  "turn_score": "S15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 127,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 102,
+                  "color": null,
+                  "turn_score": "D16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 127,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 102,
+                  "color": null,
+                  "turn_score": "S20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 127,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 102,
+                  "color": null,
+                  "turn_score": "S18"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 127,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 102,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 127,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 102,
+                  "color": null,
+                  "turn_score": "SB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 127,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 102,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 127,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 102,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 127,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": 102,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Danny Jones",
+                  "current_score": 152,
+                  "color": null,
+                  "turn_score": "DB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Cissy Mealin",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                }
+              }
+            ]
+          }
+        ]
+      ]
+    }
+  }
+}

@@ -55,11 +55,17 @@ class DataProcessor:
         # Process URLs if available
         enhanced_data = self._process_dartconnect_urls(df)
         
+        # Add cache statistics if URL processing was done
+        cache_stats = {}
+        if hasattr(self.url_fetcher, 'get_cache_stats'):
+            cache_stats = self.url_fetcher.get_cache_stats()
+        
         return {
             'raw_data': df,
             'statistics': statistics,
             'derived_metrics': derived_metrics,
             'enhanced_data': enhanced_data,
+            'cache_stats': cache_stats,
             'summary': self._generate_summary(df, statistics),
             'processed_at': datetime.now().isoformat()
         }
@@ -114,7 +120,7 @@ class DataProcessor:
         except Exception as e:
             self.logger.warning(f"Could not parse dates: {e}")
         
-        # Convert numeric columns
+        # Convert numeric columns (only if they exist)
         numeric_columns = ['score', 'average', 'checkout_percentage', 'games_played']
         for col in numeric_columns:
             if col in df.columns:
@@ -156,12 +162,16 @@ class DataProcessor:
         stats = {}
         
         if 'player_name' in df.columns:
-            # Player statistics
-            player_stats = df.groupby('player_name').agg({
-                'score': ['count', 'mean', 'std', 'min', 'max'] if 'score' in df.columns else 'count',
-                'average': ['mean', 'std'] if 'average' in df.columns else None,
-                'checkout_percentage': ['mean'] if 'checkout_percentage' in df.columns else None
-            }).round(self.data_config.get('decimal_places', 2))
+            # Player statistics (only include columns that exist)
+            agg_dict = {'player_name': 'count'}  # Always available
+            if 'score' in df.columns:
+                agg_dict['score'] = ['count', 'mean', 'std', 'min', 'max']
+            if 'average' in df.columns:
+                agg_dict['average'] = ['mean', 'std']
+            if 'checkout_percentage' in df.columns:
+                agg_dict['checkout_percentage'] = ['mean']
+            
+            player_stats = df.groupby('player_name').agg(agg_dict).round(self.data_config.get('decimal_places', 2))
             
             stats['player_statistics'] = player_stats
             

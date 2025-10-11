@@ -1,0 +1,769 @@
+{
+  "url": "https://recap.dartconnect.com/games/68d088687fb34ee7ab6f5cd2",
+  "cached_at": "2025-10-11T15:55:20.810462",
+  "game_data": {
+    "errors": {},
+    "auth": {
+      "user": null
+    },
+    "ziggy": {
+      "url": "https://recap.dartconnect.com",
+      "port": null,
+      "defaults": [],
+      "routes": {
+        "horizon.stats.index": {
+          "uri": "horizon/api/stats",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.workload.index": {
+          "uri": "horizon/api/workload",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.masters.index": {
+          "uri": "horizon/api/masters",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.monitoring.index": {
+          "uri": "horizon/api/monitoring",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.monitoring.store": {
+          "uri": "horizon/api/monitoring",
+          "methods": [
+            "POST"
+          ]
+        },
+        "horizon.monitoring-tag.paginate": {
+          "uri": "horizon/api/monitoring/{tag}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "tag"
+          ]
+        },
+        "horizon.monitoring-tag.destroy": {
+          "uri": "horizon/api/monitoring/{tag}",
+          "methods": [
+            "DELETE"
+          ],
+          "wheres": {
+            "tag": ".*"
+          },
+          "parameters": [
+            "tag"
+          ]
+        },
+        "horizon.jobs-metrics.index": {
+          "uri": "horizon/api/metrics/jobs",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.jobs-metrics.show": {
+          "uri": "horizon/api/metrics/jobs/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.queues-metrics.index": {
+          "uri": "horizon/api/metrics/queues",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.queues-metrics.show": {
+          "uri": "horizon/api/metrics/queues/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs-batches.index": {
+          "uri": "horizon/api/batches",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.jobs-batches.show": {
+          "uri": "horizon/api/batches/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs-batches.retry": {
+          "uri": "horizon/api/batches/retry/{id}",
+          "methods": [
+            "POST"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.pending-jobs.index": {
+          "uri": "horizon/api/jobs/pending",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.completed-jobs.index": {
+          "uri": "horizon/api/jobs/completed",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.silenced-jobs.index": {
+          "uri": "horizon/api/jobs/silenced",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.failed-jobs.index": {
+          "uri": "horizon/api/jobs/failed",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.failed-jobs.show": {
+          "uri": "horizon/api/jobs/failed/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.retry-jobs.show": {
+          "uri": "horizon/api/jobs/retry/{id}",
+          "methods": [
+            "POST"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs.show": {
+          "uri": "horizon/api/jobs/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.index": {
+          "uri": "horizon/{view?}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "wheres": {
+            "view": "(.*)"
+          },
+          "parameters": [
+            "view"
+          ]
+        },
+        "sanctum.csrf-cookie": {
+          "uri": "sanctum/csrf-cookie",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "ignition.healthCheck": {
+          "uri": "_ignition/health-check",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "ignition.executeSolution": {
+          "uri": "_ignition/execute-solution",
+          "methods": [
+            "POST"
+          ]
+        },
+        "ignition.updateConfig": {
+          "uri": "_ignition/update-config",
+          "methods": [
+            "POST"
+          ]
+        },
+        "login": {
+          "uri": "login",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "logout": {
+          "uri": "logout",
+          "methods": [
+            "POST"
+          ]
+        },
+        "matches.show": {
+          "uri": "matches/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "games.show": {
+          "uri": "games/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "players.show": {
+          "uri": "players/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "counts.show": {
+          "uri": "counts/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        }
+      },
+      "location": "https://recap.dartconnect.com/games/68d088687fb34ee7ab6f5cd2"
+    },
+    "matchInfo": {
+      "recapv1_url": "https://recapv1.dartconnect.com/history/report/match/68d088687fb34ee7ab6f5cd2",
+      "mergedmatch_url": "https://recapv1.dartconnect.com/history/report/event/815123",
+      "away_label": "Flight Club",
+      "competition_title": "Winston Salem Sunday Night Dart League",
+      "der": 100,
+      "division_standings_url": "https://tv.dartconnect.com/leaguestandings/WinSSNDL/17423/66065",
+      "event_title": "Fall/Winter 2025",
+      "division_title": "Division: Salem",
+      "report_dart_avg_units": "PPR",
+      "game_time": "00:11",
+      "has_01": true,
+      "has_cricket": false,
+      "home_label": "American Legion",
+      "league_id": "WinSSNDL",
+      "board_type": null,
+      "id": "68d088687fb34ee7ab6f5cd2",
+      "league_match_id": 6689083,
+      "tournament_id": null,
+      "remote_play": 0,
+      "bracket_match_id": null,
+      "tournament_match": null,
+      "leaderboard_url": "https://leaderboard.dartconnect.com/leaderboard#l-6ncb_17423_all-all_01-all-all-all-all-all",
+      "match_end_date": "7:20 PM",
+      "match_length": "00:11",
+      "match_start_date": "7:09 PM",
+      "more_darts_url": "https://tv.dartconnect.com/leaguemenu/WinSSNDL",
+      "mpr": null,
+      "opponents": [
+        {
+          "darts_thrown_mpr": "-",
+          "darts_thrown_ppr": "48",
+          "league_points": 1,
+          "league_standings_points": 1,
+          "leg_wins": 1,
+          "marks_scored": "-",
+          "mpr": "-",
+          "name": "American Legion",
+          "points_scored_mpr": "0",
+          "points_scored_ppr": "501",
+          "ppr": "31.31",
+          "score": 1,
+          "set_wins": 1
+        },
+        {
+          "darts_thrown_mpr": "-",
+          "darts_thrown_ppr": "45",
+          "league_points": 0,
+          "league_standings_points": 0,
+          "leg_wins": 0,
+          "marks_scored": "-",
+          "mpr": "-",
+          "name": "Flight Club",
+          "points_scored_mpr": "0",
+          "points_scored_ppr": "497",
+          "ppr": "33.13",
+          "score": 0,
+          "set_wins": 0
+        }
+      ],
+      "page_title": "5cd2",
+      "ppr_01": "32.19",
+      "server_match_start_date": "Sun, 21-Sep-2025",
+      "total_01_darts_thrown": "93",
+      "total_cricket_darts_thrown": null,
+      "total_darts_thrown": "93",
+      "total_games": 1,
+      "total_marks_scored": null,
+      "total_matches": 1,
+      "total_points_scored": "998",
+      "total_sets": 1,
+      "match_winner": 0,
+      "points_style": "Award SET WIN Points according to Team Size",
+      "standings_points_style": null,
+      "bonus_points": "",
+      "notes": {
+        "pub_notes": null,
+        "sets": [],
+        "games": []
+      }
+    },
+    "segments": {
+      "": [
+        [
+          {
+            "set_index": 1,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "501 SIDO",
+            "winner_index": 0,
+            "starting_opponent_index": 0,
+            "cork_winner": null,
+            "duration": "11:29",
+            "out_format": "DO",
+            "score_type": "P",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "31.31",
+              "mpr": "0.0",
+              "darts_thrown": 48,
+              "ending_points": 0,
+              "ending_marks": null
+            },
+            "away": {
+              "ppr": "33.13",
+              "mpr": "0.0",
+              "darts_thrown": null,
+              "ending_points": 4,
+              "ending_marks": null
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 475,
+                  "color": null,
+                  "turn_score": 26
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": 115,
+                  "name": "Chris Sabolcik",
+                  "current_score": 386,
+                  "color": "TON 15",
+                  "turn_score": 115
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 453,
+                  "color": null,
+                  "turn_score": 22
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Chris Sabolcik",
+                  "current_score": 345,
+                  "color": null,
+                  "turn_score": 41
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 412,
+                  "color": null,
+                  "turn_score": 41
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Chris Sabolcik",
+                  "current_score": 306,
+                  "color": null,
+                  "turn_score": 39
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 329,
+                  "color": null,
+                  "turn_score": 83
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Chris Sabolcik",
+                  "current_score": 271,
+                  "color": null,
+                  "turn_score": 35
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 286,
+                  "color": null,
+                  "turn_score": 43
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "100",
+                  "name": "Chris Sabolcik",
+                  "current_score": 171,
+                  "color": "TON",
+                  "turn_score": 100
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 245,
+                  "color": null,
+                  "turn_score": 41
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Chris Sabolcik",
+                  "current_score": 161,
+                  "color": null,
+                  "turn_score": 10
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 204,
+                  "color": null,
+                  "turn_score": 41
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Chris Sabolcik",
+                  "current_score": 131,
+                  "color": null,
+                  "turn_score": 30
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 191,
+                  "color": null,
+                  "turn_score": 13
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Chris Sabolcik",
+                  "current_score": 75,
+                  "color": null,
+                  "turn_score": 56
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 149,
+                  "color": null,
+                  "turn_score": 42
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Chris Sabolcik",
+                  "current_score": 40,
+                  "color": null,
+                  "turn_score": 35
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 127,
+                  "color": null,
+                  "turn_score": 22
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Chris Sabolcik",
+                  "current_score": 5,
+                  "color": null,
+                  "turn_score": 35
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 108,
+                  "color": null,
+                  "turn_score": 19
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Chris Sabolcik",
+                  "current_score": 5,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 48,
+                  "color": null,
+                  "turn_score": 60
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Chris Sabolcik",
+                  "current_score": 5,
+                  "color": "BUST",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 16,
+                  "color": null,
+                  "turn_score": 32
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Chris Sabolcik",
+                  "current_score": 4,
+                  "color": null,
+                  "turn_score": 1
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 16,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Chris Sabolcik",
+                  "current_score": 4,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lee  Kimbel",
+                  "current_score": 4,
+                  "color": null,
+                  "turn_score": 12
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Chris Sabolcik",
+                  "current_score": 4,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "DO (3)",
+                  "name": "Lee  Kimbel",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": 4
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Chris Sabolcik",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                }
+              }
+            ]
+          }
+        ]
+      ]
+    }
+  }
+}

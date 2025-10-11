@@ -199,12 +199,17 @@ def generate_reports(results: Dict[str, Any], config: Config, output_dir: Path) 
         # Create output directory
         output_dir.mkdir(exist_ok=True)
         
-        # Generate PDF report
-        logger.info("📄 Generating PDF report...")
-        pdf_generator = PDFGenerator(config)
-        pdf_file = output_dir / "dart_league_report.pdf"
-        pdf_generator.generate_report(results, str(pdf_file))
-        logger.info(f"✅ PDF report saved: {pdf_file}")
+        # Generate PDF reports
+        logger.info("📄 Generating PDF reports...")
+        pdf_generator = PDFGenerator(config, str(output_dir))
+        
+        # Generate league statistics report
+        pdf_file1 = pdf_generator.generate_report1(results)
+        logger.info(f"✅ League statistics report saved: {pdf_file1}")
+        
+        # Generate player performance report 
+        pdf_file2 = pdf_generator.generate_report2(results)
+        logger.info(f"✅ Player performance report saved: {pdf_file2}")
         
         # Save detailed JSON results for debugging/analysis
         json_file = output_dir / "processed_results.json"
@@ -281,6 +286,22 @@ def print_processing_summary(results: Dict[str, Any]) -> None:
             cricket_games = len(enhanced_data.get('cricket_qp_data', []))
             if cricket_games > 0:
                 print(f"  Enhanced Cricket Games: {cricket_games}")
+    
+    # Cache statistics
+    cache_stats = results.get('cache_stats', {})
+    if cache_stats:
+        print(f"\n💾 Cache Performance:")
+        hits = cache_stats.get('hits', 0)
+        misses = cache_stats.get('misses', 0)
+        total_requests = hits + misses
+        
+        if total_requests > 0:
+            hit_rate = (hits / total_requests) * 100
+            print(f"  Cache Hits: {hits}")
+            print(f"  Cache Misses: {misses}")
+            print(f"  Hit Rate: {hit_rate:.1f}%")
+            print(f"  New Fetches: {cache_stats.get('new_fetches', 0)}")
+            print(f"  Expired: {cache_stats.get('expired', 0)}")
     
     # Quality assessment
     if 'features_available' in assessment and assessment['features_available']:

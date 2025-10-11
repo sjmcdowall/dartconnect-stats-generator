@@ -1,0 +1,1580 @@
+{
+  "url": "https://recap.dartconnect.com/games/68be125ef978cb217a5acca7",
+  "cached_at": "2025-10-11T15:55:11.915900",
+  "game_data": {
+    "errors": {},
+    "auth": {
+      "user": null
+    },
+    "ziggy": {
+      "url": "https://recap.dartconnect.com",
+      "port": null,
+      "defaults": [],
+      "routes": {
+        "horizon.stats.index": {
+          "uri": "horizon/api/stats",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.workload.index": {
+          "uri": "horizon/api/workload",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.masters.index": {
+          "uri": "horizon/api/masters",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.monitoring.index": {
+          "uri": "horizon/api/monitoring",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.monitoring.store": {
+          "uri": "horizon/api/monitoring",
+          "methods": [
+            "POST"
+          ]
+        },
+        "horizon.monitoring-tag.paginate": {
+          "uri": "horizon/api/monitoring/{tag}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "tag"
+          ]
+        },
+        "horizon.monitoring-tag.destroy": {
+          "uri": "horizon/api/monitoring/{tag}",
+          "methods": [
+            "DELETE"
+          ],
+          "wheres": {
+            "tag": ".*"
+          },
+          "parameters": [
+            "tag"
+          ]
+        },
+        "horizon.jobs-metrics.index": {
+          "uri": "horizon/api/metrics/jobs",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.jobs-metrics.show": {
+          "uri": "horizon/api/metrics/jobs/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.queues-metrics.index": {
+          "uri": "horizon/api/metrics/queues",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.queues-metrics.show": {
+          "uri": "horizon/api/metrics/queues/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs-batches.index": {
+          "uri": "horizon/api/batches",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.jobs-batches.show": {
+          "uri": "horizon/api/batches/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs-batches.retry": {
+          "uri": "horizon/api/batches/retry/{id}",
+          "methods": [
+            "POST"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.pending-jobs.index": {
+          "uri": "horizon/api/jobs/pending",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.completed-jobs.index": {
+          "uri": "horizon/api/jobs/completed",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.silenced-jobs.index": {
+          "uri": "horizon/api/jobs/silenced",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.failed-jobs.index": {
+          "uri": "horizon/api/jobs/failed",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.failed-jobs.show": {
+          "uri": "horizon/api/jobs/failed/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.retry-jobs.show": {
+          "uri": "horizon/api/jobs/retry/{id}",
+          "methods": [
+            "POST"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs.show": {
+          "uri": "horizon/api/jobs/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.index": {
+          "uri": "horizon/{view?}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "wheres": {
+            "view": "(.*)"
+          },
+          "parameters": [
+            "view"
+          ]
+        },
+        "sanctum.csrf-cookie": {
+          "uri": "sanctum/csrf-cookie",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "ignition.healthCheck": {
+          "uri": "_ignition/health-check",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "ignition.executeSolution": {
+          "uri": "_ignition/execute-solution",
+          "methods": [
+            "POST"
+          ]
+        },
+        "ignition.updateConfig": {
+          "uri": "_ignition/update-config",
+          "methods": [
+            "POST"
+          ]
+        },
+        "login": {
+          "uri": "login",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "logout": {
+          "uri": "logout",
+          "methods": [
+            "POST"
+          ]
+        },
+        "matches.show": {
+          "uri": "matches/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "games.show": {
+          "uri": "games/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "players.show": {
+          "uri": "players/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "counts.show": {
+          "uri": "counts/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        }
+      },
+      "location": "https://recap.dartconnect.com/games/68be125ef978cb217a5acca7"
+    },
+    "matchInfo": {
+      "recapv1_url": "https://recapv1.dartconnect.com/history/report/match/68be125ef978cb217a5acca7",
+      "mergedmatch_url": "https://recapv1.dartconnect.com/history/report/event/800972",
+      "away_label": "Rumple Steel Tips",
+      "competition_title": "Winston Salem Sunday Night Dart League",
+      "der": 61,
+      "division_standings_url": "https://tv.dartconnect.com/leaguestandings/WinSSNDL/17423/66062",
+      "event_title": "Fall/Winter 2025",
+      "division_title": "Division: Winston",
+      "report_dart_avg_units": "PPR",
+      "game_time": "00:35",
+      "has_01": true,
+      "has_cricket": true,
+      "home_label": "Snake Farm",
+      "league_id": "WinSSNDL",
+      "board_type": null,
+      "id": "68be125ef978cb217a5acca7",
+      "league_match_id": 6689032,
+      "tournament_id": null,
+      "remote_play": 0,
+      "bracket_match_id": null,
+      "tournament_match": null,
+      "leaderboard_url": "https://leaderboard.dartconnect.com/leaderboard#l-6ncb_17423_all-all_01-all-all-all-all-all",
+      "match_end_date": "8:04 PM",
+      "match_length": "00:57",
+      "match_start_date": "7:07 PM",
+      "more_darts_url": "https://tv.dartconnect.com/leaguemenu/WinSSNDL",
+      "mpr": "1.9",
+      "opponents": [
+        {
+          "darts_thrown_mpr": "72",
+          "darts_thrown_ppr": "63",
+          "league_points": 0,
+          "league_standings_points": 0,
+          "leg_wins": 0,
+          "marks_scored": "40",
+          "mpr": "1.7",
+          "name": "Snake Farm",
+          "points_scored_mpr": "0",
+          "points_scored_ppr": "975",
+          "ppr": "46.43",
+          "score": 0,
+          "set_wins": 0
+        },
+        {
+          "darts_thrown_mpr": "76",
+          "darts_thrown_ppr": "66",
+          "league_points": 2,
+          "league_standings_points": 2,
+          "leg_wins": 4,
+          "marks_scored": "55",
+          "mpr": "2.2",
+          "name": "Rumple Steel Tips",
+          "points_scored_mpr": "0",
+          "points_scored_ppr": "1,002",
+          "ppr": "45.55",
+          "score": 2,
+          "set_wins": 2
+        }
+      ],
+      "page_title": "cca7",
+      "ppr_01": "45.98",
+      "server_match_start_date": "Sun, 7-Sep-2025",
+      "total_01_darts_thrown": "129",
+      "total_cricket_darts_thrown": "148",
+      "total_darts_thrown": "277",
+      "total_games": 4,
+      "total_marks_scored": "95",
+      "total_matches": 1,
+      "total_points_scored": "1,977",
+      "total_sets": 2,
+      "match_winner": 1,
+      "points_style": "Award SET WIN Points according to Team Size",
+      "standings_points_style": null,
+      "bonus_points": "",
+      "notes": {
+        "pub_notes": null,
+        "sets": [],
+        "games": []
+      }
+    },
+    "segments": {
+      "": [
+        [
+          {
+            "set_index": 1,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "501 SIDO",
+            "winner_index": 1,
+            "starting_opponent_index": 0,
+            "cork_winner": null,
+            "duration": "08:57",
+            "out_format": "DO",
+            "score_type": "P",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "44.27",
+              "mpr": "0.0",
+              "darts_thrown": null,
+              "ending_points": 14,
+              "ending_marks": null
+            },
+            "away": {
+              "ppr": "45.55",
+              "mpr": "0.0",
+              "darts_thrown": 33,
+              "ending_points": 0,
+              "ending_marks": null
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 411,
+                  "color": null,
+                  "turn_score": 90
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 477,
+                  "color": null,
+                  "turn_score": 24
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 368,
+                  "color": null,
+                  "turn_score": 43
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 396,
+                  "color": null,
+                  "turn_score": 81
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 348,
+                  "color": null,
+                  "turn_score": 20
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 359,
+                  "color": null,
+                  "turn_score": 37
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 313,
+                  "color": null,
+                  "turn_score": 35
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 318,
+                  "color": null,
+                  "turn_score": 41
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 292,
+                  "color": null,
+                  "turn_score": 21
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 294,
+                  "color": null,
+                  "turn_score": 24
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 267,
+                  "color": null,
+                  "turn_score": 25
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 260,
+                  "color": null,
+                  "turn_score": 34
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 245,
+                  "color": null,
+                  "turn_score": 22
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": 138,
+                  "name": "Lora Josey",
+                  "current_score": 122,
+                  "color": "TON 38",
+                  "turn_score": 138
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 206,
+                  "color": null,
+                  "turn_score": 39
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 101,
+                  "color": null,
+                  "turn_score": 21
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 130,
+                  "color": null,
+                  "turn_score": 76
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 79,
+                  "color": null,
+                  "turn_score": 22
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 94,
+                  "color": null,
+                  "turn_score": 36
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 59,
+                  "color": null,
+                  "turn_score": 20
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 14,
+                  "color": null,
+                  "turn_score": 80
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "DO (3)",
+                  "name": "Lora Josey",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": 59
+                }
+              }
+            ]
+          },
+          {
+            "set_index": 1,
+            "set_game_number": 2,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "501 SIDO",
+            "winner_index": 1,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "09:28",
+            "out_format": "DO",
+            "score_type": "P",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "48.80",
+              "mpr": "0.0",
+              "darts_thrown": null,
+              "ending_points": 13,
+              "ending_marks": null
+            },
+            "away": {
+              "ppr": "45.55",
+              "mpr": "0.0",
+              "darts_thrown": 33,
+              "ending_points": 0,
+              "ending_marks": null
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 421,
+                  "color": null,
+                  "turn_score": 80
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 420,
+                  "color": null,
+                  "turn_score": 81
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 395,
+                  "color": null,
+                  "turn_score": 26
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 365,
+                  "color": null,
+                  "turn_score": 55
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 345,
+                  "color": null,
+                  "turn_score": 50
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 320,
+                  "color": null,
+                  "turn_score": 45
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 315,
+                  "color": null,
+                  "turn_score": 30
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 276,
+                  "color": null,
+                  "turn_score": 44
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 234,
+                  "color": null,
+                  "turn_score": 81
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 231,
+                  "color": null,
+                  "turn_score": 45
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 193,
+                  "color": null,
+                  "turn_score": 41
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 207,
+                  "color": null,
+                  "turn_score": 24
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 110,
+                  "color": null,
+                  "turn_score": 83
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 188,
+                  "color": null,
+                  "turn_score": 19
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 71,
+                  "color": null,
+                  "turn_score": 39
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 147,
+                  "color": null,
+                  "turn_score": 41
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 35,
+                  "color": null,
+                  "turn_score": 36
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 106,
+                  "color": null,
+                  "turn_score": 41
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": 13,
+                  "color": null,
+                  "turn_score": 22
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 56,
+                  "color": null,
+                  "turn_score": 50
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Lentz",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "DO (3)",
+                  "name": "Lora Josey",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": 56
+                }
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "set_index": 2,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "Cricket",
+            "winner_index": 1,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "08:18",
+            "out_format": null,
+            "score_type": "M",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "0.00",
+              "mpr": "1.4",
+              "darts_thrown": null,
+              "ending_points": null,
+              "ending_marks": 78
+            },
+            "away": {
+              "ppr": "0.00",
+              "mpr": "2.0",
+              "darts_thrown": 39,
+              "ending_points": null,
+              "ending_marks": 100
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20, S19"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "S20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 18,
+                  "color": null,
+                  "turn_score": "T18, S18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "T19, S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 18,
+                  "color": null,
+                  "turn_score": "T16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "S18, D18, S15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 18,
+                  "color": null,
+                  "turn_score": "S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "S16x3"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 48,
+                  "color": null,
+                  "turn_score": "T15, S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 20,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 63,
+                  "color": null,
+                  "turn_score": "S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 40,
+                  "color": null,
+                  "turn_score": "S20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 78,
+                  "color": null,
+                  "turn_score": "S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 100,
+                  "color": null,
+                  "turn_score": "T20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 78,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 100,
+                  "color": null,
+                  "turn_score": "S15x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "3B",
+                  "name": "Matt Masten",
+                  "current_score": 100,
+                  "color": "BIG BULL",
+                  "turn_score": "SBx3"
+                }
+              }
+            ]
+          },
+          {
+            "set_index": 2,
+            "set_game_number": 2,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "Cricket",
+            "winner_index": 1,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "08:20",
+            "out_format": null,
+            "score_type": "M",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "0.00",
+              "mpr": "1.9",
+              "darts_thrown": null,
+              "ending_points": null,
+              "ending_marks": 105
+            },
+            "away": {
+              "ppr": "0.00",
+              "mpr": "2.4",
+              "darts_thrown": 37,
+              "ending_points": null,
+              "ending_marks": 133
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "T20, S18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 18,
+                  "color": null,
+                  "turn_score": "T18, S17"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20, S18"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 18,
+                  "color": null,
+                  "turn_score": "S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S17x3"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 18,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S18x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 37,
+                  "color": null,
+                  "turn_score": "T19, S19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 17,
+                  "color": null,
+                  "turn_score": "S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 75,
+                  "color": null,
+                  "turn_score": "S19x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 51,
+                  "color": null,
+                  "turn_score": "S17x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 75,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Matt Masten",
+                  "current_score": 85,
+                  "color": "BIG HIT",
+                  "turn_score": "T19, S17x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 75,
+                  "color": null,
+                  "turn_score": "S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 85,
+                  "color": null,
+                  "turn_score": "S16x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 105,
+                  "color": null,
+                  "turn_score": "S15x3"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 85,
+                  "color": null,
+                  "turn_score": "S16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 105,
+                  "color": null,
+                  "turn_score": "D17, S17"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 85,
+                  "color": null,
+                  "turn_score": "S15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 105,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 133,
+                  "color": null,
+                  "turn_score": "T16, SB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": 105,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 133,
+                  "color": null,
+                  "turn_score": "T15, SB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brooke Masten",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 133,
+                  "color": null,
+                  "turn_score": "SB"
+                }
+              }
+            ]
+          }
+        ]
+      ]
+    }
+  }
+}

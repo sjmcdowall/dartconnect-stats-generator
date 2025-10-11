@@ -9,6 +9,10 @@ import requests
 import json
 import re
 import html
+import hashlib
+import os
+from pathlib import Path
+from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 from urllib.parse import urlparse
 import logging
@@ -17,25 +21,40 @@ import logging
 class DartConnectURLFetcher:
     """Fetches and parses detailed game data from DartConnect recap URLs."""
     
-    def __init__(self, timeout: int = 30):
+    def __init__(self, timeout: int = 30, cache_dir: str = "cache/dartconnect_urls", cache_expiry_days: int = 150):
         """
         Initialize the URL fetcher.
         
         Args:
             timeout: Request timeout in seconds
+            cache_dir: Directory to store cached responses
+            cache_expiry_days: Number of days before cache expires (default: 150 - about 5 months for dart season)
         """
         self.timeout = timeout
+        self.cache_dir = Path(cache_dir)
+        self.cache_expiry_days = cache_expiry_days
         self.logger = logging.getLogger(__name__)
         self.session = requests.Session()
+        
+        # Create cache directory if it doesn't exist
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
         
         # Set a proper user agent to avoid blocking
         self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
         })
+        
+        # Track cache stats for reporting
+        self.cache_stats = {
+            'hits': 0,
+            'misses': 0,
+            'expired': 0,
+            'new_fetches': 0
+        }
     
     def fetch_game_data(self, url: str) -> Optional[Dict[str, Any]]:
         """
-        Fetch detailed game data from a DartConnect recap URL.
+        Fetch detailed game data from a DartConnect recap URL with caching.
         
         Args:
             url: DartConnect recap URL (e.g., https://recap.dartconnect.com/games/68aba220f978cb217a4c55cb)
@@ -44,12 +63,22 @@ class DartConnectURLFetcher:
             Dictionary containing game data or None if fetch failed
         """
         try:
-            self.logger.info(f"Fetching game data from: {url}")
-            
-            # Validate URL format
+            # Validate URL format first
             if not self._is_valid_dartconnect_url(url):
                 self.logger.warning(f"Invalid DartConnect URL format: {url}")
                 return None
+            
+            # Check cache first
+            cached_data = self._get_cached_data(url)
+            if cached_data is not None:
+                self.cache_stats['hits'] += 1
+                match_id = cached_data.get('matchInfo', {}).get('id', 'unknown')
+                self.logger.info(f"Using cached game data for match: {match_id}")
+                return cached_data
+            
+            # Cache miss - fetch from web
+            self.logger.info(f"Fetching game data from: {url}")
+            self.cache_stats['misses'] += 1
             
             # Fetch the page
             response = self.session.get(url, timeout=self.timeout)
@@ -59,7 +88,13 @@ class DartConnectURLFetcher:
             game_data = self._extract_game_data_from_html(response.text)
             
             if game_data:
-                self.logger.info(f"Successfully fetched game data for match: {game_data.get('matchInfo', {}).get('id', 'unknown')}")
+                match_id = game_data.get('matchInfo', {}).get('id', 'unknown')
+                self.logger.info(f"Successfully fetched game data for match: {match_id}")
+                
+                # Cache the successful response
+                self._cache_data(url, game_data)
+                self.cache_stats['new_fetches'] += 1
+                
                 return game_data
             else:
                 self.logger.warning(f"No game data found in URL: {url}")
@@ -85,6 +120,144 @@ class DartConnectURLFetcher:
             )
         except Exception:
             return False
+    
+    def _get_cache_filename(self, url: str) -> str:
+        """Generate a unique cache filename for a URL."""
+        # Extract match ID from URL for readable filenames
+        match_id = None
+        if '/games/' in url:
+            match_id = url.split('/games/')[-1]
+        elif '/match/' in url:
+            match_id = url.split('/match/')[-1]
+        
+        if match_id:
+            # Clean match ID of any query parameters
+            match_id = match_id.split('?')[0].split('#')[0]
+            return f"{match_id}.json"
+        else:
+            # Fallback to URL hash if we can't extract match ID
+            url_hash = hashlib.md5(url.encode()).hexdigest()
+            return f"url_{url_hash}.json"
+    
+    def _get_cached_data(self, url: str) -> Optional[Dict[str, Any]]:
+        """Get cached data for a URL if it exists and is not expired."""
+        try:
+            cache_file = self.cache_dir / self._get_cache_filename(url)
+            
+            if not cache_file.exists():
+                return None
+            
+            # Check if cache is expired
+            file_age = datetime.now() - datetime.fromtimestamp(cache_file.stat().st_mtime)
+            if file_age > timedelta(days=self.cache_expiry_days):
+                self.logger.debug(f"Cache expired for {url} (age: {file_age.days} days)")
+                self.cache_stats['expired'] += 1
+                # Remove expired cache file
+                cache_file.unlink()
+                return None
+            
+            # Load and return cached data
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                cached_data = json.load(f)
+                return cached_data.get('game_data')
+                
+        except Exception as e:
+            self.logger.warning(f"Error reading cache for {url}: {e}")
+            return None
+    
+    def _cache_data(self, url: str, game_data: Dict[str, Any]) -> None:
+        """Cache game data for a URL."""
+        try:
+            cache_file = self.cache_dir / self._get_cache_filename(url)
+            
+            cache_entry = {
+                'url': url,
+                'cached_at': datetime.now().isoformat(),
+                'game_data': game_data
+            }
+            
+            with open(cache_file, 'w', encoding='utf-8') as f:
+                json.dump(cache_entry, f, indent=2, ensure_ascii=False)
+                
+            self.logger.debug(f"Cached data for {url}")
+            
+        except Exception as e:
+            self.logger.warning(f"Error caching data for {url}: {e}")
+    
+    def get_cache_stats(self) -> Dict[str, int]:
+        """Get cache performance statistics."""
+        return self.cache_stats.copy()
+    
+    def get_cache_info(self) -> Dict[str, Any]:
+        """Get detailed cache information including size and age statistics."""
+        try:
+            if not self.cache_dir.exists():
+                return {'total_files': 0, 'total_size_mb': 0, 'oldest_file': None, 'newest_file': None}
+            
+            cache_files = list(self.cache_dir.glob('*.json'))
+            if not cache_files:
+                return {'total_files': 0, 'total_size_mb': 0, 'oldest_file': None, 'newest_file': None}
+            
+            total_size = sum(f.stat().st_size for f in cache_files)
+            file_times = [(f, datetime.fromtimestamp(f.stat().st_mtime)) for f in cache_files]
+            
+            oldest_file = min(file_times, key=lambda x: x[1])
+            newest_file = max(file_times, key=lambda x: x[1])
+            
+            return {
+                'total_files': len(cache_files),
+                'total_size_mb': round(total_size / (1024 * 1024), 2),
+                'oldest_file': {
+                    'name': oldest_file[0].name,
+                    'date': oldest_file[1].isoformat(),
+                    'age_days': (datetime.now() - oldest_file[1]).days
+                },
+                'newest_file': {
+                    'name': newest_file[0].name,
+                    'date': newest_file[1].isoformat(),
+                    'age_days': (datetime.now() - newest_file[1]).days
+                },
+                'expiry_days': self.cache_expiry_days
+            }
+        except Exception as e:
+            self.logger.error(f"Error getting cache info: {e}")
+            return {'error': str(e)}
+    
+    def clear_cache(self, older_than_days: Optional[int] = None) -> int:
+        """Clear cache files, optionally only those older than specified days."""
+        cleared_count = 0
+        
+        try:
+            if not self.cache_dir.exists():
+                return 0
+            
+            cutoff_time = None
+            if older_than_days is not None:
+                cutoff_time = datetime.now() - timedelta(days=older_than_days)
+            
+            for cache_file in self.cache_dir.glob('*.json'):
+                try:
+                    if cutoff_time is None:
+                        # Clear all cache files
+                        cache_file.unlink()
+                        cleared_count += 1
+                    else:
+                        # Only clear files older than cutoff
+                        file_time = datetime.fromtimestamp(cache_file.stat().st_mtime)
+                        if file_time < cutoff_time:
+                            cache_file.unlink()
+                            cleared_count += 1
+                            
+                except Exception as e:
+                    self.logger.warning(f"Error removing cache file {cache_file}: {e}")
+            
+            if cleared_count > 0:
+                self.logger.info(f"Cleared {cleared_count} cache files")
+                
+        except Exception as e:
+            self.logger.error(f"Error clearing cache: {e}")
+        
+        return cleared_count
     
     def _extract_game_data_from_html(self, html_content: str) -> Optional[Dict[str, Any]]:
         """Extract game data from the HTML page's data-page attribute."""

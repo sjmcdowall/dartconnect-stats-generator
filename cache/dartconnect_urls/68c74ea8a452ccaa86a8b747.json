@@ -1,0 +1,2178 @@
+{
+  "url": "https://recap.dartconnect.com/games/68c74ea8a452ccaa86a8b747",
+  "cached_at": "2025-10-11T15:55:17.604537",
+  "game_data": {
+    "errors": {},
+    "auth": {
+      "user": null
+    },
+    "ziggy": {
+      "url": "https://recap.dartconnect.com",
+      "port": null,
+      "defaults": [],
+      "routes": {
+        "horizon.stats.index": {
+          "uri": "horizon/api/stats",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.workload.index": {
+          "uri": "horizon/api/workload",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.masters.index": {
+          "uri": "horizon/api/masters",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.monitoring.index": {
+          "uri": "horizon/api/monitoring",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.monitoring.store": {
+          "uri": "horizon/api/monitoring",
+          "methods": [
+            "POST"
+          ]
+        },
+        "horizon.monitoring-tag.paginate": {
+          "uri": "horizon/api/monitoring/{tag}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "tag"
+          ]
+        },
+        "horizon.monitoring-tag.destroy": {
+          "uri": "horizon/api/monitoring/{tag}",
+          "methods": [
+            "DELETE"
+          ],
+          "wheres": {
+            "tag": ".*"
+          },
+          "parameters": [
+            "tag"
+          ]
+        },
+        "horizon.jobs-metrics.index": {
+          "uri": "horizon/api/metrics/jobs",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.jobs-metrics.show": {
+          "uri": "horizon/api/metrics/jobs/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.queues-metrics.index": {
+          "uri": "horizon/api/metrics/queues",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.queues-metrics.show": {
+          "uri": "horizon/api/metrics/queues/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs-batches.index": {
+          "uri": "horizon/api/batches",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.jobs-batches.show": {
+          "uri": "horizon/api/batches/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs-batches.retry": {
+          "uri": "horizon/api/batches/retry/{id}",
+          "methods": [
+            "POST"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.pending-jobs.index": {
+          "uri": "horizon/api/jobs/pending",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.completed-jobs.index": {
+          "uri": "horizon/api/jobs/completed",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.silenced-jobs.index": {
+          "uri": "horizon/api/jobs/silenced",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.failed-jobs.index": {
+          "uri": "horizon/api/jobs/failed",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.failed-jobs.show": {
+          "uri": "horizon/api/jobs/failed/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.retry-jobs.show": {
+          "uri": "horizon/api/jobs/retry/{id}",
+          "methods": [
+            "POST"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs.show": {
+          "uri": "horizon/api/jobs/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.index": {
+          "uri": "horizon/{view?}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "wheres": {
+            "view": "(.*)"
+          },
+          "parameters": [
+            "view"
+          ]
+        },
+        "sanctum.csrf-cookie": {
+          "uri": "sanctum/csrf-cookie",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "ignition.healthCheck": {
+          "uri": "_ignition/health-check",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "ignition.executeSolution": {
+          "uri": "_ignition/execute-solution",
+          "methods": [
+            "POST"
+          ]
+        },
+        "ignition.updateConfig": {
+          "uri": "_ignition/update-config",
+          "methods": [
+            "POST"
+          ]
+        },
+        "login": {
+          "uri": "login",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "logout": {
+          "uri": "logout",
+          "methods": [
+            "POST"
+          ]
+        },
+        "matches.show": {
+          "uri": "matches/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "games.show": {
+          "uri": "games/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "players.show": {
+          "uri": "players/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "counts.show": {
+          "uri": "counts/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        }
+      },
+      "location": "https://recap.dartconnect.com/games/68c74ea8a452ccaa86a8b747"
+    },
+    "matchInfo": {
+      "recapv1_url": "https://recapv1.dartconnect.com/history/report/match/68c74ea8a452ccaa86a8b747",
+      "mergedmatch_url": "https://recapv1.dartconnect.com/history/report/event/808049",
+      "away_label": "Blades",
+      "competition_title": "Winston Salem Sunday Night Dart League",
+      "der": 69,
+      "division_standings_url": "https://tv.dartconnect.com/leaguestandings/WinSSNDL/17423/66065",
+      "event_title": "Fall/Winter 2025",
+      "division_title": "Division: Salem",
+      "report_dart_avg_units": "PPR",
+      "game_time": "00:59",
+      "has_01": true,
+      "has_cricket": true,
+      "home_label": "One More Shot",
+      "league_id": "WinSSNDL",
+      "board_type": null,
+      "id": "68c74ea8a452ccaa86a8b747",
+      "league_match_id": 6689068,
+      "tournament_id": null,
+      "remote_play": 0,
+      "bracket_match_id": null,
+      "tournament_match": null,
+      "leaderboard_url": "https://leaderboard.dartconnect.com/leaderboard#l-6ncb_17423_all-all_01-all-all-all-all-all",
+      "match_end_date": "8:34 PM",
+      "match_length": "01:25",
+      "match_start_date": "7:09 PM",
+      "more_darts_url": "https://tv.dartconnect.com/leaguemenu/WinSSNDL",
+      "mpr": "1.1",
+      "opponents": [
+        {
+          "darts_thrown_mpr": "129",
+          "darts_thrown_ppr": "93",
+          "league_points": 3,
+          "league_standings_points": 3,
+          "leg_wins": 2,
+          "marks_scored": "43",
+          "mpr": "1.0",
+          "name": "One More Shot",
+          "points_scored_mpr": "0",
+          "points_scored_ppr": "1,002",
+          "ppr": "32.32",
+          "score": 2,
+          "set_wins": 2
+        },
+        {
+          "darts_thrown_mpr": "131",
+          "darts_thrown_ppr": "90",
+          "league_points": 3,
+          "league_standings_points": 3,
+          "leg_wins": 2,
+          "marks_scored": "50",
+          "mpr": "1.1",
+          "name": "Blades",
+          "points_scored_mpr": "0",
+          "points_scored_ppr": "960",
+          "ppr": "32.00",
+          "score": 2,
+          "set_wins": 2
+        }
+      ],
+      "page_title": "b747",
+      "ppr_01": "32.16",
+      "server_match_start_date": "Sun, 14-Sep-2025",
+      "total_01_darts_thrown": "183",
+      "total_cricket_darts_thrown": "260",
+      "total_darts_thrown": "443",
+      "total_games": 4,
+      "total_marks_scored": "93",
+      "total_matches": 1,
+      "total_points_scored": "1,962",
+      "total_sets": 4,
+      "match_winner": null,
+      "points_style": "Award SET WIN Points according to Team Size",
+      "standings_points_style": null,
+      "bonus_points": "",
+      "notes": {
+        "pub_notes": null,
+        "sets": [],
+        "games": []
+      }
+    },
+    "segments": {
+      "": [
+        [
+          {
+            "set_index": 1,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "501 SIDO",
+            "winner_index": 0,
+            "starting_opponent_index": 0,
+            "cork_winner": null,
+            "duration": "14:21",
+            "out_format": "DO",
+            "score_type": "P",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "33.40",
+              "mpr": "0.0",
+              "darts_thrown": 45,
+              "ending_points": 0,
+              "ending_marks": null
+            },
+            "away": {
+              "ppr": "33.64",
+              "mpr": "0.0",
+              "darts_thrown": null,
+              "ending_points": 30,
+              "ending_marks": null
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "John Perrone",
+                  "current_score": 475,
+                  "color": null,
+                  "turn_score": 26
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 471,
+                  "color": null,
+                  "turn_score": 30
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "John Perrone",
+                  "current_score": 438,
+                  "color": null,
+                  "turn_score": 37
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 445,
+                  "color": null,
+                  "turn_score": 26
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "John Perrone",
+                  "current_score": 398,
+                  "color": null,
+                  "turn_score": 40
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 419,
+                  "color": null,
+                  "turn_score": 26
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "John Perrone",
+                  "current_score": 391,
+                  "color": null,
+                  "turn_score": 7
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 372,
+                  "color": null,
+                  "turn_score": 47
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "John Perrone",
+                  "current_score": 354,
+                  "color": null,
+                  "turn_score": 37
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 314,
+                  "color": null,
+                  "turn_score": 58
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "John Perrone",
+                  "current_score": 323,
+                  "color": null,
+                  "turn_score": 31
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 272,
+                  "color": null,
+                  "turn_score": 42
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "John Perrone",
+                  "current_score": 278,
+                  "color": null,
+                  "turn_score": 45
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 231,
+                  "color": null,
+                  "turn_score": 41
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "John Perrone",
+                  "current_score": 216,
+                  "color": null,
+                  "turn_score": 62
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 217,
+                  "color": null,
+                  "turn_score": 14
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "John Perrone",
+                  "current_score": 177,
+                  "color": null,
+                  "turn_score": 39
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 210,
+                  "color": null,
+                  "turn_score": 7
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "John Perrone",
+                  "current_score": 144,
+                  "color": null,
+                  "turn_score": 33
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 168,
+                  "color": null,
+                  "turn_score": 42
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "John Perrone",
+                  "current_score": 128,
+                  "color": null,
+                  "turn_score": 16
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 95,
+                  "color": null,
+                  "turn_score": 73
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "John Perrone",
+                  "current_score": 84,
+                  "color": null,
+                  "turn_score": 44
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 58,
+                  "color": null,
+                  "turn_score": 37
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "John Perrone",
+                  "current_score": 51,
+                  "color": null,
+                  "turn_score": 33
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 30,
+                  "color": null,
+                  "turn_score": 28
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "John Perrone",
+                  "current_score": 32,
+                  "color": null,
+                  "turn_score": 19
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 30,
+                  "color": "BUST",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "DO (3)",
+                  "name": "John Perrone",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": 32
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                }
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "set_index": 2,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "Cricket",
+            "winner_index": 1,
+            "starting_opponent_index": 0,
+            "cork_winner": null,
+            "duration": "19:05",
+            "out_format": null,
+            "score_type": "M",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "0.00",
+              "mpr": "0.7",
+              "darts_thrown": null,
+              "ending_points": null,
+              "ending_marks": 34
+            },
+            "away": {
+              "ppr": "0.00",
+              "mpr": "0.8",
+              "darts_thrown": 89,
+              "ending_points": null,
+              "ending_marks": 50
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S18"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "T20"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "D18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20, S18"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20, S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "D17, S19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S18, T19"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S19, S16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": null,
+                  "turn_score": "T17, S19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": null,
+                  "turn_score": "S16, S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": null,
+                  "turn_score": "S16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S16, T15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": null,
+                  "turn_score": "S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": null,
+                  "turn_score": "D15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "SB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "DB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 25,
+                  "color": null,
+                  "turn_score": "SB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 25,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 25,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Paul Walker",
+                  "current_score": 34,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 50,
+                  "color": null,
+                  "turn_score": "SB"
+                }
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "set_index": 3,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "501 SIDO",
+            "winner_index": 0,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "15:32",
+            "out_format": "DO",
+            "score_type": "P",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "31.31",
+              "mpr": "0.0",
+              "darts_thrown": 48,
+              "ending_points": 0,
+              "ending_marks": null
+            },
+            "away": {
+              "ppr": "30.56",
+              "mpr": "0.0",
+              "darts_thrown": null,
+              "ending_points": 12,
+              "ending_marks": null
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": 462,
+                  "color": null,
+                  "turn_score": 39
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jade Martinez",
+                  "current_score": 456,
+                  "color": null,
+                  "turn_score": 45
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Shannon  Woodard",
+                  "current_score": 427,
+                  "color": null,
+                  "turn_score": 35
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 427,
+                  "color": null,
+                  "turn_score": 29
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": 388,
+                  "color": null,
+                  "turn_score": 39
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jade Martinez",
+                  "current_score": 394,
+                  "color": null,
+                  "turn_score": 33
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Shannon  Woodard",
+                  "current_score": 356,
+                  "color": null,
+                  "turn_score": 32
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 354,
+                  "color": null,
+                  "turn_score": 40
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": 331,
+                  "color": null,
+                  "turn_score": 25
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jade Martinez",
+                  "current_score": 331,
+                  "color": null,
+                  "turn_score": 23
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Shannon  Woodard",
+                  "current_score": 311,
+                  "color": null,
+                  "turn_score": 20
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 308,
+                  "color": null,
+                  "turn_score": 23
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": 266,
+                  "color": null,
+                  "turn_score": 45
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jade Martinez",
+                  "current_score": 252,
+                  "color": null,
+                  "turn_score": 56
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Shannon  Woodard",
+                  "current_score": 230,
+                  "color": null,
+                  "turn_score": 36
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 192,
+                  "color": null,
+                  "turn_score": 60
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": 207,
+                  "color": null,
+                  "turn_score": 23
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jade Martinez",
+                  "current_score": 182,
+                  "color": null,
+                  "turn_score": 10
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Shannon  Woodard",
+                  "current_score": 186,
+                  "color": null,
+                  "turn_score": 21
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 173,
+                  "color": null,
+                  "turn_score": 9
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": 126,
+                  "color": null,
+                  "turn_score": 60
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jade Martinez",
+                  "current_score": 133,
+                  "color": null,
+                  "turn_score": 40
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Shannon  Woodard",
+                  "current_score": 79,
+                  "color": null,
+                  "turn_score": 47
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 88,
+                  "color": null,
+                  "turn_score": 45
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": 60,
+                  "color": null,
+                  "turn_score": 19
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jade Martinez",
+                  "current_score": 60,
+                  "color": null,
+                  "turn_score": 28
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Shannon  Woodard",
+                  "current_score": 23,
+                  "color": null,
+                  "turn_score": 37
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 26,
+                  "color": null,
+                  "turn_score": 34
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": 23,
+                  "color": "BUST",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Jade Martinez",
+                  "current_score": 12,
+                  "color": null,
+                  "turn_score": 14
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "DO (3)",
+                  "name": "Shannon  Woodard",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": 23
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 12,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "set_index": 4,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "Cricket",
+            "winner_index": 1,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "09:46",
+            "out_format": null,
+            "score_type": "M",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "0.00",
+              "mpr": "1.7",
+              "darts_thrown": null,
+              "ending_points": null,
+              "ending_marks": 107
+            },
+            "away": {
+              "ppr": "0.00",
+              "mpr": "1.9",
+              "darts_thrown": 42,
+              "ending_points": null,
+              "ending_marks": 115
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Dave Dickemeyer",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Dave Dickemeyer",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S18x3"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Dave Dickemeyer",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20, S18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "D20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S17"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "S19x2, D17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Dave Dickemeyer",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S19x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "S19, S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "SB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Dave Dickemeyer",
+                  "current_score": 0,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 20,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": 32,
+                  "color": null,
+                  "turn_score": "S16x2, D16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 20,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Dave Dickemeyer",
+                  "current_score": 32,
+                  "color": null,
+                  "turn_score": "T17, S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 39,
+                  "color": null,
+                  "turn_score": "T16, S19"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": 62,
+                  "color": null,
+                  "turn_score": "S15, T15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 39,
+                  "color": null,
+                  "turn_score": "DB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Dave Dickemeyer",
+                  "current_score": 107,
+                  "color": null,
+                  "turn_score": "T15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Durkos",
+                  "current_score": 115,
+                  "color": null,
+                  "turn_score": "T19, S19"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michelle Forss",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Wendy Martinez",
+                  "current_score": 115,
+                  "color": null,
+                  "turn_score": "S15x3"
+                }
+              }
+            ]
+          }
+        ]
+      ]
+    }
+  }
+}

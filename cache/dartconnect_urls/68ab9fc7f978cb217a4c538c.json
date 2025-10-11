@@ -1,0 +1,813 @@
+{
+  "url": "https://recap.dartconnect.com/games/68ab9fc7f978cb217a4c538c",
+  "cached_at": "2025-10-11T15:55:03.720728",
+  "game_data": {
+    "errors": {},
+    "auth": {
+      "user": null
+    },
+    "ziggy": {
+      "url": "https://recap.dartconnect.com",
+      "port": null,
+      "defaults": [],
+      "routes": {
+        "horizon.stats.index": {
+          "uri": "horizon/api/stats",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.workload.index": {
+          "uri": "horizon/api/workload",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.masters.index": {
+          "uri": "horizon/api/masters",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.monitoring.index": {
+          "uri": "horizon/api/monitoring",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.monitoring.store": {
+          "uri": "horizon/api/monitoring",
+          "methods": [
+            "POST"
+          ]
+        },
+        "horizon.monitoring-tag.paginate": {
+          "uri": "horizon/api/monitoring/{tag}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "tag"
+          ]
+        },
+        "horizon.monitoring-tag.destroy": {
+          "uri": "horizon/api/monitoring/{tag}",
+          "methods": [
+            "DELETE"
+          ],
+          "wheres": {
+            "tag": ".*"
+          },
+          "parameters": [
+            "tag"
+          ]
+        },
+        "horizon.jobs-metrics.index": {
+          "uri": "horizon/api/metrics/jobs",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.jobs-metrics.show": {
+          "uri": "horizon/api/metrics/jobs/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.queues-metrics.index": {
+          "uri": "horizon/api/metrics/queues",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.queues-metrics.show": {
+          "uri": "horizon/api/metrics/queues/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs-batches.index": {
+          "uri": "horizon/api/batches",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.jobs-batches.show": {
+          "uri": "horizon/api/batches/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs-batches.retry": {
+          "uri": "horizon/api/batches/retry/{id}",
+          "methods": [
+            "POST"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.pending-jobs.index": {
+          "uri": "horizon/api/jobs/pending",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.completed-jobs.index": {
+          "uri": "horizon/api/jobs/completed",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.silenced-jobs.index": {
+          "uri": "horizon/api/jobs/silenced",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.failed-jobs.index": {
+          "uri": "horizon/api/jobs/failed",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.failed-jobs.show": {
+          "uri": "horizon/api/jobs/failed/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.retry-jobs.show": {
+          "uri": "horizon/api/jobs/retry/{id}",
+          "methods": [
+            "POST"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs.show": {
+          "uri": "horizon/api/jobs/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.index": {
+          "uri": "horizon/{view?}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "wheres": {
+            "view": "(.*)"
+          },
+          "parameters": [
+            "view"
+          ]
+        },
+        "sanctum.csrf-cookie": {
+          "uri": "sanctum/csrf-cookie",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "ignition.healthCheck": {
+          "uri": "_ignition/health-check",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "ignition.executeSolution": {
+          "uri": "_ignition/execute-solution",
+          "methods": [
+            "POST"
+          ]
+        },
+        "ignition.updateConfig": {
+          "uri": "_ignition/update-config",
+          "methods": [
+            "POST"
+          ]
+        },
+        "login": {
+          "uri": "login",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "logout": {
+          "uri": "logout",
+          "methods": [
+            "POST"
+          ]
+        },
+        "matches.show": {
+          "uri": "matches/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "games.show": {
+          "uri": "games/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "players.show": {
+          "uri": "players/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "counts.show": {
+          "uri": "counts/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        }
+      },
+      "location": "https://recap.dartconnect.com/games/68ab9fc7f978cb217a4c538c"
+    },
+    "matchInfo": {
+      "recapv1_url": "https://recapv1.dartconnect.com/history/report/match/68ab9fc7f978cb217a4c538c",
+      "mergedmatch_url": "https://recapv1.dartconnect.com/history/report/event/792098",
+      "away_label": "Flight Club",
+      "competition_title": "Winston Salem Sunday Night Dart League",
+      "der": 100,
+      "division_standings_url": "https://tv.dartconnect.com/leaguestandings/WinSSNDL/17423/66065",
+      "event_title": "Fall/Winter 2025",
+      "division_title": "Division: Salem",
+      "report_dart_avg_units": "PPR",
+      "game_time": "00:15",
+      "has_01": true,
+      "has_cricket": false,
+      "home_label": "One More Shot",
+      "league_id": "WinSSNDL",
+      "board_type": null,
+      "id": "68ab9fc7f978cb217a4c538c",
+      "league_match_id": 6688546,
+      "tournament_id": null,
+      "remote_play": 0,
+      "bracket_match_id": null,
+      "tournament_match": null,
+      "leaderboard_url": "https://leaderboard.dartconnect.com/leaderboard#l-6ncb_17423_all-all_01-all-all-all-all-all",
+      "match_end_date": "7:26 PM",
+      "match_length": "00:15",
+      "match_start_date": "7:11 PM",
+      "more_darts_url": "https://tv.dartconnect.com/leaguemenu/WinSSNDL",
+      "mpr": null,
+      "opponents": [
+        {
+          "darts_thrown_mpr": "-",
+          "darts_thrown_ppr": "52",
+          "league_points": 1,
+          "league_standings_points": 1,
+          "leg_wins": 1,
+          "marks_scored": "-",
+          "mpr": "-",
+          "name": "One More Shot",
+          "points_scored_mpr": "0",
+          "points_scored_ppr": "501",
+          "ppr": "28.90",
+          "score": 1,
+          "set_wins": 1
+        },
+        {
+          "darts_thrown_mpr": "-",
+          "darts_thrown_ppr": "51",
+          "league_points": 0,
+          "league_standings_points": 0,
+          "leg_wins": 0,
+          "marks_scored": "-",
+          "mpr": "-",
+          "name": "Flight Club",
+          "points_scored_mpr": "0",
+          "points_scored_ppr": "431",
+          "ppr": "25.35",
+          "score": 0,
+          "set_wins": 0
+        }
+      ],
+      "page_title": "538c",
+      "ppr_01": "27.15",
+      "server_match_start_date": "Sun, 24-Aug-2025",
+      "total_01_darts_thrown": "103",
+      "total_cricket_darts_thrown": null,
+      "total_darts_thrown": "103",
+      "total_games": 1,
+      "total_marks_scored": null,
+      "total_matches": 1,
+      "total_points_scored": "932",
+      "total_sets": 1,
+      "match_winner": 0,
+      "points_style": "Award SET WIN Points according to Team Size",
+      "standings_points_style": null,
+      "bonus_points": "",
+      "notes": {
+        "pub_notes": "9/12/2025: Edited leg 1.1, Changed player from Shannon  Woodard to Michele Forss\n",
+        "sets": [],
+        "games": []
+      }
+    },
+    "segments": {
+      "": [
+        [
+          {
+            "set_index": 1,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "501 SIDO",
+            "winner_index": 0,
+            "starting_opponent_index": 0,
+            "cork_winner": null,
+            "duration": "15:24",
+            "out_format": "DO",
+            "score_type": "P",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "28.90",
+              "mpr": "0.0",
+              "darts_thrown": 52,
+              "ending_points": 0,
+              "ending_marks": null
+            },
+            "away": {
+              "ppr": "25.35",
+              "mpr": "0.0",
+              "darts_thrown": null,
+              "ending_points": 70,
+              "ending_marks": null
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 477,
+                  "color": null,
+                  "turn_score": 24
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 477,
+                  "color": null,
+                  "turn_score": 24
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 455,
+                  "color": null,
+                  "turn_score": 22
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 437,
+                  "color": null,
+                  "turn_score": 40
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 422,
+                  "color": null,
+                  "turn_score": 33
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 419,
+                  "color": null,
+                  "turn_score": 18
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 371,
+                  "color": null,
+                  "turn_score": 51
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 405,
+                  "color": null,
+                  "turn_score": 14
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 328,
+                  "color": null,
+                  "turn_score": 43
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 359,
+                  "color": null,
+                  "turn_score": 46
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 304,
+                  "color": null,
+                  "turn_score": 24
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 348,
+                  "color": null,
+                  "turn_score": 11
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 282,
+                  "color": null,
+                  "turn_score": 22
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 314,
+                  "color": null,
+                  "turn_score": 34
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 237,
+                  "color": null,
+                  "turn_score": 45
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 281,
+                  "color": null,
+                  "turn_score": 33
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 208,
+                  "color": null,
+                  "turn_score": 29
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 245,
+                  "color": null,
+                  "turn_score": 36
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 150,
+                  "color": null,
+                  "turn_score": 58
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 212,
+                  "color": null,
+                  "turn_score": 33
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 135,
+                  "color": null,
+                  "turn_score": 15
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 205,
+                  "color": null,
+                  "turn_score": 7
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 110,
+                  "color": null,
+                  "turn_score": 25
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 205,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 69,
+                  "color": null,
+                  "turn_score": 41
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 191,
+                  "color": null,
+                  "turn_score": 14
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 31,
+                  "color": null,
+                  "turn_score": 38
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 135,
+                  "color": null,
+                  "turn_score": 56
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 31,
+                  "color": "BUST",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 115,
+                  "color": null,
+                  "turn_score": 20
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 28,
+                  "color": null,
+                  "turn_score": 3
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 115,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Michele Forss",
+                  "current_score": 28,
+                  "color": "BUST",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": 70,
+                  "color": null,
+                  "turn_score": 45
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "DO (1)",
+                  "name": "Michele Forss",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": 28
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Emily Satterfield",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                }
+              }
+            ]
+          }
+        ]
+      ]
+    }
+  }
+}

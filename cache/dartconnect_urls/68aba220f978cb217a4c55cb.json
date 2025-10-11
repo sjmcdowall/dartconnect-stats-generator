@@ -1,0 +1,1323 @@
+{
+  "url": "https://recap.dartconnect.com/games/68aba220f978cb217a4c55cb",
+  "cached_at": "2025-10-11T15:55:04.814733",
+  "game_data": {
+    "errors": {},
+    "auth": {
+      "user": null
+    },
+    "ziggy": {
+      "url": "https://recap.dartconnect.com",
+      "port": null,
+      "defaults": [],
+      "routes": {
+        "horizon.stats.index": {
+          "uri": "horizon/api/stats",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.workload.index": {
+          "uri": "horizon/api/workload",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.masters.index": {
+          "uri": "horizon/api/masters",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.monitoring.index": {
+          "uri": "horizon/api/monitoring",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.monitoring.store": {
+          "uri": "horizon/api/monitoring",
+          "methods": [
+            "POST"
+          ]
+        },
+        "horizon.monitoring-tag.paginate": {
+          "uri": "horizon/api/monitoring/{tag}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "tag"
+          ]
+        },
+        "horizon.monitoring-tag.destroy": {
+          "uri": "horizon/api/monitoring/{tag}",
+          "methods": [
+            "DELETE"
+          ],
+          "wheres": {
+            "tag": ".*"
+          },
+          "parameters": [
+            "tag"
+          ]
+        },
+        "horizon.jobs-metrics.index": {
+          "uri": "horizon/api/metrics/jobs",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.jobs-metrics.show": {
+          "uri": "horizon/api/metrics/jobs/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.queues-metrics.index": {
+          "uri": "horizon/api/metrics/queues",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.queues-metrics.show": {
+          "uri": "horizon/api/metrics/queues/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs-batches.index": {
+          "uri": "horizon/api/batches",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.jobs-batches.show": {
+          "uri": "horizon/api/batches/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs-batches.retry": {
+          "uri": "horizon/api/batches/retry/{id}",
+          "methods": [
+            "POST"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.pending-jobs.index": {
+          "uri": "horizon/api/jobs/pending",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.completed-jobs.index": {
+          "uri": "horizon/api/jobs/completed",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.silenced-jobs.index": {
+          "uri": "horizon/api/jobs/silenced",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.failed-jobs.index": {
+          "uri": "horizon/api/jobs/failed",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.failed-jobs.show": {
+          "uri": "horizon/api/jobs/failed/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.retry-jobs.show": {
+          "uri": "horizon/api/jobs/retry/{id}",
+          "methods": [
+            "POST"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs.show": {
+          "uri": "horizon/api/jobs/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.index": {
+          "uri": "horizon/{view?}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "wheres": {
+            "view": "(.*)"
+          },
+          "parameters": [
+            "view"
+          ]
+        },
+        "sanctum.csrf-cookie": {
+          "uri": "sanctum/csrf-cookie",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "ignition.healthCheck": {
+          "uri": "_ignition/health-check",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "ignition.executeSolution": {
+          "uri": "_ignition/execute-solution",
+          "methods": [
+            "POST"
+          ]
+        },
+        "ignition.updateConfig": {
+          "uri": "_ignition/update-config",
+          "methods": [
+            "POST"
+          ]
+        },
+        "login": {
+          "uri": "login",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "logout": {
+          "uri": "logout",
+          "methods": [
+            "POST"
+          ]
+        },
+        "matches.show": {
+          "uri": "matches/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "games.show": {
+          "uri": "games/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "players.show": {
+          "uri": "players/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "counts.show": {
+          "uri": "counts/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        }
+      },
+      "location": "https://recap.dartconnect.com/games/68aba220f978cb217a4c55cb"
+    },
+    "matchInfo": {
+      "recapv1_url": "https://recapv1.dartconnect.com/history/report/match/68aba220f978cb217a4c55cb",
+      "mergedmatch_url": "https://recapv1.dartconnect.com/history/report/event/792089",
+      "away_label": "Slop Counts",
+      "competition_title": "Winston Salem Sunday Night Dart League",
+      "der": 97,
+      "division_standings_url": "https://tv.dartconnect.com/leaguestandings/WinSSNDL/17423/66062",
+      "event_title": "Fall/Winter 2025",
+      "division_title": "Division: Winston",
+      "report_dart_avg_units": "PPR",
+      "game_time": "00:23",
+      "has_01": false,
+      "has_cricket": true,
+      "home_label": "We Be Trippin",
+      "league_id": "WinSSNDL",
+      "board_type": null,
+      "id": "68aba220f978cb217a4c55cb",
+      "league_match_id": 6688537,
+      "tournament_id": null,
+      "remote_play": 0,
+      "bracket_match_id": null,
+      "tournament_match": null,
+      "leaderboard_url": "https://leaderboard.dartconnect.com/leaderboard#l-6ncb_17423_all-all_01-all-all-all-all-all",
+      "match_end_date": "7:55 PM",
+      "match_length": "00:24",
+      "match_start_date": "7:30 PM",
+      "more_darts_url": "https://tv.dartconnect.com/leaguemenu/WinSSNDL",
+      "mpr": "2.6",
+      "opponents": [
+        {
+          "darts_thrown_mpr": "111",
+          "darts_thrown_ppr": "-",
+          "league_points": 0,
+          "league_standings_points": 0,
+          "leg_wins": 1,
+          "marks_scored": "100",
+          "mpr": "2.7",
+          "name": "We Be Trippin",
+          "points_scored_mpr": "-",
+          "points_scored_ppr": "-",
+          "ppr": "-",
+          "score": 1,
+          "set_wins": 0
+        },
+        {
+          "darts_thrown_mpr": "111",
+          "darts_thrown_ppr": "-",
+          "league_points": 1,
+          "league_standings_points": 1,
+          "leg_wins": 2,
+          "marks_scored": "94",
+          "mpr": "2.5",
+          "name": "Slop Counts",
+          "points_scored_mpr": "-",
+          "points_scored_ppr": "-",
+          "ppr": "-",
+          "score": 2,
+          "set_wins": 1
+        }
+      ],
+      "page_title": "55cb",
+      "ppr_01": null,
+      "server_match_start_date": "Sun, 24-Aug-2025",
+      "total_01_darts_thrown": null,
+      "total_cricket_darts_thrown": "222",
+      "total_darts_thrown": "222",
+      "total_games": 3,
+      "total_marks_scored": "194",
+      "total_matches": 1,
+      "total_points_scored": null,
+      "total_sets": 1,
+      "match_winner": 1,
+      "points_style": "Award SET WIN Points according to Team Size",
+      "standings_points_style": null,
+      "bonus_points": "",
+      "notes": {
+        "pub_notes": null,
+        "sets": [],
+        "games": []
+      }
+    },
+    "segments": {
+      "": [
+        [
+          {
+            "set_index": 1,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "Cricket",
+            "winner_index": 0,
+            "starting_opponent_index": 0,
+            "cork_winner": null,
+            "duration": "06:07",
+            "out_format": null,
+            "score_type": "M",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "0.00",
+              "mpr": "3.4",
+              "darts_thrown": 27,
+              "ending_points": null,
+              "ending_marks": 190
+            },
+            "away": {
+              "ppr": "0.00",
+              "mpr": "2.6",
+              "darts_thrown": null,
+              "ending_points": null,
+              "ending_marks": 164
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "T20, S20"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 19,
+                  "color": null,
+                  "turn_score": "T19, S19"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 100,
+                  "color": null,
+                  "turn_score": "S20, T20"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 76,
+                  "color": null,
+                  "turn_score": "S19x3"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "7M",
+                  "name": "Megan Ferguson",
+                  "current_score": 100,
+                  "color": "BIG HIT",
+                  "turn_score": "T19, T17, S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Ed Koment",
+                  "current_score": 112,
+                  "color": "BIG HIT",
+                  "turn_score": "T18, S18x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 160,
+                  "color": null,
+                  "turn_score": "S18, T20"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 148,
+                  "color": null,
+                  "turn_score": "S18x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 160,
+                  "color": null,
+                  "turn_score": "S18x2, S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 148,
+                  "color": null,
+                  "turn_score": "S16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 190,
+                  "color": null,
+                  "turn_score": "T15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 148,
+                  "color": null,
+                  "turn_score": "S16x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 190,
+                  "color": null,
+                  "turn_score": "S16x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 164,
+                  "color": null,
+                  "turn_score": "S16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 190,
+                  "color": null,
+                  "turn_score": "S16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 164,
+                  "color": null,
+                  "turn_score": "SBx2, S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "3B",
+                  "name": "Megan Ferguson",
+                  "current_score": 190,
+                  "color": "BIG BULL",
+                  "turn_score": "SB, DB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                }
+              }
+            ]
+          },
+          {
+            "set_index": 1,
+            "set_game_number": 2,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "Cricket",
+            "winner_index": 1,
+            "starting_opponent_index": 0,
+            "cork_winner": null,
+            "duration": "07:28",
+            "out_format": null,
+            "score_type": "M",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "0.00",
+              "mpr": "2.3",
+              "darts_thrown": null,
+              "ending_points": null,
+              "ending_marks": 137
+            },
+            "away": {
+              "ppr": "0.00",
+              "mpr": "2.5",
+              "darts_thrown": 36,
+              "ending_points": null,
+              "ending_marks": 148
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Megan Ferguson",
+                  "current_score": 40,
+                  "color": "BIG HIT",
+                  "turn_score": "T20, S20x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S19x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 40,
+                  "color": null,
+                  "turn_score": "S19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 57,
+                  "color": null,
+                  "turn_score": "T19, S19"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 120,
+                  "color": null,
+                  "turn_score": "T20, S20"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 57,
+                  "color": null,
+                  "turn_score": "T20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 120,
+                  "color": null,
+                  "turn_score": "S19x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 57,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "6M",
+                  "name": "Megan Ferguson",
+                  "current_score": 120,
+                  "color": "BIG HIT",
+                  "turn_score": "T18, T17"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 73,
+                  "color": null,
+                  "turn_score": "T16, S16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 120,
+                  "color": null,
+                  "turn_score": "S16x3"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Ed Koment",
+                  "current_score": 103,
+                  "color": "BIG HIT",
+                  "turn_score": "S15x2, T15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 120,
+                  "color": null,
+                  "turn_score": "S15x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 148,
+                  "color": null,
+                  "turn_score": "T15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 137,
+                  "color": null,
+                  "turn_score": "S15, S17"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 148,
+                  "color": null,
+                  "turn_score": "D17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 137,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 148,
+                  "color": null,
+                  "turn_score": "T18, S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 137,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 148,
+                  "color": null,
+                  "turn_score": "SB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 137,
+                  "color": null,
+                  "turn_score": "SBx2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 148,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 137,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 148,
+                  "color": null,
+                  "turn_score": "SBx2"
+                }
+              }
+            ]
+          },
+          {
+            "set_index": 1,
+            "set_game_number": 3,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "Cricket",
+            "winner_index": 1,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "09:52",
+            "out_format": null,
+            "score_type": "M",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "0.00",
+              "mpr": "2.6",
+              "darts_thrown": null,
+              "ending_points": null,
+              "ending_marks": 360
+            },
+            "away": {
+              "ppr": "0.00",
+              "mpr": "2.5",
+              "darts_thrown": 51,
+              "ending_points": null,
+              "ending_marks": 374
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "S20, T20"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Megan Ferguson",
+                  "current_score": 38,
+                  "color": "BIG HIT",
+                  "turn_score": "S18, T18, S19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 19,
+                  "color": null,
+                  "turn_score": "T19, S19"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 56,
+                  "color": null,
+                  "turn_score": "S19x2, S18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 57,
+                  "color": null,
+                  "turn_score": "S19x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "6M",
+                  "name": "Megan Ferguson",
+                  "current_score": 164,
+                  "color": "BIG HIT",
+                  "turn_score": "T18x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "7M",
+                  "name": "Ed Koment",
+                  "current_score": 125,
+                  "color": "BIG HIT",
+                  "turn_score": "T17x2, S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 182,
+                  "color": null,
+                  "turn_score": "S18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 159,
+                  "color": null,
+                  "turn_score": "S17x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 200,
+                  "color": null,
+                  "turn_score": "S18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 193,
+                  "color": null,
+                  "turn_score": "S17x2, S18"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 272,
+                  "color": null,
+                  "turn_score": "T18, S18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 210,
+                  "color": null,
+                  "turn_score": "S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 272,
+                  "color": null,
+                  "turn_score": "S17x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 261,
+                  "color": null,
+                  "turn_score": "S17x3"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 290,
+                  "color": null,
+                  "turn_score": "S17, S18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 278,
+                  "color": null,
+                  "turn_score": "S18, S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 290,
+                  "color": null,
+                  "turn_score": "DB, S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 278,
+                  "color": null,
+                  "turn_score": "S18"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 305,
+                  "color": null,
+                  "turn_score": "S15x3"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 294,
+                  "color": null,
+                  "turn_score": "T16, S16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 335,
+                  "color": null,
+                  "turn_score": "S15x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Ed Koment",
+                  "current_score": 374,
+                  "color": "BIG HIT",
+                  "turn_score": "T16, S16x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 335,
+                  "color": null,
+                  "turn_score": "S16x3"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 374,
+                  "color": null,
+                  "turn_score": "T15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 335,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 374,
+                  "color": null,
+                  "turn_score": "SB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 360,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 374,
+                  "color": null,
+                  "turn_score": "SB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Ed Koment",
+                  "current_score": 374,
+                  "color": null,
+                  "turn_score": "DB"
+                }
+              }
+            ]
+          }
+        ]
+      ]
+    }
+  }
+}

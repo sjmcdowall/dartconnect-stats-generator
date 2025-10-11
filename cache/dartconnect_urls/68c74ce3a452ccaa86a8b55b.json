@@ -1,0 +1,3444 @@
+{
+  "url": "https://recap.dartconnect.com/games/68c74ce3a452ccaa86a8b55b",
+  "cached_at": "2025-10-11T15:55:17.478766",
+  "game_data": {
+    "errors": {},
+    "auth": {
+      "user": null
+    },
+    "ziggy": {
+      "url": "https://recap.dartconnect.com",
+      "port": null,
+      "defaults": [],
+      "routes": {
+        "horizon.stats.index": {
+          "uri": "horizon/api/stats",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.workload.index": {
+          "uri": "horizon/api/workload",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.masters.index": {
+          "uri": "horizon/api/masters",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.monitoring.index": {
+          "uri": "horizon/api/monitoring",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.monitoring.store": {
+          "uri": "horizon/api/monitoring",
+          "methods": [
+            "POST"
+          ]
+        },
+        "horizon.monitoring-tag.paginate": {
+          "uri": "horizon/api/monitoring/{tag}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "tag"
+          ]
+        },
+        "horizon.monitoring-tag.destroy": {
+          "uri": "horizon/api/monitoring/{tag}",
+          "methods": [
+            "DELETE"
+          ],
+          "wheres": {
+            "tag": ".*"
+          },
+          "parameters": [
+            "tag"
+          ]
+        },
+        "horizon.jobs-metrics.index": {
+          "uri": "horizon/api/metrics/jobs",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.jobs-metrics.show": {
+          "uri": "horizon/api/metrics/jobs/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.queues-metrics.index": {
+          "uri": "horizon/api/metrics/queues",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.queues-metrics.show": {
+          "uri": "horizon/api/metrics/queues/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs-batches.index": {
+          "uri": "horizon/api/batches",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.jobs-batches.show": {
+          "uri": "horizon/api/batches/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs-batches.retry": {
+          "uri": "horizon/api/batches/retry/{id}",
+          "methods": [
+            "POST"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.pending-jobs.index": {
+          "uri": "horizon/api/jobs/pending",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.completed-jobs.index": {
+          "uri": "horizon/api/jobs/completed",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.silenced-jobs.index": {
+          "uri": "horizon/api/jobs/silenced",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.failed-jobs.index": {
+          "uri": "horizon/api/jobs/failed",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "horizon.failed-jobs.show": {
+          "uri": "horizon/api/jobs/failed/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.retry-jobs.show": {
+          "uri": "horizon/api/jobs/retry/{id}",
+          "methods": [
+            "POST"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.jobs.show": {
+          "uri": "horizon/api/jobs/{id}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "id"
+          ]
+        },
+        "horizon.index": {
+          "uri": "horizon/{view?}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "wheres": {
+            "view": "(.*)"
+          },
+          "parameters": [
+            "view"
+          ]
+        },
+        "sanctum.csrf-cookie": {
+          "uri": "sanctum/csrf-cookie",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "ignition.healthCheck": {
+          "uri": "_ignition/health-check",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "ignition.executeSolution": {
+          "uri": "_ignition/execute-solution",
+          "methods": [
+            "POST"
+          ]
+        },
+        "ignition.updateConfig": {
+          "uri": "_ignition/update-config",
+          "methods": [
+            "POST"
+          ]
+        },
+        "login": {
+          "uri": "login",
+          "methods": [
+            "GET",
+            "HEAD"
+          ]
+        },
+        "logout": {
+          "uri": "logout",
+          "methods": [
+            "POST"
+          ]
+        },
+        "matches.show": {
+          "uri": "matches/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "games.show": {
+          "uri": "games/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "players.show": {
+          "uri": "players/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        },
+        "counts.show": {
+          "uri": "counts/{match}",
+          "methods": [
+            "GET",
+            "HEAD"
+          ],
+          "parameters": [
+            "match"
+          ],
+          "bindings": {
+            "match": "match_id"
+          }
+        }
+      },
+      "location": "https://recap.dartconnect.com/games/68c74ce3a452ccaa86a8b55b"
+    },
+    "matchInfo": {
+      "recapv1_url": "https://recapv1.dartconnect.com/history/report/match/68c74ce3a452ccaa86a8b55b",
+      "mergedmatch_url": "https://recapv1.dartconnect.com/history/report/event/808043",
+      "away_label": "Rumple Steel Tips",
+      "competition_title": "Winston Salem Sunday Night Dart League",
+      "der": 52,
+      "division_standings_url": "https://tv.dartconnect.com/leaguestandings/WinSSNDL/17423/66062",
+      "event_title": "Fall/Winter 2025",
+      "division_title": "Division: Winston",
+      "report_dart_avg_units": "PPR",
+      "game_time": "01:05",
+      "has_01": true,
+      "has_cricket": true,
+      "home_label": "We Be Trippin",
+      "league_id": "WinSSNDL",
+      "board_type": null,
+      "id": "68c74ce3a452ccaa86a8b55b",
+      "league_match_id": 6689056,
+      "tournament_id": null,
+      "remote_play": 0,
+      "bracket_match_id": null,
+      "tournament_match": null,
+      "leaderboard_url": "https://leaderboard.dartconnect.com/leaderboard#l-6ncb_17423_all-all_01-all-all-all-all-all",
+      "match_end_date": "9:15 PM",
+      "match_length": "02:06",
+      "match_start_date": "7:09 PM",
+      "more_darts_url": "https://tv.dartconnect.com/leaguemenu/WinSSNDL",
+      "mpr": "2.3",
+      "opponents": [
+        {
+          "darts_thrown_mpr": "180",
+          "darts_thrown_ppr": "173",
+          "league_points": 4,
+          "league_standings_points": 4,
+          "leg_wins": 6,
+          "marks_scored": "136",
+          "mpr": "2.3",
+          "name": "We Be Trippin",
+          "points_scored_mpr": "0",
+          "points_scored_ppr": "2,466",
+          "ppr": "42.76",
+          "score": 3,
+          "set_wins": 3
+        },
+        {
+          "darts_thrown_mpr": "186",
+          "darts_thrown_ppr": "176",
+          "league_points": 2,
+          "league_standings_points": 2,
+          "leg_wins": 4,
+          "marks_scored": "142",
+          "mpr": "2.3",
+          "name": "Rumple Steel Tips",
+          "points_scored_mpr": "0",
+          "points_scored_ppr": "2,422",
+          "ppr": "41.28",
+          "score": 1,
+          "set_wins": 1
+        }
+      ],
+      "page_title": "b55b",
+      "ppr_01": "42.02",
+      "server_match_start_date": "Sun, 14-Sep-2025",
+      "total_01_darts_thrown": "349",
+      "total_cricket_darts_thrown": "366",
+      "total_darts_thrown": "715",
+      "total_games": 10,
+      "total_marks_scored": "278",
+      "total_matches": 1,
+      "total_points_scored": "4,888",
+      "total_sets": 4,
+      "match_winner": 0,
+      "points_style": "Award SET WIN Points according to Team Size",
+      "standings_points_style": null,
+      "bonus_points": "",
+      "notes": {
+        "pub_notes": null,
+        "sets": [],
+        "games": []
+      }
+    },
+    "segments": {
+      "": [
+        [
+          {
+            "set_index": 1,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "501 SIDO",
+            "winner_index": 0,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "07:12",
+            "out_format": "DO",
+            "score_type": "P",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "36.66",
+              "mpr": "0.0",
+              "darts_thrown": 41,
+              "ending_points": 0,
+              "ending_marks": null
+            },
+            "away": {
+              "ppr": "35.57",
+              "mpr": "0.0",
+              "darts_thrown": null,
+              "ending_points": 3,
+              "ending_marks": null
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 456,
+                  "color": null,
+                  "turn_score": 45
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 475,
+                  "color": null,
+                  "turn_score": 26
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 441,
+                  "color": null,
+                  "turn_score": 15
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 449,
+                  "color": null,
+                  "turn_score": 26
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 400,
+                  "color": null,
+                  "turn_score": 41
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 364,
+                  "color": null,
+                  "turn_score": 85
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 337,
+                  "color": null,
+                  "turn_score": 63
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 353,
+                  "color": null,
+                  "turn_score": 11
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 298,
+                  "color": null,
+                  "turn_score": 39
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 272,
+                  "color": null,
+                  "turn_score": 81
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 241,
+                  "color": null,
+                  "turn_score": 57
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 246,
+                  "color": null,
+                  "turn_score": 26
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 194,
+                  "color": null,
+                  "turn_score": 47
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 161,
+                  "color": null,
+                  "turn_score": 85
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 177,
+                  "color": null,
+                  "turn_score": 17
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 91,
+                  "color": null,
+                  "turn_score": 70
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 132,
+                  "color": null,
+                  "turn_score": 45
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 40,
+                  "color": null,
+                  "turn_score": 51
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 106,
+                  "color": null,
+                  "turn_score": 26
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 32,
+                  "color": null,
+                  "turn_score": 8
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 82,
+                  "color": null,
+                  "turn_score": 24
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 24,
+                  "color": null,
+                  "turn_score": 8
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 25,
+                  "color": null,
+                  "turn_score": 57
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 24,
+                  "color": "BUST",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 8,
+                  "color": null,
+                  "turn_score": 17
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 6,
+                  "color": null,
+                  "turn_score": 18
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "DO (2)",
+                  "name": "Mike Richter",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": 8
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 3,
+                  "color": null,
+                  "turn_score": 3
+                }
+              }
+            ]
+          },
+          {
+            "set_index": 1,
+            "set_game_number": 2,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "501 SIDO",
+            "winner_index": 1,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "05:53",
+            "out_format": "DO",
+            "score_type": "P",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "46.20",
+              "mpr": "0.0",
+              "darts_thrown": null,
+              "ending_points": 39,
+              "ending_marks": null
+            },
+            "away": {
+              "ppr": "46.97",
+              "mpr": "0.0",
+              "darts_thrown": 32,
+              "ending_points": 0,
+              "ending_marks": null
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 437,
+                  "color": null,
+                  "turn_score": 64
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "100",
+                  "name": "Brandon Jeffs",
+                  "current_score": 401,
+                  "color": "TON",
+                  "turn_score": 100
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 394,
+                  "color": null,
+                  "turn_score": 43
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 341,
+                  "color": null,
+                  "turn_score": 60
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "95",
+                  "name": "Mike Richter",
+                  "current_score": 299,
+                  "color": "95!",
+                  "turn_score": 95
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 281,
+                  "color": null,
+                  "turn_score": 60
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 270,
+                  "color": null,
+                  "turn_score": 29
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 221,
+                  "color": null,
+                  "turn_score": 60
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 211,
+                  "color": null,
+                  "turn_score": 59
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 176,
+                  "color": null,
+                  "turn_score": 45
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 194,
+                  "color": null,
+                  "turn_score": 17
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 116,
+                  "color": null,
+                  "turn_score": 60
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 153,
+                  "color": null,
+                  "turn_score": 41
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 71,
+                  "color": null,
+                  "turn_score": 45
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 74,
+                  "color": null,
+                  "turn_score": 79
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 40,
+                  "color": null,
+                  "turn_score": 31
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 39,
+                  "color": null,
+                  "turn_score": 35
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 18,
+                  "color": null,
+                  "turn_score": 22
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 39,
+                  "color": "BUST",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 2,
+                  "color": null,
+                  "turn_score": 16
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "DO (2)",
+                  "name": "Brandon Jeffs",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": 2
+                }
+              }
+            ]
+          },
+          {
+            "set_index": 1,
+            "set_game_number": 3,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "501 SIDO",
+            "winner_index": 0,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "04:42",
+            "out_format": "DO",
+            "score_type": "P",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "50.10",
+              "mpr": "0.0",
+              "darts_thrown": 30,
+              "ending_points": 0,
+              "ending_marks": null
+            },
+            "away": {
+              "ppr": "48.10",
+              "mpr": "0.0",
+              "darts_thrown": null,
+              "ending_points": 20,
+              "ending_marks": null
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 418,
+                  "color": null,
+                  "turn_score": 83
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 460,
+                  "color": null,
+                  "turn_score": 41
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 333,
+                  "color": null,
+                  "turn_score": 85
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 415,
+                  "color": null,
+                  "turn_score": 45
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 302,
+                  "color": null,
+                  "turn_score": 31
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 335,
+                  "color": null,
+                  "turn_score": 80
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 261,
+                  "color": null,
+                  "turn_score": 41
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 275,
+                  "color": null,
+                  "turn_score": 60
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 204,
+                  "color": null,
+                  "turn_score": 57
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 215,
+                  "color": null,
+                  "turn_score": 60
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 147,
+                  "color": null,
+                  "turn_score": 57
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 193,
+                  "color": null,
+                  "turn_score": 22
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 90,
+                  "color": null,
+                  "turn_score": 57
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 180,
+                  "color": null,
+                  "turn_score": 13
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 52,
+                  "color": null,
+                  "turn_score": 38
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 120,
+                  "color": null,
+                  "turn_score": 60
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 32,
+                  "color": null,
+                  "turn_score": 20
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 75,
+                  "color": null,
+                  "turn_score": 45
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "DO (3)",
+                  "name": "Mike Richter",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": 32
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": 55
+                }
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "set_index": 2,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "Cricket",
+            "winner_index": 1,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "07:11",
+            "out_format": null,
+            "score_type": "M",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "0.00",
+              "mpr": "2.5",
+              "darts_thrown": null,
+              "ending_points": null,
+              "ending_marks": 207
+            },
+            "away": {
+              "ppr": "0.00",
+              "mpr": "2.3",
+              "darts_thrown": 41,
+              "ending_points": null,
+              "ending_marks": 225
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Stefano Cortese",
+                  "current_score": 38,
+                  "color": "BIG HIT",
+                  "turn_score": "S19x2, T19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Brandon Jeffs",
+                  "current_score": 40,
+                  "color": "BIG HIT",
+                  "turn_score": "T20, S20x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Stefano Cortese",
+                  "current_score": 95,
+                  "color": "BIG HIT",
+                  "turn_score": "T19, S20x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 80,
+                  "color": null,
+                  "turn_score": "S19, S20x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 95,
+                  "color": null,
+                  "turn_score": "S17"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "6M",
+                  "name": "Brandon Jeffs",
+                  "current_score": 140,
+                  "color": "BIG HIT",
+                  "turn_score": "T20, T19, S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 95,
+                  "color": null,
+                  "turn_score": "S17x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 140,
+                  "color": null,
+                  "turn_score": "S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 95,
+                  "color": null,
+                  "turn_score": "S18x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 140,
+                  "color": null,
+                  "turn_score": "S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Stefano Cortese",
+                  "current_score": 127,
+                  "color": "BIG HIT",
+                  "turn_score": "S16x2, T16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 140,
+                  "color": null,
+                  "turn_score": "S18x3"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Stefano Cortese",
+                  "current_score": 175,
+                  "color": "BIG HIT",
+                  "turn_score": "S20, S18, T16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 160,
+                  "color": null,
+                  "turn_score": "S16, S20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 175,
+                  "color": null,
+                  "turn_score": "S15x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 160,
+                  "color": null,
+                  "turn_score": "S15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 191,
+                  "color": null,
+                  "turn_score": "S16, S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 175,
+                  "color": null,
+                  "turn_score": "T15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 207,
+                  "color": null,
+                  "turn_score": "S16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "3B",
+                  "name": "Brandon Jeffs",
+                  "current_score": 175,
+                  "color": "BIG BULL",
+                  "turn_score": "DB, SB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 207,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 175,
+                  "color": null,
+                  "turn_score": "D16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 207,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 175,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 207,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 175,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 225,
+                  "color": null,
+                  "turn_score": "DB"
+                }
+              }
+            ]
+          },
+          {
+            "set_index": 2,
+            "set_game_number": 2,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "Cricket",
+            "winner_index": 0,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "05:32",
+            "out_format": null,
+            "score_type": "M",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "0.00",
+              "mpr": "2.2",
+              "darts_thrown": 33,
+              "ending_points": null,
+              "ending_marks": 55
+            },
+            "away": {
+              "ppr": "0.00",
+              "mpr": "1.4",
+              "darts_thrown": null,
+              "ending_points": null,
+              "ending_marks": 40
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "7M",
+                  "name": "Stefano Cortese",
+                  "current_score": 20,
+                  "color": "BIG HIT",
+                  "turn_score": "S20, T20, T19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "S18x3"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S18"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "S17x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 39,
+                  "color": null,
+                  "turn_score": "D17, S19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S17x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 55,
+                  "color": null,
+                  "turn_score": "T16, S16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 55,
+                  "color": null,
+                  "turn_score": "S15x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 55,
+                  "color": null,
+                  "turn_score": "S15"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 15,
+                  "color": null,
+                  "turn_score": "S15x3"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 55,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 15,
+                  "color": null,
+                  "turn_score": "SB, S20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 55,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 15,
+                  "color": null,
+                  "turn_score": "SB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 55,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 40,
+                  "color": null,
+                  "turn_score": "DB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 55,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 40,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              }
+            ]
+          },
+          {
+            "set_index": 2,
+            "set_game_number": 3,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "Cricket",
+            "winner_index": 0,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "06:26",
+            "out_format": null,
+            "score_type": "M",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "0.00",
+              "mpr": "2.5",
+              "darts_thrown": 39,
+              "ending_points": null,
+              "ending_marks": 223
+            },
+            "away": {
+              "ppr": "0.00",
+              "mpr": "2.5",
+              "darts_thrown": null,
+              "ending_points": null,
+              "ending_marks": 211
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20x3"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20x3"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S19x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S19x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 19,
+                  "color": null,
+                  "turn_score": "S19x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "6M",
+                  "name": "Stefano Cortese",
+                  "current_score": 72,
+                  "color": "BIG HIT",
+                  "turn_score": "T18x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 76,
+                  "color": null,
+                  "turn_score": "T19"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 72,
+                  "color": null,
+                  "turn_score": "T17, S19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 76,
+                  "color": null,
+                  "turn_score": "S18x3"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 89,
+                  "color": null,
+                  "turn_score": "S17, S16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 76,
+                  "color": null,
+                  "turn_score": "S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 89,
+                  "color": null,
+                  "turn_score": "S16x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 76,
+                  "color": null,
+                  "turn_score": "S16x3"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 89,
+                  "color": null,
+                  "turn_score": "S15x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 76,
+                  "color": null,
+                  "turn_score": "S15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 123,
+                  "color": null,
+                  "turn_score": "S17x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Brandon Jeffs",
+                  "current_score": 121,
+                  "color": "BIG HIT",
+                  "turn_score": "T15, S15x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "3B",
+                  "name": "Stefano Cortese",
+                  "current_score": 123,
+                  "color": "BIG BULL",
+                  "turn_score": "DB, SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 136,
+                  "color": null,
+                  "turn_score": "T17, S15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 173,
+                  "color": null,
+                  "turn_score": "SBx2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 196,
+                  "color": null,
+                  "turn_score": "T15, S15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 198,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 211,
+                  "color": null,
+                  "turn_score": "S15, SBx2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Stefano Cortese",
+                  "current_score": 223,
+                  "color": null,
+                  "turn_score": "S15, SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 211,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "set_index": 3,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "501 SIDO",
+            "winner_index": 0,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "06:11",
+            "out_format": "DO",
+            "score_type": "P",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "51.83",
+              "mpr": "0.0",
+              "darts_thrown": 29,
+              "ending_points": 0,
+              "ending_marks": null
+            },
+            "away": {
+              "ppr": "46.10",
+              "mpr": "0.0",
+              "darts_thrown": null,
+              "ending_points": 40,
+              "ending_marks": null
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 435,
+                  "color": null,
+                  "turn_score": 66
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 441,
+                  "color": null,
+                  "turn_score": 60
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Casey Ferguson",
+                  "current_score": 372,
+                  "color": null,
+                  "turn_score": 63
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 383,
+                  "color": null,
+                  "turn_score": 58
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 292,
+                  "color": null,
+                  "turn_score": 80
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 359,
+                  "color": null,
+                  "turn_score": 24
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Casey Ferguson",
+                  "current_score": 245,
+                  "color": null,
+                  "turn_score": 47
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 300,
+                  "color": null,
+                  "turn_score": 59
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 200,
+                  "color": null,
+                  "turn_score": 45
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 260,
+                  "color": null,
+                  "turn_score": 40
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Casey Ferguson",
+                  "current_score": 167,
+                  "color": null,
+                  "turn_score": 33
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 200,
+                  "color": null,
+                  "turn_score": 60
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 141,
+                  "color": null,
+                  "turn_score": 26
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 174,
+                  "color": null,
+                  "turn_score": 26
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": 108,
+                  "name": "Casey Ferguson",
+                  "current_score": 33,
+                  "color": "TON 8",
+                  "turn_score": 108
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 142,
+                  "color": null,
+                  "turn_score": 32
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 16,
+                  "color": null,
+                  "turn_score": 17
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 100,
+                  "color": null,
+                  "turn_score": 42
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "DO (2)",
+                  "name": "Casey Ferguson",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": 16
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 40,
+                  "color": null,
+                  "turn_score": 60
+                }
+              }
+            ]
+          },
+          {
+            "set_index": 3,
+            "set_game_number": 2,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "501 SIDO",
+            "winner_index": 0,
+            "starting_opponent_index": 0,
+            "cork_winner": null,
+            "duration": "08:58",
+            "out_format": "DO",
+            "score_type": "P",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "34.95",
+              "mpr": "0.0",
+              "darts_thrown": 43,
+              "ending_points": 0,
+              "ending_marks": null
+            },
+            "away": {
+              "ppr": "34.36",
+              "mpr": "0.0",
+              "darts_thrown": null,
+              "ending_points": 20,
+              "ending_marks": null
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 456,
+                  "color": null,
+                  "turn_score": 45
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 454,
+                  "color": null,
+                  "turn_score": 47
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Casey Ferguson",
+                  "current_score": 430,
+                  "color": null,
+                  "turn_score": 26
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 434,
+                  "color": null,
+                  "turn_score": 20
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 387,
+                  "color": null,
+                  "turn_score": 43
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 413,
+                  "color": null,
+                  "turn_score": 21
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Casey Ferguson",
+                  "current_score": 362,
+                  "color": null,
+                  "turn_score": 25
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "99",
+                  "name": "Lora Josey",
+                  "current_score": 314,
+                  "color": "99!",
+                  "turn_score": 99
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 340,
+                  "color": null,
+                  "turn_score": 22
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 273,
+                  "color": null,
+                  "turn_score": 41
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Casey Ferguson",
+                  "current_score": 311,
+                  "color": null,
+                  "turn_score": 29
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 214,
+                  "color": null,
+                  "turn_score": 59
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 251,
+                  "color": null,
+                  "turn_score": 60
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 177,
+                  "color": null,
+                  "turn_score": 37
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Casey Ferguson",
+                  "current_score": 210,
+                  "color": null,
+                  "turn_score": 41
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 130,
+                  "color": null,
+                  "turn_score": 47
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 169,
+                  "color": null,
+                  "turn_score": 41
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 102,
+                  "color": null,
+                  "turn_score": 28
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Casey Ferguson",
+                  "current_score": 143,
+                  "color": null,
+                  "turn_score": 26
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 64,
+                  "color": null,
+                  "turn_score": 38
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 83,
+                  "color": null,
+                  "turn_score": 60
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": 44
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Casey Ferguson",
+                  "current_score": 40,
+                  "color": null,
+                  "turn_score": 43
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 20,
+                  "color": "BUST",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 10,
+                  "color": null,
+                  "turn_score": 30
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": 20,
+                  "color": "BUST",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Casey Ferguson",
+                  "current_score": 10,
+                  "color": "BUST",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Lora Josey",
+                  "current_score": 20,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "DO (1)",
+                  "name": "Megan Ferguson",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": 10
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Matt Masten",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                }
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "set_index": 4,
+            "set_game_number": 1,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "Cricket",
+            "winner_index": 1,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "05:31",
+            "out_format": null,
+            "score_type": "M",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "0.00",
+              "mpr": "2.2",
+              "darts_thrown": null,
+              "ending_points": null,
+              "ending_marks": 119
+            },
+            "away": {
+              "ppr": "0.00",
+              "mpr": "2.7",
+              "darts_thrown": 31,
+              "ending_points": null,
+              "ending_marks": 125
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 20,
+                  "color": null,
+                  "turn_score": "T20, S20"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Eric Hale",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S20x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 40,
+                  "color": null,
+                  "turn_score": "S19, S20"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S19"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 60,
+                  "color": null,
+                  "turn_score": "S20"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Eric Hale",
+                  "current_score": 57,
+                  "color": "BIG HIT",
+                  "turn_score": "T19, S19x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 60,
+                  "color": null,
+                  "turn_score": "S18x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 76,
+                  "color": null,
+                  "turn_score": "S20, S19"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Megan Ferguson",
+                  "current_score": 94,
+                  "color": "BIG HIT",
+                  "turn_score": "S17x2, T17"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Eric Hale",
+                  "current_score": 94,
+                  "color": null,
+                  "turn_score": "T18, S18"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 94,
+                  "color": null,
+                  "turn_score": "S19x2, S18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 94,
+                  "color": null,
+                  "turn_score": "S17x3"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 94,
+                  "color": null,
+                  "turn_score": "S16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Eric Hale",
+                  "current_score": 94,
+                  "color": null,
+                  "turn_score": "S16"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 94,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "7M",
+                  "name": "Brandon Jeffs",
+                  "current_score": 125,
+                  "color": "BIG HIT",
+                  "turn_score": "T16, T15, S15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 94,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Eric Hale",
+                  "current_score": 125,
+                  "color": null,
+                  "turn_score": "SB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "3B",
+                  "name": "Mike Richter",
+                  "current_score": 119,
+                  "color": "BIG BULL",
+                  "turn_score": "SB, DB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 125,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Eric Hale",
+                  "current_score": 125,
+                  "color": null,
+                  "turn_score": "DB"
+                }
+              }
+            ]
+          },
+          {
+            "set_index": 4,
+            "set_game_number": 2,
+            "league_segment": {
+              "set_id": null,
+              "segment_id": null,
+              "label": "",
+              "segment_number": null
+            },
+            "game_name": "Cricket",
+            "winner_index": 1,
+            "starting_opponent_index": 1,
+            "cork_winner": null,
+            "duration": "07:50",
+            "out_format": null,
+            "score_type": "M",
+            "is_nine_darter": false,
+            "score_edits": [],
+            "home": {
+              "ppr": "0.00",
+              "mpr": "2.0",
+              "darts_thrown": null,
+              "ending_points": null,
+              "ending_marks": 198
+            },
+            "away": {
+              "ppr": "0.00",
+              "mpr": "2.4",
+              "darts_thrown": 42,
+              "ending_points": null,
+              "ending_marks": 233
+            },
+            "turns": [
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Megan Ferguson",
+                  "current_score": 0,
+                  "color": "BIG HIT",
+                  "turn_score": "T20, S18x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Eric Hale",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "T20"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 18,
+                  "color": null,
+                  "turn_score": "S18x2, S19"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 0,
+                  "color": null,
+                  "turn_score": "S19x3"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 36,
+                  "color": null,
+                  "turn_score": "S19x2, S18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Eric Hale",
+                  "current_score": 57,
+                  "color": null,
+                  "turn_score": "T19"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 72,
+                  "color": null,
+                  "turn_score": "S18x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 57,
+                  "color": null,
+                  "turn_score": "S18x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 108,
+                  "color": null,
+                  "turn_score": "S18x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Eric Hale",
+                  "current_score": 57,
+                  "color": null,
+                  "turn_score": "S17"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 126,
+                  "color": null,
+                  "turn_score": "S17, S18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 57,
+                  "color": null,
+                  "turn_score": "S17x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 198,
+                  "color": null,
+                  "turn_score": "S18, T18"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Eric Hale",
+                  "current_score": 142,
+                  "color": "BIG HIT",
+                  "turn_score": "T17, S17x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 198,
+                  "color": null,
+                  "turn_score": "S17x2"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 176,
+                  "color": null,
+                  "turn_score": "S17x2"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 198,
+                  "color": null,
+                  "turn_score": "S16"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "5M",
+                  "name": "Eric Hale",
+                  "current_score": 192,
+                  "color": "BIG HIT",
+                  "turn_score": "T16, S16, S18"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 198,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 208,
+                  "color": null,
+                  "turn_score": "S16, T15"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 198,
+                  "color": null,
+                  "turn_score": "SB"
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Eric Hale",
+                  "current_score": 208,
+                  "color": null,
+                  "turn_score": "SB"
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": 198,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Brandon Jeffs",
+                  "current_score": 208,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Megan Ferguson",
+                  "current_score": 198,
+                  "color": "MISS",
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Eric Hale",
+                  "current_score": 208,
+                  "color": "MISS",
+                  "turn_score": null
+                }
+              },
+              {
+                "home": {
+                  "opponent_index": 0,
+                  "is_starting_opponent": false,
+                  "won_cork": null,
+                  "notable": null,
+                  "name": "Mike Richter",
+                  "current_score": null,
+                  "color": null,
+                  "turn_score": null
+                },
+                "away": {
+                  "opponent_index": 1,
+                  "is_starting_opponent": true,
+                  "won_cork": null,
+                  "notable": "3B",
+                  "name": "Brandon Jeffs",
+                  "current_score": 233,
+                  "color": "BIG BULL",
+                  "turn_score": "SB, DB"
+                }
+              }
+            ]
+          }
+        ]
+      ]
+    }
+  }
+}
