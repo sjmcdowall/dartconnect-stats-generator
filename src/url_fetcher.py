@@ -329,51 +329,16 @@ class DartConnectURLFetcher:
             return []
     
     def _parse_cricket_game(self, game: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Parse individual Cricket game for detailed statistics."""
+        """Parse individual Cricket game for detailed statistics and QP calculation."""
         try:
             turns = game.get('turns', [])
             if not turns:
                 return None
             
-            # Get game-level ending marks first
-            home_ending_marks = game.get('home', {}).get('ending_marks', 0)
-            away_ending_marks = game.get('away', {}).get('ending_marks', 0)
-            
-            # Initialize player stats
+            # Initialize player stats with turn-by-turn tracking
             players = {}
-            player_names = set()
             
-            # Collect all player names first
-            for turn in turns:
-                home_player = turn.get('home', {})
-                away_player = turn.get('away', {})
-                
-                if home_player.get('name'):
-                    player_names.add(home_player.get('name'))
-                if away_player.get('name'):
-                    player_names.add(away_player.get('name'))
-            
-            # Initialize players with ending marks
-            player_list = list(player_names)
-            for i, name in enumerate(player_list):
-                # Assign ending marks based on home/away position
-                # This is a simplification - in reality we'd need to track which player is home/away
-                ending_marks = home_ending_marks if i == 0 else away_ending_marks
-                if len(player_list) > 2:  # Multiple players, distribute marks
-                    ending_marks = ending_marks // (len(player_list) // 2) if len(player_list) > 1 else ending_marks
-                
-                players[name] = {
-                    'name': name,
-                    'ending_marks': ending_marks,
-                    'total_bulls': 0,
-                    'single_bulls': 0,
-                    'double_bulls': 0,
-                    'big_hits': 0,
-                    'turns': 0,
-                    'misses': 0
-                }
-            
-            # Process each turn for bulls and other stats
+            # Process each turn to track marks and bulls PER TURN for QP calculation
             for turn in turns:
                 home_player = turn.get('home', {})
                 away_player = turn.get('away', {})
@@ -383,31 +348,33 @@ class DartConnectURLFetcher:
                         continue
                         
                     name = player_data.get('name')
-                    if not name or name not in players:
+                    if not name:
                         continue
                     
-                    # Count bulls in turn score
+                    # Initialize player if not seen before
+                    if name not in players:
+                        players[name] = {
+                            'name': name,
+                            'turn_data': [],  # Store each turn's marks and bulls
+                            'max_qp': 0,  # Best single turn QP
+                        }
+                    
+                    # Parse this turn's score to get marks and bulls
                     turn_score = player_data.get('turn_score', '')
-                    if turn_score:
-                        players[name]['total_bulls'] += self._count_bulls_in_turn(turn_score)
-                        players[name]['single_bulls'] += turn_score.count('SB')
-                        players[name]['double_bulls'] += turn_score.count('DB')
-                        players[name]['turns'] += 1
+                    marks, bulls = self._parse_cricket_turn(turn_score)
                     
-                    # Check for notable achievements
-                    notable = player_data.get('notable', '')
-                    if notable:
-                        if 'M' in notable:  # Mark count (e.g., "7M")
-                            marks = int(notable.replace('M', ''))
-                            if marks >= 5:  # Big hit threshold
-                                players[name]['big_hits'] += 1
-                        elif 'B' in notable:  # Bull count (e.g., "3B")
-                            # Already counted in turn_score
-                            pass
+                    # Store turn data
+                    players[name]['turn_data'].append({
+                        'marks': marks,
+                        'bulls': bulls
+                    })
                     
-                    # Check for misses
-                    if player_data.get('color') == 'MISS':
-                        players[name]['misses'] += 1
+                    # Calculate QP for this turn
+                    turn_qp = self._calculate_turn_qp(marks, bulls)
+                    
+                    # Track the maximum QP from any single turn
+                    if turn_qp > players[name]['max_qp']:
+                        players[name]['max_qp'] = turn_qp
             
             # Add game-level information
             game_info = {
@@ -416,8 +383,8 @@ class DartConnectURLFetcher:
                 'duration': game.get('duration'),
                 'home_mpr': game.get('home', {}).get('mpr'),
                 'away_mpr': game.get('away', {}).get('mpr'),
-                'home_ending_marks': home_ending_marks,
-                'away_ending_marks': away_ending_marks,
+                'home_ending_marks': game.get('home', {}).get('ending_marks', 0),
+                'away_ending_marks': game.get('away', {}).get('ending_marks', 0),
                 'players': list(players.values())
             }
             
@@ -427,99 +394,121 @@ class DartConnectURLFetcher:
             self.logger.error(f"Error parsing cricket game: {e}")
             return None
     
-    def _count_bulls_in_turn(self, turn_score: str) -> int:
-        """Count total bulls (SB + DB) in a turn score string."""
+    def _parse_cricket_turn(self, turn_score: str) -> tuple:
+        """Parse a cricket turn score to count marks and bulls.
+        
+        Args:
+            turn_score: Turn score string like "T20, S20" or "SB, DB, S19"
+            
+        Returns:
+            Tuple of (marks, bulls) where:
+            - marks = number of marks scored (hits on 15-20)
+            - bulls = number of bulls scored (SB=1, DB=2)
+        """
         if not turn_score:
+            return (0, 0)
+        
+        marks = 0
+        bulls = 0
+        
+        # Split by comma and process each dart
+        darts = [d.strip() for d in turn_score.split(',')]
+        
+        for dart in darts:
+            # Count bulls
+            if 'SB' in dart:
+                bulls += 1
+            elif 'DB' in dart:
+                bulls += 2
+            # Count marks on cricket numbers (15-20)
+            elif any(num in dart for num in ['15', '16', '17', '18', '19', '20']):
+                # Count multiplier (T=3, D=2, S=1)
+                if dart.startswith('T'):
+                    marks += 3
+                elif dart.startswith('D'):
+                    marks += 2
+                elif dart.startswith('S'):
+                    marks += 1
+                # Handle format like "S20x2" (2 single 20s)
+                if 'x' in dart:
+                    multiplier = int(dart.split('x')[1])
+                    # We already counted 1, so add the rest
+                    if dart.startswith('T'):
+                        marks += 3 * (multiplier - 1)
+                    elif dart.startswith('D'):
+                        marks += 2 * (multiplier - 1)
+                    elif dart.startswith('S'):
+                        marks += (multiplier - 1)
+        
+        return (marks, bulls)
+    
+    def _calculate_turn_qp(self, marks: int, bulls: int) -> int:
+        """Calculate QP for a single turn based on marks and bulls.
+        
+        QP Rules:
+        5 QP: 9H, 6B, 3H+4B, 6H+2B
+        4 QP: 8H, 5B, 2H+4B, 3H+3B, 5H+2B, 6H+1B
+        3 QP: 7H, 4B, 1H+4B, 2H+3B, 4H+2B, 5H+1B
+        2 QP: 6H, 3B, 1H+3B, 3H+2B, 4H+1B
+        1 QP: 5H, 3H+1B, 2H+2B
+        """
+        # QP Level 5
+        if (marks >= 9 or
+            bulls >= 6 or
+            (marks >= 3 and bulls >= 4) or
+            (marks >= 6 and bulls >= 2)):
+            return 5
+        
+        # QP Level 4
+        elif (marks >= 8 or
+              bulls >= 5 or
+              (marks >= 2 and bulls >= 4) or
+              (marks >= 3 and bulls >= 3) or
+              (marks >= 5 and bulls >= 2) or
+              (marks >= 6 and bulls >= 1)):
+            return 4
+        
+        # QP Level 3
+        elif (marks >= 7 or
+              bulls >= 4 or
+              (marks >= 1 and bulls >= 4) or
+              (marks >= 2 and bulls >= 3) or
+              (marks >= 4 and bulls >= 2) or
+              (marks >= 5 and bulls >= 1)):
+            return 3
+        
+        # QP Level 2
+        elif (marks >= 6 or
+              bulls >= 3 or
+              (marks >= 1 and bulls >= 3) or
+              (marks >= 3 and bulls >= 2) or
+              (marks >= 4 and bulls >= 1)):
+            return 2
+        
+        # QP Level 1
+        elif (marks >= 5 or
+              (marks >= 3 and bulls >= 1) or
+              (marks >= 2 and bulls >= 2)):
+            return 1
+        
+        # No QP
+        else:
             return 0
-        
-        # Count single bulls (SB) and double bulls (DB)
-        single_bulls = turn_score.count('SB')
-        double_bulls = turn_score.count('DB')
-        
-        # Each DB counts as 2 bulls, SB counts as 1
-        return single_bulls + (double_bulls * 2)
     
     def calculate_cricket_qp(self, player_stats: Dict[str, Any]) -> int:
         """
-        Calculate Cricket Quality Points using the official league system.
+        Get the maximum QP earned by a player in any single turn of the game.
         
-        QP levels based on combinations of Hits (H) and Bulls (B):
-        1: 5H, 3H+1B, 2B+2H
-        2: 6H, 3B, 1H+3B, 3H+2B, 4H+1B  
-        3: 7H, 4B, 1H+4B, 2H+3B, 4H+2B, 5H+1B
-        4: 8H, 5B, 2H+4B, 3H+3B, 5H+2B, 6H+1B
-        5: 9H, 6B, 3H+4B, 6H+2B
+        The QP has already been calculated per-turn in _parse_cricket_game().
+        We simply return the max_qp value.
         
         Args:
-            player_stats: Player statistics from cricket game
+            player_stats: Player statistics from cricket game with 'max_qp' field
             
         Returns:
-            QP level (1-5) or 0 if no QP earned
+            Maximum QP earned in any single turn (0-5)
         """
-        try:
-            # Get actual ending marks (hits) and bulls from game data
-            hits = player_stats.get('ending_marks', 0)  # Actual marks scored in game
-            bulls = player_stats.get('total_bulls', 0)  # Bulls hit during game
-            
-            # Convert ending marks to "hits" for QP calculation
-            # In Cricket, marks represent closed numbers, we need to convert to hit count
-            # This is an approximation - ending_marks is a score, not hit count
-            # We'll need to derive hits from the mark score (rough estimate)
-            if hits >= 190:  # High score suggests many hits
-                hits = hits // 20  # Rough conversion
-            elif hits >= 100:
-                hits = hits // 15
-            else:
-                hits = hits // 10
-                
-            hits = max(0, hits)  # Ensure non-negative
-            
-            # QP Level 5 checks
-            if (hits >= 9 or 
-                bulls >= 6 or
-                (hits >= 3 and bulls >= 4) or
-                (hits >= 6 and bulls >= 2)):
-                return 5
-            
-            # QP Level 4 checks  
-            elif (hits >= 8 or
-                  bulls >= 5 or
-                  (hits >= 2 and bulls >= 4) or
-                  (hits >= 3 and bulls >= 3) or
-                  (hits >= 5 and bulls >= 2) or
-                  (hits >= 6 and bulls >= 1)):
-                return 4
-            
-            # QP Level 3 checks
-            elif (hits >= 7 or
-                  bulls >= 4 or
-                  (hits >= 1 and bulls >= 4) or
-                  (hits >= 2 and bulls >= 3) or
-                  (hits >= 4 and bulls >= 2) or
-                  (hits >= 5 and bulls >= 1)):
-                return 3
-            
-            # QP Level 2 checks
-            elif (hits >= 6 or
-                  bulls >= 3 or
-                  (hits >= 1 and bulls >= 3) or
-                  (hits >= 3 and bulls >= 2) or
-                  (hits >= 4 and bulls >= 1)):
-                return 2
-            
-            # QP Level 1 checks
-            elif (hits >= 5 or
-                  (hits >= 3 and bulls >= 1) or
-                  (hits >= 2 and bulls >= 2)):
-                return 1
-            
-            # No QP earned
-            else:
-                return 0
-            
-        except Exception as e:
-            self.logger.error(f"Error calculating cricket QP: {e}")
-            return 0
+        return player_stats.get('max_qp', 0)
     
     def calculate_501_qp(self, total_score: int, checkout_score: Optional[int] = None) -> int:
         """

@@ -633,18 +633,9 @@ class PDFGenerator:
                 ]
                 table_data.append(player_row)
             
-            # Add empty rows for spacing (like in sample)
-            for _ in range(3):
-                empty_row = [''] * 19
-                table_data.append(empty_row)
-            
-            # Add Sub/Forfeit/Default rows
-            table_data.extend([
-                ['Sub'] + ['0'] * 18,
-                ['Sub'] + ['0'] * 18,
-                ['Forfeit'] + ['0'] * 18,
-                ['Default'] + ['0'] * 18
-            ])
+            # Add one empty row for spacing between teams
+            empty_row = [''] * 19
+            table_data.append(empty_row)
         
         # Create the table with adjusted column widths to prevent overlap
         col_widths = [
@@ -712,8 +703,8 @@ class PDFGenerator:
                 else:
                     style.append(('TEXTCOLOR', (4, player_row), (4, player_row), colors.red))
             
-            # Move to next team (account for players + empty rows + sub rows)
-            team_row_index += 1 + len(team["players"]) + 3 + 4
+            # Move to next team (account for team name row + players + 1 empty row)
+            team_row_index += 1 + len(team["players"]) + 1
         
         table.setStyle(TableStyle(style))
         content.append(table)
@@ -724,6 +715,9 @@ class PDFGenerator:
         """Get teams for a specific division from processed data."""
         if 'raw_data' not in data:
             return []
+        
+        # Store enhanced_data for QP calculations
+        self.enhanced_data = data.get('enhanced_data', {})
         
         df = data['raw_data']
         
@@ -771,7 +765,7 @@ class PDFGenerator:
         
         players = []
         for _, full_name in player_list:
-            player_data = self._calculate_player_stats(team_df, full_name, games_to_qualify)
+            player_data = self._calculate_player_stats(team_df, full_name, games_to_qualify, self.enhanced_data)
             players.append(player_data)
         
         return {
@@ -779,7 +773,7 @@ class PDFGenerator:
             "players": players
         }
     
-    def _calculate_player_stats(self, team_df, player_name: str, games_to_qualify_threshold: int) -> Dict:
+    def _calculate_player_stats(self, team_df, player_name: str, games_to_qualify_threshold: int, enhanced_data: Dict = None) -> Dict:
         """Calculate comprehensive player statistics."""
         player_df = team_df[team_df['player_name'] == player_name]
         
@@ -804,8 +798,8 @@ class PDFGenerator:
         total_games = total_wins + total_losses
         win_pct = f"{(total_wins / total_games * 100):.2f}%" if total_games > 0 else "0.00%"
         
-        # Calculate QPs (simplified for now - would need enhanced data for accurate QPs)
-        qps = self._estimate_qps(player_df)
+        # Calculate QPs properly using CSV data for 501 and enhanced data for Cricket
+        qps = self._calculate_total_qps(player_df, player_name, enhanced_data)
         qp_pct = f"{(qps / legs_played * 100):.2f}%" if legs_played > 0 else "0.00%"
         
         # Calculate rating
@@ -838,32 +832,143 @@ class PDFGenerator:
         }
     
     def _estimate_games_played(self, player_df):
-        """Estimate games played based on leg data."""
-        # This is a rough estimate - in practice you'd want more precise game tracking
-        return max(1, len(player_df) // 3)  # Assume ~3 legs per game on average
+        """Calculate actual games played by counting unique Set# combinations."""
+        if len(player_df) == 0:
+            return 0
+        
+        # Each unique combination of report_url + Set # represents one game
+        if 'report_url' in player_df.columns and 'Set #' in player_df.columns:
+            # Count unique games (Set numbers) across all matches
+            games = player_df.groupby(['report_url', 'Set #']).ngroups
+            return games
+        else:
+            # Fallback: estimate based on legs (best of 3, so ~2-3 legs per game)
+            return max(1, len(player_df) // 3)
     
     def _calculate_game_specific_stats(self, player_df):
-        """Calculate wins/losses by game type."""
+        """Calculate wins/losses by game type (counting games, not legs)."""
         stats = {}
+        
+        if 'report_url' not in player_df.columns or 'Set #' not in player_df.columns:
+            # Fallback: count legs if we don't have Set # info
+            for game_type in player_df['game_name'].unique():
+                game_df = player_df[player_df['game_name'] == game_type]
+                wins = len(game_df[game_df['win'] == 'W'])
+                losses = len(game_df[game_df['win'] == 'L'])
+                stats[game_type] = {'wins': wins, 'losses': losses}
+            return stats
+        
+        # Proper calculation: determine who won each game (Set)
         for game_type in player_df['game_name'].unique():
             game_df = player_df[player_df['game_name'] == game_type]
-            wins = len(game_df[game_df['win'] == 'W'])
-            losses = len(game_df[game_df['win'] == 'L'])
+            
+            wins = 0
+            losses = 0
+            
+            # Group by match and Set to determine game winners
+            for (match_url, set_num), set_data in game_df.groupby(['report_url', 'Set #']):
+                # Count legs won in this set
+                legs_won = (set_data['win'] == 'W').sum()
+                legs_lost = (set_data['win'] == 'L').sum()
+                
+                # Determine if player won this game (best of 3/5)
+                if legs_won > legs_lost:
+                    wins += 1
+                elif legs_lost > legs_won:
+                    losses += 1
+                # If tied, it might be incomplete - count as neither for now
+            
             stats[game_type] = {'wins': wins, 'losses': losses}
+        
         return stats
     
-    def _estimate_qps(self, player_df):
-        """Estimate Quality Points - simplified version."""
-        # This is very simplified - real QP calculation would use enhanced data
-        qp_count = 0
-        for _, row in player_df.iterrows():
-            score = row.get('score', 0)
-            if isinstance(score, (int, float)):
-                if score >= 180:  # High score QP
-                    qp_count += 1
-                elif score >= 140:  # Medium score QP
-                    qp_count += 0.5
-        return int(qp_count * 10)  # Scale up for realistic QP values
+    def _calculate_total_qps(self, player_df, player_name: str, enhanced_data: Dict = None) -> int:
+        """Calculate total Quality Points from 501 (CSV) and Cricket (enhanced data)."""
+        total_qps = 0
+        
+        # Calculate 501 QPs from CSV columns (Hi Turn and DO)
+        total_qps += self._calculate_501_qps_from_csv(player_df)
+        
+        # Add Cricket QPs from enhanced data if available
+        if enhanced_data:
+            cricket_qps = self._get_cricket_qps_for_player(player_name, enhanced_data)
+            total_qps += cricket_qps
+        
+        return total_qps
+    
+    def _calculate_501_qps_from_csv(self, player_df) -> int:
+        """Calculate 501 QPs using Hi Turn and DO columns from CSV.
+        
+        QP Rules for 501:
+        Turn Score QPs (Hi Turn):     Checkout QPs (DO):
+        1: 95-115                     1: 61-84 out
+        2: 116-131                    2: 85-106 out
+        3: 132-147                    3: 107-128 out
+        4: 148-163                    4: 129-150 out
+        5: 164-180                    5: 151-170 out
+        
+        QPs are ADDITIVE - a leg can earn QPs from both columns!
+        """
+        total_qps = 0
+        
+        # Filter for 501 games only
+        games_501 = player_df[player_df['game_name'] == '501 SIDO']
+        
+        for _, row in games_501.iterrows():
+            leg_qps = 0
+            
+            # QPs from Hi Turn (high score in one turn)
+            hi_turn = row.get('Hi Turn', 0)
+            if pd.notna(hi_turn):
+                try:
+                    hi_turn = float(hi_turn)
+                    if 164 <= hi_turn <= 180:
+                        leg_qps += 5
+                    elif 148 <= hi_turn <= 163:
+                        leg_qps += 4
+                    elif 132 <= hi_turn <= 147:
+                        leg_qps += 3
+                    elif 116 <= hi_turn <= 131:
+                        leg_qps += 2
+                    elif 95 <= hi_turn <= 115:
+                        leg_qps += 1
+                except (ValueError, TypeError):
+                    pass
+            
+            # QPs from DO (checkout score)
+            do_score = row.get('DO', 0)
+            if pd.notna(do_score):
+                try:
+                    do_score = float(do_score)
+                    if 151 <= do_score <= 170:
+                        leg_qps += 5
+                    elif 129 <= do_score <= 150:
+                        leg_qps += 4
+                    elif 107 <= do_score <= 128:
+                        leg_qps += 3
+                    elif 85 <= do_score <= 106:
+                        leg_qps += 2
+                    elif 61 <= do_score <= 84:
+                        leg_qps += 1
+                except (ValueError, TypeError):
+                    pass
+            
+            total_qps += leg_qps
+        
+        return total_qps
+    
+    def _get_cricket_qps_for_player(self, player_name: str, enhanced_data: Dict) -> int:
+        """Extract Cricket QPs for a player from enhanced data."""
+        if not enhanced_data:
+            return 0
+        
+        # Check if we have cricket QP data
+        cricket_qp_data = enhanced_data.get('enhanced_statistics', {}).get('cricket_enhanced_qp', {})
+        
+        if player_name in cricket_qp_data:
+            return cricket_qp_data[player_name].get('total_qp', 0)
+        
+        return 0
     
     def _empty_player_stats(self, player_name: str, games_to_qualify: int):
         """Return empty stats structure for players with no data."""
@@ -918,18 +1023,10 @@ class PDFGenerator:
             ]
             table_data.append(row)
         
-        # Add empty rows to fill out the team (as in sample)
-        while len(table_data) < 13:  # Include space for more players
-            empty_row = [''] * 19
-            table_data.append(empty_row)
-        
-        # Add Sub/Forfeit/Default rows
-        table_data.extend([
-            ['Sub'] + ['0'] * 18,
-            ['Sub'] + ['0'] * 18,
-            ['Forfeit'] + ['0'] * 18,
-            ['Default'] + ['0'] * 18
-        ])
+        # Add minimal empty rows for spacing (removed Sub/Forfeit/Default rows)
+        # Just add one empty row for visual separation
+        empty_row = [''] * 19
+        table_data.append(empty_row)
         
         # Create table with proper column widths
         col_widths = [
