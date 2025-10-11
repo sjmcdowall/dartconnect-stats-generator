@@ -4,10 +4,10 @@
 This document specifies the exact output requirements for the two PDF reports generated from DartConnect league data.
 
 **Report Naming Convention:**
-- Overall Report: `Overall-{week_number}.pdf` (e.g., `Overall-14.pdf`)
-- Individual Report: `Individual-{week_number}.pdf` (e.g., `Individual-14.pdf`)
+- Overall Report: `Overall-{MMDD_HHMMSS}.pdf` (e.g., `Overall-1011_162943.pdf`)
+- Individual Report: `Individual-{MMDD_HHMMSS}.pdf` (e.g., `Individual-1011_162943.pdf`)
 
-Where `{week_number}` represents the week of the season the stats are current through.
+Where `{MMDD_HHMMSS}` represents the month/day and hour/minute/second when the report was generated.
 
 ---
 

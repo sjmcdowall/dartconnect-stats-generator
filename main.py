@@ -54,12 +54,12 @@ def main():
         generator = PDFGenerator(config, args.output_dir)
         
         # Generate both PDF reports
-        report1_path = generator.generate_report1(processed_data)
-        report2_path = generator.generate_report2(processed_data)
+        overall_path = generator.generate_overall_report(processed_data)
+        individual_path = generator.generate_individual_report(processed_data)
         
         print(f"Successfully generated reports:")
-        print(f"  Report 1: {report1_path}")
-        print(f"  Report 2: {report2_path}")
+        print(f"  Overall: {overall_path}")
+        print(f"  Individual: {individual_path}")
         
     except Exception as e:
         print(f"Error: {e}")

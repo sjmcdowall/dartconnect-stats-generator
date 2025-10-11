@@ -204,12 +204,12 @@ def generate_reports(results: Dict[str, Any], config: Config, output_dir: Path) 
         pdf_generator = PDFGenerator(config, str(output_dir))
         
         # Generate league statistics report
-        pdf_file1 = pdf_generator.generate_report1(results)
-        logger.info(f"✅ League statistics report saved: {pdf_file1}")
+        overall_file = pdf_generator.generate_overall_report(results)
+        logger.info(f"✅ Overall report saved: {overall_file}")
         
         # Generate player performance report 
-        pdf_file2 = pdf_generator.generate_report2(results)
-        logger.info(f"✅ Player performance report saved: {pdf_file2}")
+        individual_file = pdf_generator.generate_individual_report(results)
+        logger.info(f"✅ Individual report saved: {individual_file}")
         
         # Save detailed JSON results for debugging/analysis
         json_file = output_dir / "processed_results.json"
@@ -229,12 +229,22 @@ def save_json_results(results: Dict[str, Any], json_file: Path) -> None:
     import json
     import pandas as pd
     import numpy as np
+    import logging
     from datetime import datetime, date
+    
+    def flatten_multiindex_columns(df):
+        """Flatten MultiIndex columns to strings to avoid tuple key issues."""
+        if hasattr(df.columns, 'levels'):  # MultiIndex columns
+            df = df.copy()
+            df.columns = ['_'.join(map(str, col)) if isinstance(col, tuple) else str(col) for col in df.columns]
+        return df
     
     def json_serializer(obj):
         """Custom JSON serializer for pandas and numpy objects."""
         if isinstance(obj, pd.DataFrame):
-            return obj.to_dict('records')
+            # Flatten MultiIndex columns first
+            obj_flat = flatten_multiindex_columns(obj)
+            return obj_flat.to_dict('records')
         elif isinstance(obj, pd.Series):
             return obj.to_dict()
         elif isinstance(obj, (pd.Timestamp, pd.Period)):
@@ -247,32 +257,69 @@ def save_json_results(results: Dict[str, Any], json_file: Path) -> None:
             return float(obj)
         elif isinstance(obj, np.ndarray):
             return obj.tolist()
+        elif isinstance(obj, tuple):
+            return str(obj)  # Convert tuples to strings
         elif hasattr(obj, '__dict__'):
             return str(obj)
         else:
             return str(obj)
     
-    json_results = results.copy()
+    def clean_data_structure(obj):
+        """Recursively clean data structures to remove problematic types."""
+        if isinstance(obj, dict):
+            cleaned = {}
+            for key, value in obj.items():
+                # Convert tuple keys to strings
+                str_key = str(key) if isinstance(key, tuple) else key
+                cleaned[str_key] = clean_data_structure(value)
+            return cleaned
+        elif isinstance(obj, list):
+            return [clean_data_structure(item) for item in obj]
+        elif isinstance(obj, pd.DataFrame):
+            # Flatten MultiIndex columns and convert to dict
+            obj_flat = flatten_multiindex_columns(obj)
+            return obj_flat.to_dict('index')
+        else:
+            return obj
     
-    # Convert DataFrames to dictionaries
+    json_results = clean_data_structure(results.copy())
+    
+    # Convert remaining DataFrames to dictionaries with proper handling
     if 'raw_data' in json_results and hasattr(json_results['raw_data'], 'to_dict'):
-        json_results['raw_data'] = json_results['raw_data'].to_dict('records')
+        json_results['raw_data'] = flatten_multiindex_columns(json_results['raw_data']).to_dict('records')
     
     if 'derived_metrics' in json_results and 'rankings' in json_results['derived_metrics']:
         rankings = json_results['derived_metrics']['rankings']
         for key, df in rankings.items():
             if hasattr(df, 'to_dict'):
-                rankings[key] = df.to_dict('index')
+                rankings[key] = flatten_multiindex_columns(df).to_dict('index')
     
     # Convert any player statistics DataFrames
     if 'statistics' in json_results and 'player_statistics' in json_results['statistics']:
         player_stats = json_results['statistics']['player_statistics']
         if hasattr(player_stats, 'to_dict'):
-            json_results['statistics']['player_statistics'] = player_stats.to_dict('index')
+            json_results['statistics']['player_statistics'] = flatten_multiindex_columns(player_stats).to_dict('index')
     
     # Save with robust serialization
-    with open(json_file, 'w') as f:
-        json.dump(json_results, f, indent=2, default=json_serializer)
+    try:
+        with open(json_file, 'w') as f:
+            json.dump(json_results, f, indent=2, default=json_serializer)
+    except Exception as e:
+        # If JSON serialization still fails, save a simplified version
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Full JSON serialization failed: {e}. Saving simplified version.")
+        simplified_results = {
+            'processing_strategy': json_results.get('processing_strategy', 'unknown'),
+            'quality_assessment': json_results.get('quality_assessment', {}),
+            'summary': json_results.get('summary', {}),
+            'cache_stats': json_results.get('cache_stats', {}),
+            'data_overview': {
+                'total_records': len(json_results.get('raw_data', [])) if 'raw_data' in json_results else 0,
+                'processing_errors': str(e)
+            }
+        }
+        with open(json_file, 'w') as f:
+            json.dump(simplified_results, f, indent=2, default=json_serializer)
 
 
 def print_processing_summary(results: Dict[str, Any]) -> None:

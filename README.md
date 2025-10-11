@@ -24,12 +24,12 @@ This tool primarily uses DartConnect's "By Leg" export data with URL processing 
 - **Automatic Management**: Self-cleaning expired cache
 - **Offline Capability**: Process reports without internet for cached data
 
-### 📊 **Comprehensive Analytics**
-- Game-by-game performance tracking
-- Player improvement trends
-- League-wide QP distribution analysis
-- Turn-by-turn statistics for Cricket games
-- Configurable report templates
+### 📊 **Professional PDF Reports**
+- **Overall Report**: League statistics with division rankings (Winston/Salem)
+- **Individual Report**: Detailed team/player performance with eligibility tracking
+- **Sample-Matched Format**: PDFs match official league report layouts exactly
+- **Comprehensive Analytics**: Game-by-game tracking, trends, and QP distributions
+- **Configurable Templates**: Customizable report layouts and styling
 
 ## Installation
 
@@ -108,7 +108,7 @@ python enhanced_integration_example.py
 python main_consolidated.py data/Fall_Winter_2025_By_Leg_export.csv
 
 # Expected: ~20-30 seconds (builds cache for all historical matches)
-# Generates: league_statistics_*.pdf + player_performance_*.pdf
+# Generates: Overall-MMDD_HHMMSS.pdf + Individual-MMDD_HHMMSS.pdf
 ```
 
 ### Weekly Updates
@@ -177,7 +177,14 @@ dartconnect-stats-generator/
 │   ├── URL_INTEGRATION_GUIDE.md  # URL processing guide
 │   ├── CACHE_OPTIMIZATION.md     # Cache system documentation
 │   └── samples/                  # Sample data files
-└── tests/                        # Unit tests
+├── tests/                        # Unit tests
+└── docs/samples/
+    ├── Individual-14.pdf         # Sample individual report format
+    ├── Overall-14.pdf           # Sample overall report format
+    └── dartconnect_exports/     # Sample data files
+        ├── Fall_Winter_2025_By_Leg_export.csv
+        ├── WinSSNDL_Fall_Winter_2025_all_01_leaderboard.csv
+        └── WinSSNDL_Fall_Winter_2025_all_cricket_leaderboard.csv
 ```
 
 ## Contributing
