@@ -96,15 +96,22 @@ class DataProcessor:
         # Rename columns to standard names
         df = df.rename(columns=column_mapping)
         
-        # Create full player name if we have separate first/last names
-        if 'player_name' not in df.columns and 'last_name' in df.columns:
-            first_name = df.get('player_name', '') if 'player_name' in df.columns else ''
-            last_name = df.get('last_name', '') if 'last_name' in df.columns else ''
-            # For DartConnect exports, often the last name column contains "Last, F" format
-            # Check what the actual first name column is called after mapping
-            first_name_col = 'player_name' if 'player_name' in df.columns else 'First Name'
-            df['player_name'] = df.apply(lambda row: 
-                self._create_full_name(row.get('last_name', ''), row.get(first_name_col, '')), axis=1)
+        # Create full player name from first and last names
+        # If we have both last_name and player_name (which is currently first name), create full name
+        if 'last_name' in df.columns:
+            # player_name currently contains first name from mapping
+            # We need to combine it with last_name to get full name
+            if 'player_name' in df.columns:
+                # Save first name temporarily
+                df['first_name_temp'] = df['player_name']
+                # Create full name using first name and last name
+                df['player_name'] = df.apply(lambda row: 
+                    self._create_full_name(row.get('last_name', ''), row.get('first_name_temp', '')), axis=1)
+                # Clean up temp column
+                df = df.drop(columns=['first_name_temp'])
+            else:
+                # If only last_name exists, use it as player_name
+                df['player_name'] = df['last_name']
         
         # Remove rows with missing essential data
         essential_columns = ['player_name'] if 'player_name' in df.columns else []

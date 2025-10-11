@@ -699,6 +699,7 @@ class PDFGenerator:
                 ('SPAN', (0, team_row_index), (-1, team_row_index)),  # Span entire row
                 ('BACKGROUND', (0, team_row_index), (-1, team_row_index), colors.lightblue),
                 ('FONTNAME', (0, team_row_index), (-1, team_row_index), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, team_row_index), (-1, team_row_index), 8),  # Larger font for team names
                 ('ALIGN', (0, team_row_index), (-1, team_row_index), 'LEFT'),
             ])
             
@@ -737,21 +738,40 @@ class PDFGenerator:
         # Get teams for this division, sorted alphabetically
         division_teams = sorted(df[df['Division'] == target_division]['Team'].unique())
         
+        # Calculate games to qualify for this division
+        # Round robin: each team plays every other team twice
+        # Games to qualify = (number of matches) × 1.5
+        num_teams = len(division_teams)
+        matches_per_team = (num_teams - 1) * 2  # Play each other team twice
+        games_to_qualify = int(matches_per_team * 1.5)
+        
         teams = []
         for team_name in division_teams:
-            team_data = self._extract_team_data(df, team_name)
+            team_data = self._extract_team_data(df, team_name, games_to_qualify)
             teams.append(team_data)
         
         return teams
     
-    def _extract_team_data(self, df, team_name: str) -> Dict:
+    def _extract_team_data(self, df, team_name: str, games_to_qualify: int) -> Dict:
         """Extract team and player data from the DataFrame."""
         team_df = df[df['Team'] == team_name]
         
-        # Get unique players for this team, sorted alphabetically
+        # Get unique players for this team, sorted alphabetically by last name
+        # Create a list of (last_name, full_name) tuples for proper sorting
+        player_names = team_df['player_name'].unique()
+        player_list = []
+        for name in player_names:
+            # Extract last name (assumed to be last word)
+            parts = name.split()
+            last_name = parts[-1] if parts else name
+            player_list.append((last_name, name))
+        
+        # Sort by last name, then get player data
+        player_list.sort(key=lambda x: x[0])
+        
         players = []
-        for player_name in sorted(team_df['player_name'].unique()):
-            player_data = self._calculate_player_stats(team_df, player_name)
+        for _, full_name in player_list:
+            player_data = self._calculate_player_stats(team_df, full_name, games_to_qualify)
             players.append(player_data)
         
         return {
@@ -759,19 +779,19 @@ class PDFGenerator:
             "players": players
         }
     
-    def _calculate_player_stats(self, team_df, player_name: str) -> Dict:
+    def _calculate_player_stats(self, team_df, player_name: str, games_to_qualify_threshold: int) -> Dict:
         """Calculate comprehensive player statistics."""
         player_df = team_df[team_df['player_name'] == player_name]
         
         if len(player_df) == 0:
             # Return empty stats for players with no data
-            return self._empty_player_stats(player_name)
+            return self._empty_player_stats(player_name, games_to_qualify_threshold)
         
         # Calculate basic stats
         legs_played = len(player_df)
         games_played = self._estimate_games_played(player_df)
-        games_to_qualify = max(0, 18 - games_played)
-        eligibility = "QUALIFIED" if games_played >= 18 else "INELIGIBLE"
+        games_remaining = max(0, games_to_qualify_threshold - games_played)
+        eligibility = "QUALIFIED" if games_played >= games_to_qualify_threshold else "INELIGIBLE"
         
         # Calculate game-specific W/L records
         game_stats = self._calculate_game_specific_stats(player_df)
@@ -796,10 +816,10 @@ class PDFGenerator:
             rating = "0.0000"
         
         return {
-            "name": player_name,
+            "name": player_name,  # Full name from data
             "legs": legs_played,
             "games": games_played,
-            "qualify": games_to_qualify,
+            "qualify": games_remaining,
             "eligibility": eligibility,
             "s01_w": game_stats.get('501 SIDO', {}).get('wins', 0),
             "s01_l": game_stats.get('501 SIDO', {}).get('losses', 0),
@@ -845,11 +865,11 @@ class PDFGenerator:
                     qp_count += 0.5
         return int(qp_count * 10)  # Scale up for realistic QP values
     
-    def _empty_player_stats(self, player_name: str):
+    def _empty_player_stats(self, player_name: str, games_to_qualify: int):
         """Return empty stats structure for players with no data."""
         return {
             "name": player_name,
-            "legs": 0, "games": 0, "qualify": 18, "eligibility": "INELIGIBLE",
+            "legs": 0, "games": 0, "qualify": games_to_qualify, "eligibility": "INELIGIBLE",
             "s01_w": 0, "s01_l": 0, "sc_w": 0, "sc_l": 0,
             "d01_w": 0, "d01_l": 0, "dc_w": 0, "dc_l": 0,
             "total_w": 0, "total_l": 0, "win_pct": "0.00%",
