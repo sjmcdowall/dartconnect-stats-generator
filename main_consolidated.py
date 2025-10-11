@@ -227,6 +227,30 @@ def generate_reports(results: Dict[str, Any], config: Config, output_dir: Path) 
 def save_json_results(results: Dict[str, Any], json_file: Path) -> None:
     """Save results to JSON with proper serialization."""
     import json
+    import pandas as pd
+    import numpy as np
+    from datetime import datetime, date
+    
+    def json_serializer(obj):
+        """Custom JSON serializer for pandas and numpy objects."""
+        if isinstance(obj, pd.DataFrame):
+            return obj.to_dict('records')
+        elif isinstance(obj, pd.Series):
+            return obj.to_dict()
+        elif isinstance(obj, (pd.Timestamp, pd.Period)):
+            return str(obj)
+        elif isinstance(obj, (datetime, date)):
+            return obj.isoformat()
+        elif isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif hasattr(obj, '__dict__'):
+            return str(obj)
+        else:
+            return str(obj)
     
     json_results = results.copy()
     
@@ -240,9 +264,15 @@ def save_json_results(results: Dict[str, Any], json_file: Path) -> None:
             if hasattr(df, 'to_dict'):
                 rankings[key] = df.to_dict('index')
     
-    # Save with formatting
+    # Convert any player statistics DataFrames
+    if 'statistics' in json_results and 'player_statistics' in json_results['statistics']:
+        player_stats = json_results['statistics']['player_statistics']
+        if hasattr(player_stats, 'to_dict'):
+            json_results['statistics']['player_statistics'] = player_stats.to_dict('index')
+    
+    # Save with robust serialization
     with open(json_file, 'w') as f:
-        json.dump(json_results, f, indent=2, default=str)
+        json.dump(json_results, f, indent=2, default=json_serializer)
 
 
 def print_processing_summary(results: Dict[str, Any]) -> None:

@@ -233,8 +233,12 @@ class DataProcessor:
         df['month'] = df['game_date'].dt.to_period('M')
         df['week'] = df['game_date'].dt.to_period('W')
         
-        time_stats['games_per_month'] = df.groupby('month').size().to_dict()
-        time_stats['games_per_week'] = df.groupby('week').size().to_dict()
+        # Convert Period objects to strings for JSON serialization
+        monthly_counts = df.groupby('month').size()
+        weekly_counts = df.groupby('week').size()
+        
+        time_stats['games_per_month'] = {str(period): count for period, count in monthly_counts.items()}
+        time_stats['games_per_week'] = {str(period): count for period, count in weekly_counts.items()}
         
         # Recent activity (last 30 days)
         recent_cutoff = df['game_date'].max() - pd.Timedelta(days=30)
