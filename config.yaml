@@ -34,3 +34,10 @@ league:
   name: 'Dart League'
   season: '2024'
   contact_info: 'league@example.com'
+
+# Season information for reports
+season:
+  number: '74th'  # e.g., '73rd', '74th', etc.
+  name: 'Fall/Winter 2025'  # e.g., 'Spring 2025', 'Fall/Winter 2025'
+  # Note: Week number is automatically calculated from match dates in the CSV
+  # The first match date is considered Week 1

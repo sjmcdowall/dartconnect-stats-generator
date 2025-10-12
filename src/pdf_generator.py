@@ -110,7 +110,7 @@ class PDFGenerator:
     
     def generate_individual_report(self, data: Dict[str, Any]) -> str:
         """
-        Generate the Individual PDF report (Player Performance Report).
+        Generate the Individual PDF report (Player Performance Rankings).
         
         Args:
             data: Processed data dictionary
@@ -118,42 +118,454 @@ class PDFGenerator:
         Returns:
             Path to the generated PDF file
         """
-        report_config = self.config.get_pdf_config('report2')
         filename = f"Individual-{datetime.now().strftime('%m%d_%H%M%S')}.pdf"
         filepath = self.output_dir / filename
         
-        # Create PDF document
+        # Create PDF document with letter size
         doc = SimpleDocTemplate(
             str(filepath),
-            pagesize=A4 if report_config.get('page_size') == 'A4' else letter,
-            topMargin=0.8*inch,
-            bottomMargin=0.8*inch,
-            leftMargin=0.8*inch,
-            rightMargin=0.8*inch
+            pagesize=letter,
+            topMargin=0.5*inch,
+            bottomMargin=0.5*inch,
+            leftMargin=0.5*inch,
+            rightMargin=0.5*inch
         )
+        
+        # Get season info from config
+        season_number = self.config.get('season.number', '73rd')
+        season_name = self.config.get('season.name', 'Fall/Winter 2025')
+        
+        # Calculate current week number
+        week_number = self._calculate_week_number(data)
         
         # Build content to match Individual-14.pdf format
         content = []
         
-        # Title sections
+        # Title: League name
         content.append(Paragraph(
-            "WEEK 1",
-            ParagraphStyle('WeekTitle', parent=self.styles['Title'], 
-                          fontSize=14, alignment=1, spaceAfter=10)
+            "Winston-Salem Sunday Night Dart League",
+            ParagraphStyle('LeagueTitle', parent=self.styles['Title'], 
+                          fontSize=16, alignment=1, spaceAfter=2, fontName='Helvetica-Bold')
         ))
         
-        # Division sections with teams
-        content.extend(self._create_team_performance_section(data, "WINSTON DIVISION"))
+        # Subtitle: Season and week
+        content.append(Paragraph(
+            f"{season_number} Season - {season_name} - Week {week_number}",
+            ParagraphStyle('SeasonTitle', parent=self.styles['Title'], 
+                          fontSize=14, alignment=1, spaceAfter=15)
+        ))
         
-        # Add page break for additional divisions if needed
+        # Store enhanced_data for statistics calculations and achievement extraction
+        self.enhanced_data = data.get('enhanced_data', {})
+        # Also store raw_data in enhanced_data for achievement extraction
+        if isinstance(self.enhanced_data, dict):
+            self.enhanced_data['raw_data'] = data.get('raw_data')
+        
+        # Winston Division
+        content.extend(self._create_individual_division_section(data, "Winston"))
+        
+        # Page break between divisions
         content.append(PageBreak())
-        content.extend(self._create_team_performance_section(data, "SALEM DIVISION"))
+        
+        # Salem Division
+        content.extend(self._create_individual_division_section(data, "Salem"))
+        
+        # Footer notes
+        content.extend(self._create_individual_footer())
         
         # Build PDF
         doc.build(content)
         
         self.logger.info(f"Generated Individual report: {filepath}")
         return str(filepath)
+    
+    def _create_individual_division_section(self, data: Dict[str, Any], division: str) -> List:
+        """Create a division section for Individual report with rankings."""
+        content = []
+        
+        # Division header
+        header_color = colors.HexColor('#90EE90') if division == "Winston" else colors.HexColor('#87CEEB')
+        header_table = Table([[f"{division} Division"]], colWidths=[7.5*inch])
+        header_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), header_color),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 14),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ]))
+        content.append(header_table)
+        content.append(Spacer(1, 10))
+        
+        # Get player statistics for this division
+        women_stats = self._extract_player_stats(data, division, 'F')
+        men_stats = self._extract_player_stats(data, division, 'M')
+        
+        # Create 3-column layout: Singles, All Events, Quality Points
+        # Women first row
+        women_row = Table([
+            [self._create_category_table("Singles - Women", women_stats['singles'], ['Name', 'W', 'L', 'Win%']),
+             self._create_category_table("All Events - Women", women_stats['all_events'], ['Name', 'W', 'L', 'Win%']),
+             self._create_category_table("Quality Points - Women", women_stats['qp'], ['Name', "Qp's", 'QP%'])]
+        ], colWidths=[2.4*inch, 2.4*inch, 2.4*inch])
+        women_row.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 5),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        ]))
+        content.append(women_row)
+        content.append(Spacer(1, 15))
+        
+        # Men second row
+        men_row = Table([
+            [self._create_category_table("Singles - Men", men_stats['singles'], ['Name', 'W', 'L', 'Win%']),
+             self._create_category_table("All Events - Men", men_stats['all_events'], ['Name', 'W', 'L', 'Win%']),
+             self._create_category_table("Quality Points - Men", men_stats['qp'], ['Name', "Qp's", 'QP%'])]
+        ], colWidths=[2.4*inch, 2.4*inch, 2.4*inch])
+        men_row.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 5),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        ]))
+        content.append(men_row)
+        content.append(Spacer(1, 15))
+        
+        # Ratings and Special QP Register row
+        content.extend(self._create_ratings_and_qp_register_section(women_stats['ratings'], men_stats['ratings'], division))
+        
+        content.append(Spacer(1, 20))
+        
+        return content
+    
+    def _extract_player_stats(self, data: Dict[str, Any], division: str, gender: str) -> Dict:
+        """Extract player statistics for a specific division and gender."""
+        if 'raw_data' not in data:
+            return {'singles': [], 'all_events': [], 'qp': [], 'ratings': []}
+        
+        df = data['raw_data']
+        
+        # Filter by division and gender
+        division_df = df[df['Division'] == division]
+        
+        # Filter by gender - the column is 'M/F' in the CSV
+        if gender in ['M', 'F']:
+            division_df = division_df[division_df['M/F'] == gender]
+        # If gender is empty string or other, still include those players
+        elif gender == '':
+            division_df = division_df[division_df['M/F'].isna() | (division_df['M/F'] == '')]
+        
+        # Calculate stats per player (Singles = PF='S', All Events = all)
+        player_stats = {}
+        
+        for player_name in division_df['player_name'].unique():
+            player_df = division_df[division_df['player_name'] == player_name]
+            
+            # Singles stats (PF='S')
+            singles_df = player_df[player_df['PF'] == 'S']
+            singles_games = self._estimate_games_played(singles_df) if len(singles_df) > 0 else 0
+            singles_game_stats = self._calculate_game_specific_stats(singles_df) if len(singles_df) > 0 else {}
+            singles_wins = sum([singles_game_stats.get(g, {}).get('wins', 0) for g in singles_game_stats])
+            singles_losses = sum([singles_game_stats.get(g, {}).get('losses', 0) for g in singles_game_stats])
+            
+            # All events stats (all PF types)
+            all_games = self._estimate_games_played(player_df)
+            all_game_stats = self._calculate_game_specific_stats(player_df)
+            all_wins = sum([all_game_stats.get(g, {}).get('wins', 0) for g in all_game_stats])
+            all_losses = sum([all_game_stats.get(g, {}).get('losses', 0) for g in all_game_stats])
+            
+            # QPs
+            total_qps = self._calculate_total_qps(player_df, player_name, self.enhanced_data)
+            legs_played = len(player_df)
+            
+            # Rating
+            if all_games > 0:
+                rating = ((all_wins * 2) / all_games) + (total_qps / legs_played) if legs_played > 0 else 0
+            else:
+                rating = 0
+            
+            player_stats[player_name] = {
+                'singles_wins': singles_wins,
+                'singles_losses': singles_losses,
+                'singles_games': singles_games,
+                'all_wins': all_wins,
+                'all_losses': all_losses,
+                'all_games': all_games,
+                'qps': total_qps,
+                'legs': legs_played,
+                'rating': rating
+            }
+        
+        # Format for tables (top 5 each)
+        singles_list = []
+        all_events_list = []
+        qp_list = []
+        ratings_list = []
+        
+        for name, stats in player_stats.items():
+            if stats['singles_games'] > 0:
+                singles_win_pct = (stats['singles_wins'] / (stats['singles_wins'] + stats['singles_losses']) * 100) if (stats['singles_wins'] + stats['singles_losses']) > 0 else 0
+                singles_list.append((name, stats['singles_wins'], stats['singles_losses'], singles_win_pct, singles_win_pct))
+            
+            if stats['all_games'] > 0:
+                all_win_pct = (stats['all_wins'] / (stats['all_wins'] + stats['all_losses']) * 100) if (stats['all_wins'] + stats['all_losses']) > 0 else 0
+                all_events_list.append((name, stats['all_wins'], stats['all_losses'], all_win_pct, all_win_pct))
+            
+            if stats['legs'] > 0:
+                qp_pct = (stats['qps'] / stats['legs'] * 100)
+                qp_list.append((name, stats['qps'], qp_pct, qp_pct))
+            
+            if stats['rating'] > 0:
+                ratings_list.append((name, stats['rating'], stats['rating']))
+        
+        # Sort and take top 5
+        singles_list.sort(key=lambda x: x[4], reverse=True)
+        all_events_list.sort(key=lambda x: x[4], reverse=True)
+        qp_list.sort(key=lambda x: x[3], reverse=True)
+        ratings_list.sort(key=lambda x: x[2], reverse=True)
+        
+        return {
+            'singles': [[row[0], str(row[1]), str(row[2]), f"{row[3]:.2f}%"] for row in singles_list[:5]],
+            'all_events': [[row[0], str(row[1]), str(row[2]), f"{row[3]:.2f}%"] for row in all_events_list[:5]],
+            'qp': [[row[0], str(row[1]), f"{row[2]:.2f}%"] for row in qp_list[:5]],
+            'ratings': [[row[0], f"{row[1]:.4f}"] for row in ratings_list[:5]]
+        }
+    
+    def _create_category_table(self, title: str, data: List, headers: List) -> Table:
+        """Create a ranking table for one category."""
+        # Add title and headers
+        table_data = [[title] + [''] * (len(headers) - 1)] + [headers] + data
+        
+        # Calculate column widths based on number of columns
+        if len(headers) == 4:  # Singles/All Events
+            col_widths = [1.2*inch, 0.3*inch, 0.3*inch, 0.5*inch]
+        else:  # QP (3 columns)
+            col_widths = [1.3*inch, 0.5*inch, 0.5*inch]
+        
+        table = Table(table_data, colWidths=col_widths)
+        
+        style = [
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Title row
+            ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),  # Header row
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#FFFF99')),  # Title background
+            ('SPAN', (0, 0), (-1, 0)),  # Span title across all columns
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),  # Center title
+            ('ALIGN', (0, 1), (0, -1), 'LEFT'),  # Names left-aligned
+            ('ALIGN', (1, 1), (-1, -1), 'CENTER'),  # Numbers centered
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]
+        
+        table.setStyle(TableStyle(style))
+        return table
+    
+    def _create_ratings_and_qp_register_section(self, women_ratings: List, men_ratings: List, division: str) -> List:
+        """Create the ratings tables and special QP register section."""
+        content = []
+        
+        # Ratings tables (Women | Special QP Register | Men)
+        women_table = self._create_ratings_table("Ratings - Women", women_ratings)
+        men_table = self._create_ratings_table("Ratings - Men", men_ratings)
+        special_qp = self._create_special_qp_register(division)
+        
+        # Create 3-column layout
+        ratings_row = Table([[women_table, special_qp, men_table]], 
+                           colWidths=[2.2*inch, 3.0*inch, 2.2*inch])
+        ratings_row.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('ALIGN', (1, 0), (1, 0), 'CENTER'),  # Center the special QP register
+        ]))
+        content.append(ratings_row)
+        
+        return content
+    
+    def _create_ratings_table(self, title: str, data: List) -> Table:
+        """Create a ratings table."""
+        table_data = [[title, '']] + data
+        table = Table(table_data, colWidths=[1.4*inch, 0.7*inch])
+        
+        style = [
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#FFFF99')),
+            ('SPAN', (0, 0), (-1, 0)),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('ALIGN', (0, 1), (0, -1), 'LEFT'),
+            ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ]
+        table.setStyle(TableStyle(style))
+        return table
+    
+    def _create_special_qp_register(self, division: str) -> Table:
+        """Create the Special Quality Point Register box with actual achievements."""
+        # Extract achievements from data
+        achievements = self._extract_special_achievements(division)
+        
+        qp_data = []
+        
+        # Add 180s
+        if achievements['perfect_180s']:
+            names = ', '.join([self._format_name(name, achievements['perfect_180s'][name]) 
+                              for name in sorted(achievements['perfect_180s'].keys())])
+            qp_data.append([f'180 - {names}'])
+        
+        # Add highest out
+        if achievements['highest_out']:
+            player, score = achievements['highest_out']
+            qp_data.append([f'{int(score)} OUT - {self._format_name_simple(player)}'])
+        
+        # Add 6 Bulls
+        if achievements['six_bulls']:
+            names = ', '.join([self._format_name(name, achievements['six_bulls'][name]) 
+                              for name in sorted(achievements['six_bulls'].keys())])
+            qp_data.append([f'6B - {names}'])
+        
+        # Add 9 Hits (9+ marks)
+        if achievements['nine_hits']:
+            names = ', '.join([self._format_name(name, achievements['nine_hits'][name]) 
+                              for name in sorted(achievements['nine_hits'].keys())])
+            qp_data.append([f'9H - {names}'])
+        
+        # If no achievements, show message
+        if not qp_data:
+            qp_data = [['No special achievements yet']]
+        
+        table_data = [['Special Quality Point Register']] + qp_data
+        table = Table(table_data, colWidths=[2.8*inch])
+        
+        style = [
+            ('FONTSIZE', (0, 0), (-1, -1), 7),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#FFFF99')),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.red),  # Red text for achievements
+        ]
+        table.setStyle(TableStyle(style))
+        return table
+    
+    def _extract_special_achievements(self, division: str) -> Dict:
+        """Extract special achievements (180s, high outs, 6B, 9H) for a division."""
+        if not hasattr(self, 'enhanced_data'):
+            return {'perfect_180s': {}, 'highest_out': None, 'six_bulls': {}, 'nine_hits': {}}
+        
+        # Get raw data
+        from src.data_processor import DataProcessor
+        df = self.enhanced_data.get('raw_data') if isinstance(self.enhanced_data, dict) else None
+        if df is None:
+            return {'perfect_180s': {}, 'highest_out': None, 'six_bulls': {}, 'nine_hits': {}}
+        
+        # Filter by division
+        div_df = df[df['Division'] == division]
+        
+        achievements = {
+            'perfect_180s': {},  # {player_name: count}
+            'highest_out': None,  # (player_name, score)
+            'six_bulls': {},  # {player_name: count}
+            'nine_hits': {}  # {player_name: count}
+        }
+        
+        # Find 180s in 501 games
+        games_501 = div_df[div_df['game_name'] == '501 SIDO']
+        perfect_180s = games_501[games_501['Hi Turn'] == 180]
+        for player in perfect_180s['player_name'].unique():
+            count = len(perfect_180s[perfect_180s['player_name'] == player])
+            achievements['perfect_180s'][player] = count
+        
+        # Find highest out
+        outs = games_501[games_501['DO'] > 0]
+        if len(outs) > 0:
+            max_out = outs['DO'].max()
+            player = outs[outs['DO'] == max_out].iloc[0]['player_name']
+            achievements['highest_out'] = (player, max_out)
+        
+        # Find 6 Bulls and 9 Hits from Cricket enhanced data
+        if isinstance(self.enhanced_data, dict) and 'cricket_qp_data' in self.enhanced_data:
+            cricket_data = self.enhanced_data['cricket_qp_data']
+            for game in cricket_data:
+                for player_data in game.get('players', []):
+                    player_name = player_data.get('name')
+                    # Check if player is in this division (cross-reference with raw data)
+                    if player_name in div_df['player_name'].values:
+                        for turn in player_data.get('turn_data', []):
+                            # Check for 6 bulls
+                            if turn.get('bulls', 0) >= 6:
+                                achievements['six_bulls'][player_name] = achievements['six_bulls'].get(player_name, 0) + 1
+                            # Check for 9+ marks (9 hits)
+                            if turn.get('marks', 0) >= 9:
+                                achievements['nine_hits'][player_name] = achievements['nine_hits'].get(player_name, 0) + 1
+        
+        return achievements
+    
+    def _format_name(self, full_name: str, count: int) -> str:
+        """Format player name for achievement display (first name + count if > 1)."""
+        # Extract first name
+        parts = full_name.split()
+        first_name = parts[0] if parts else full_name
+        
+        # Add count if more than 1
+        if count > 1:
+            return f"{first_name}({count})"
+        return first_name
+    
+    def _format_name_simple(self, full_name: str) -> str:
+        """Format player name to first name only."""
+        parts = full_name.split()
+        return parts[0] if parts else full_name
+    
+    def _create_individual_footer(self) -> List:
+        """Create footer with calculation notes."""
+        content = []
+        
+        footer_text = [
+            "Rating is calculated by adding Total Wins x 2 divded by Total Games plus QPs divided by Total Legs",
+            "QP percentage is calculated # of QP's divided by the number of games played."
+        ]
+        
+        for text in footer_text:
+            content.append(Paragraph(
+                text,
+                ParagraphStyle('Footer', parent=self.styles['Normal'], 
+                             fontSize=8, alignment=1, spaceAfter=2)
+            ))
+        
+        return content
+    
+    def _calculate_week_number(self, data: Dict[str, Any]) -> int:
+        """Calculate the current week number based on match dates.
+        
+        The week number is calculated by finding the earliest and latest Sunday dates
+        in the data and dividing by 7. Most games are played on Sundays, so we use
+        the first match date as the season start (Week 1).
+        """
+        if 'raw_data' not in data:
+            return 1
+        
+        df = data['raw_data']
+        
+        # Get all match dates from the data (column is 'game_date' after processing)
+        if 'game_date' in df.columns:
+            # game_date is already a datetime column, just get unique dates
+            unique_dates = df['game_date'].dt.date.unique()
+            
+            if len(unique_dates) > 0:
+                # Sort dates to get first and last
+                sorted_dates = sorted(unique_dates)
+                first_match_date = sorted_dates[0]  # Season start (Week 1)
+                most_recent_date = sorted_dates[-1]  # Current week
+                
+                # Calculate the number of weeks between first and last match
+                # Week 1 starts on the first match date
+                from datetime import datetime
+                days_diff = (most_recent_date - first_match_date).days
+                week_number = (days_diff // 7) + 1  # +1 because first week is Week 1, not Week 0
+                
+                return max(1, week_number)  # At least week 1
+        
+        return 1  # Default to week 1 if we can't determine
     
     def _create_league_summary(self, data: Dict[str, Any]) -> List:
         """Create league summary section."""
@@ -1173,20 +1585,6 @@ class PDFGenerator:
         
         return content
     
-    def _create_ratings_table(self, data: List[List], title: str) -> Table:
-        """Create a ratings table."""
-        table_data = data
-        table = Table(table_data, colWidths=[1.5*inch, 0.8*inch])
-        
-        style = [
-            ('FONTSIZE', (0, 0), (-1, -1), 8),
-            ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-            ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ]
-        
-        table.setStyle(TableStyle(style))
-        return table
     
     def _create_special_achievements_section(self, data: Dict[str, Any], division: str) -> List:
         """Create special achievements section."""
