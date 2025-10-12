@@ -19,6 +19,14 @@ if __name__ == "__main__":
     print(f"📊 Found {results['raw_data']['Team'].nunique()} teams")
     print(f"👥 Found {results['raw_data']['player_name'].nunique()} players")
     
+    # Check cache stats
+    enhanced = results.get('enhanced_data', {})
+    if 'urls_processed' in enhanced:
+        print(f"\n🌐 Cricket data:")
+        print(f"   URLs processed: {enhanced['urls_processed']}")
+        print(f"   URLs failed: {enhanced.get('urls_failed', 0)}")
+        print(f"   Enhanced games: {len(enhanced.get('enhanced_games', []))}")
+    
     # Generate the PDF
     print("\n🎨 Generating Overall PDF...")
     generator = PDFGenerator(config, output_dir="output")

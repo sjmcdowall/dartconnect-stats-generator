@@ -83,14 +83,28 @@ class PDFGenerator:
             rightMargin=0.3*inch
         )
         
-        # Build content to match Overall-14.pdf format
+        # Get season info from config
+        season_number = self.config.get('season.number', '74th')
+        season_name = self.config.get('season.name', 'Fall/Winter 2025')
+        
+        # Calculate current week number
+        week_number = self._calculate_week_number(data)
+        
+        # Build content with same header format as Individual report
         content = []
         
-        # Week header
+        # Title: League name
         content.append(Paragraph(
-            "WEEK 14",
-            ParagraphStyle('WeekHeader', parent=self.styles['Title'], 
-                          fontSize=14, alignment=1, spaceAfter=10)
+            "Winston-Salem Sunday Night Dart League",
+            ParagraphStyle('LeagueTitle', parent=self.styles['Title'], 
+                          fontSize=16, alignment=1, spaceAfter=2, fontName='Helvetica-Bold')
+        ))
+        
+        # Subtitle: Season and week
+        content.append(Paragraph(
+            f"{season_number} Season - {season_name} - Week {week_number}",
+            ParagraphStyle('SeasonTitle', parent=self.styles['Title'], 
+                          fontSize=14, alignment=1, spaceAfter=15)
         ))
         
         # Winston Division
