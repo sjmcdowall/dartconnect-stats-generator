@@ -112,12 +112,19 @@ dmypy.json
 # Output files
 output/*.pdf
 *.pdf
+output/*.json
+
+# Cache files (regeneratable)
+cache/
 
 # Data files (except samples)
 data/*.csv
 data/*.xlsx
 data/*.xls
 !data/sample_data.csv
+
+# DartConnect exports (regeneratable from DC)
+docs/samples/dartconnect_exports/*.csv
 
 # IDE files
 .vscode/
