@@ -299,8 +299,7 @@ class DartConnectExporter:
                 raise RuntimeError("Could not find Login button")
             login_btn.click()
             
-            # 2) Wait for competition organizer page and click Manage League
-            # Possible direct landing to Competition Organizer
+            # 2) Navigate to Competition Organizer and click Manage League
             time.sleep(3)
             
             # Dismiss any modal if present
@@ -312,20 +311,42 @@ class DartConnectExporter:
             except Exception:
                 pass
             
-            # Click Manage League in "My Leagues" table
-            try:
-                manage_link = driver.find_element(By.LINK_TEXT, "Manage League")
-                manage_link.click()
-            except Exception:
-                # If already in league portal, ignore
-                self.logger.debug("Manage League link not found; assuming already in league portal")
+            # Click Competition Organizer in the top nav
+            comp_clicked = False
+            for by, sel in [
+                (By.LINK_TEXT, "Competition Organizer"),
+                (By.XPATH, "//a[contains(., 'Competition Organizer')]")
+            ]:
+                try:
+                    comp = driver.find_element(by, sel)
+                    comp.click(); comp_clicked = True; break
+                except Exception:
+                    continue
+            if not comp_clicked:
+                self.logger.debug("Could not click Competition Organizer; continuing")
+            time.sleep(1)
             
-            # 3) Ensure Home tab
+            # In 'My Leagues' table, click Manage League
+            manage_clicked = False
+            for by, sel in [
+                (By.LINK_TEXT, "Manage League"),
+                (By.XPATH, "//a[contains(., 'Manage League')]")
+            ]:
+                try:
+                    ml = driver.find_element(by, sel)
+                    ml.click(); manage_clicked = True; break
+                except Exception:
+                    continue
+            if not manage_clicked:
+                self.logger.debug("Manage League link not found; attempting direct league portal URL")
+                driver.get("https://league.dartconnect.com/")
+            
+            # 3) Ensure Home tab in league portal
             try:
                 home_tab = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "Home")))
                 home_tab.click()
             except Exception:
-                pass
+                self.logger.debug("Home tab not clickable; may already be active")
             
             # 4) Configure CSV Reports dropdowns
             # Gather selects present in order
