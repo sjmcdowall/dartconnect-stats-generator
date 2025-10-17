@@ -184,12 +184,13 @@ class DartConnectExporter:
         content_lower = html_content.lower()
         return any(indicator.lower() in content_lower for indicator in indicators)
     
-    def download_exports(self, output_dir: str) -> Dict[str, Path]:
+    def download_exports(self, output_dir: str, assist: bool = False) -> Dict[str, Path]:
         """
         Download DartConnect CSV exports.
         
         Args:
             output_dir: Directory to save the CSV files
+            assist: If True, opens portal and waits while user clicks Export
             
         Returns:
             Dictionary with file types and their paths: {'by_leg': Path, ...}
@@ -198,8 +199,11 @@ class DartConnectExporter:
         output_path.mkdir(parents=True, exist_ok=True)
         
         try:
-            # Full Selenium-driven workflow: login + navigate + export
-            file_path = self._selenium_download_by_leg(output_path)
+            if assist:
+                file_path = self._selenium_assist_download(output_path)
+            else:
+                # Full Selenium-driven workflow: login + navigate + export
+                file_path = self._selenium_download_by_leg(output_path)
             return {'by_leg': file_path} if file_path else {}
         except Exception as e:
             self.logger.error(f"❌ Export download failed: {e}")
@@ -371,29 +375,17 @@ class DartConnectExporter:
                     if 'by leg' in o.text.lower():
                         o.click(); break
             
-            # 5) Click Export Report
-            export_btn = driver.find_element(By.XPATH, "//button[contains(., 'Export Report')]")
-            export_btn.click()
+            # 5) Click Export Report (use JS to avoid interactability issues)
+            try:
+                export_btn = driver.find_element(By.XPATH, "//button[contains(., 'Export Report')]")
+                driver.execute_script("arguments[0].scrollIntoView({block:'center'});", export_btn)
+                driver.execute_script("arguments[0].click();", export_btn)
+            except Exception as e:
+                raise RuntimeError(f"Could not trigger Export Report: {e}")
             
             # Wait for CSV to appear in download_dir (simple poll by newest file)
             self.logger.info("Waiting for CSV download...")
-            end = time.time() + 30
-            last_size = -1
-            csv_path = None
-            while time.time() < end:
-                csvs = sorted(download_dir.glob("*.csv"), key=lambda p: p.stat().st_mtime, reverse=True)
-                if csvs:
-                    latest = csvs[0]
-                    size = latest.stat().st_size
-                    if size > 0 and size == last_size:
-                        csv_path = latest
-                        break
-                    last_size = size
-                time.sleep(1)
-            if not csv_path:
-                raise RuntimeError("CSV download not detected in time")
-            self.logger.info(f"CSV downloaded: {csv_path}")
-            return csv_path
+            return self._wait_for_csv(download_dir, timeout=60)
         except Exception as e:
             self.logger.error(f"Selenium workflow failed: {e}")
             return None
@@ -436,6 +428,24 @@ class DartConnectExporter:
             self.logger.error(f"Download failed for {url}: {e}")
             return None
     
+    def _wait_for_csv(self, download_dir: Path, timeout: int = 60) -> Optional[Path]:
+        end = time.time() + timeout
+        last_size = -1
+        csv_path = None
+        while time.time() < end:
+            csvs = sorted(download_dir.glob("*.csv"), key=lambda p: p.stat().st_mtime, reverse=True)
+            if csvs:
+                latest = csvs[0]
+                size = latest.stat().st_size
+                if size > 0 and size == last_size:
+                    csv_path = latest
+                    break
+                last_size = size
+            time.sleep(1)
+        if csv_path:
+            self.logger.info(f"CSV downloaded: {csv_path}")
+        return csv_path
+    
     def _get_filename(self, response: requests.Response, url: str, file_type: str) -> str:
         """Extract or generate filename for downloaded file."""
         # Try to get from Content-Disposition header
@@ -457,6 +467,77 @@ class DartConnectExporter:
         # Generate filename
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         return f"{file_type}_{timestamp}.csv"
+    
+    def _selenium_assist_download(self, download_dir: Path) -> Optional[Path]:
+        """Assisted mode: log in, open Competition Organizer, then wait for CSV.
+        User clicks: Manage League → Home → CSV Reports → By Leg → Export Report.
+        """
+        if not SELENIUM_AVAILABLE:
+            self.logger.error("Selenium not installed. pip install selenium webdriver-manager")
+            return None
+        driver = None
+        try:
+            options = webdriver.ChromeOptions()
+            prefs = {
+                "download.default_directory": str(download_dir),
+                "download.prompt_for_download": False,
+                "safebrowsing.enabled": False
+            }
+            options.add_experimental_option("prefs", prefs)
+            options.add_argument("--window-size=1400,900")
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
+            wait = WebDriverWait(driver, 20)
+            
+            # Login
+            driver.get(self.LOGIN_URL)
+            time.sleep(1)
+            # Email / password (best-effort selectors)
+            email_el = None
+            for by, sel in [
+                (By.CSS_SELECTOR, "input[type='email']"),
+                (By.CSS_SELECTOR, "input[name*='email']"),
+                (By.CSS_SELECTOR, "input[id*='email']"),
+                (By.CSS_SELECTOR, "input[type='text']"),
+            ]:
+                try:
+                    email_el = driver.find_element(by, sel)
+                    if email_el.is_displayed(): break
+                except Exception: continue
+            if not email_el:
+                raise RuntimeError("Email field not found")
+            email_el.clear(); email_el.send_keys(self.email)
+            pwd_el = driver.find_element(By.CSS_SELECTOR, "input[type='password']")
+            pwd_el.clear(); pwd_el.send_keys(self.password)
+            btn = driver.find_element(By.XPATH, "//button[contains(., 'Login')]")
+            btn.click()
+            time.sleep(3)
+            
+            # Open Competition Organizer explicitly
+            for by, sel in [
+                (By.LINK_TEXT, "Competition Organizer"),
+                (By.XPATH, "//a[contains(., 'Competition Organizer')]")
+            ]:
+                try:
+                    el = driver.find_element(by, sel); el.click(); break
+                except Exception: continue
+            
+            print("\nPlease complete these steps in the opened browser:")
+            print("  1) In 'My Leagues', click 'Manage League'")
+            print("  2) Ensure 'Home' tab is active")
+            print("  3) In CSV Reports: All Divisions / Regular Season / By Leg")
+            print("  4) Click 'Export Report' — I will detect the CSV automatically")
+            
+            # Wait up to 3 minutes for CSV
+            csv = self._wait_for_csv(download_dir, timeout=180)
+            return csv
+        except Exception as e:
+            self.logger.error(f"Assist mode failed: {e}")
+            return None
+        finally:
+            if driver:
+                # Keep browser open until CSV detected; closing afterwards is fine
+                driver.quit()
     
     def close(self):
         """Close the session."""

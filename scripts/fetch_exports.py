@@ -60,6 +60,11 @@ def main():
         action='store_true',
         help='Check if credentials are properly configured and exit'
     )
+    parser.add_argument(
+        '--assist',
+        action='store_true',
+        help='Assisted mode: opens portal and waits while you click Export'
+    )
     
     args = parser.parse_args()
     
@@ -93,7 +98,7 @@ def main():
         logger.info("🚀 Starting DartConnect export downloader")
         
         exporter = DartConnectExporter(headless=args.headless)
-        files = exporter.download_exports(args.output_dir)
+        files = exporter.download_exports(args.output_dir, assist=args.assist)
         
         if files:
             print(f"\n✅ Successfully downloaded {len(files)} file(s):")
