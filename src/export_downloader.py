@@ -2,14 +2,18 @@
 
 This module handles:
 - Logging into DartConnect with email/password
-- Navigating to export pages
-- Downloading CSV files (by_leg_export, leaderboards)
+- Navigating to export pages using Selenium (for JavaScript rendering)
+- Downloading CSV files (by_leg_export)
 - Saving to local data directory
 - Credential security (environment variables, no repo storage)
 
 Credentials are loaded from environment variables:
 - DARTCONNECT_EMAIL: Your DartConnect email/username
 - DARTCONNECT_PASSWORD: Your DartConnect password
+
+Requirements:
+- selenium (pip install selenium)
+- webdriver-manager (pip install webdriver-manager)
 
 Example:
     export DARTCONNECT_EMAIL="your.email@example.com"
@@ -30,6 +34,17 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 import re
+
+try:
+    from selenium import webdriver
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import Select, WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.chrome.service import Service
+    from webdriver_manager.chrome import ChromeDriverManager
+    SELENIUM_AVAILABLE = True
+except ImportError:
+    SELENIUM_AVAILABLE = False
 
 
 class DartConnectExporter:
@@ -217,28 +232,125 @@ class DartConnectExporter:
     
     def _find_export_links(self) -> Dict[str, str]:
         """
-        Find export links on the DartConnect page.
+        Find and trigger export downloads using Selenium.
+        
+        Site structure from screenshots:
+        1. Navigate to league.dartconnect.com (hash-based routing)
+        2. Click Home tab
+        3. Fill CSV Reports form:
+           - Division dropdown: "All Divisions"
+           - Season dropdown: "Regular Season"
+           - Report dropdown: "By Leg"
+        4. Click "Export Report" button
+        5. Browser auto-downloads CSV file
         
         Returns:
-            Dictionary mapping file types to download URLs
+            Dictionary mapping file types to download URLs (or file paths after download)
         """
-        # This will be implemented after we see the export page structure
-        # For now, returning empty dict as placeholder
-        export_links = {}
+        if not SELENIUM_AVAILABLE:
+            self.logger.error(
+                "Selenium not installed. Install with: pip install selenium webdriver-manager"
+            )
+            return {}
         
+        driver = None
         try:
-            # Navigate to league/stats page
-            response = self.session.get(f"{self.BASE_URL}/dashboard", timeout=self.timeout)
+            # Setup Chrome driver with download handling
+            options = webdriver.ChromeOptions()
             
-            # Look for export links in the page
-            # This needs to be updated based on actual page structure (from screenshots)
+            # Set download directory
+            download_dir = str(Path.home() / "Downloads")
+            prefs = {
+                "download.default_directory": download_dir,
+                "download.prompt_for_download": False,
+                "safebrowsing.enabled": False
+            }
+            options.add_experimental_option("prefs", prefs)
             
-            self.logger.debug("Searching page for export links...")
+            # Run headless if specified
+            if self.headless:
+                options.add_argument("--headless")
+            
+            # Create driver
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
+            
+            self.logger.info("Navigating to League Portal...")
+            driver.get("https://league.dartconnect.com/")
+            
+            # Wait for page to load
+            time.sleep(2)
+            
+            # Click Home tab if needed
+            try:
+                home_tab = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.LINK_TEXT, "Home"))
+                )
+                home_tab.click()
+                self.logger.debug("Clicked Home tab")
+                time.sleep(1)
+            except Exception as e:
+                self.logger.debug(f"Home tab click failed (may already be on Home): {e}")
+            
+            # Fill CSV Reports form
+            self.logger.info("Filling CSV Reports form...")
+            
+            # Select Division: "All Divisions"
+            try:
+                division_dropdown = WebDriverWait(driver, 10).until(
+                    EC.presence_of_all_elements_located((By.TAG_NAME, "select"))
+                )[0]  # First dropdown is divisions
+                Select(division_dropdown).select_by_value("All Divisions")
+                self.logger.debug("Selected 'All Divisions'")
+            except Exception as e:
+                self.logger.warning(f"Could not select division: {e}")
+            
+            # Select Season: "Regular Season"
+            try:
+                season_dropdown = WebDriverWait(driver, 10).until(
+                    EC.presence_of_all_elements_located((By.TAG_NAME, "select"))
+                )[1]  # Second dropdown is season type
+                Select(season_dropdown).select_by_value("Regular Season")
+                self.logger.debug("Selected 'Regular Season'")
+            except Exception as e:
+                self.logger.warning(f"Could not select season: {e}")
+            
+            # Select Report: "By Leg"
+            try:
+                report_dropdown = WebDriverWait(driver, 10).until(
+                    EC.presence_of_all_elements_located((By.TAG_NAME, "select"))
+                )[2]  # Third dropdown is report type
+                Select(report_dropdown).select_by_value("By Leg")
+                self.logger.debug("Selected 'By Leg' report")
+            except Exception as e:
+                self.logger.warning(f"Could not select report: {e}")
+            
+            time.sleep(1)
+            
+            # Click Export Report button
+            self.logger.info("Clicking Export Report button...")
+            try:
+                export_button = driver.find_element(By.XPATH, "//button[contains(text(), 'Export Report')]")
+                export_button.click()
+                self.logger.info("✅ Export triggered")
+                
+                # Wait for download
+                time.sleep(3)
+                
+            except Exception as e:
+                self.logger.error(f"Could not click Export button: {e}")
+                return {}
+            
+            # Return success (file will be in downloads folder)
+            return {"by_leg": download_dir}
             
         except Exception as e:
-            self.logger.error(f"Error finding export links: {e}")
-        
-        return export_links
+            self.logger.error(f"Error in export process: {e}")
+            return {}
+        finally:
+            if driver:
+                driver.quit()
+                self.logger.debug("Browser closed")
     
     def _download_file(self, url: str, output_dir: Path, file_type: str) -> Optional[Path]:
         """

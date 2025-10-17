@@ -210,7 +210,7 @@ PDF Output (Overall-*.pdf)
    - Must use turn-by-turn for Cricket QPs
 
 4. **Official Data Source**: 
-   - `docs/samples/dartconnect_exports/Fall_Winter_2025_By_Leg_export.csv`
+- `data/season74/by_leg_export.csv`
    - This is 1/3 of season (34 legs vs 83 in sample PDF)
 
 ---

@@ -123,6 +123,9 @@ data/*.xlsx
 data/*.xls
 !data/sample_data.csv
 
+# Ignore season data directories (real data, not tracked)
+data/season*/
+
 # DartConnect exports (regeneratable from DC)
 docs/samples/dartconnect_exports/*.csv
 

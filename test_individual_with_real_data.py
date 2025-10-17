@@ -13,7 +13,7 @@ if __name__ == "__main__":
     processor = DataProcessor(config)
     
     # Process the real data
-    results = processor.process_file("docs/samples/dartconnect_exports/Fall_Winter_2025_By_Leg_export.csv")
+    results = processor.process_file("data/season74/by_leg_export.csv")
     
     print(f"✅ Processed {len(results['raw_data'])} rows")
     print(f"📊 Found {results['raw_data']['Division'].nunique()} divisions")

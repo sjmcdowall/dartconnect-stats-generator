@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 
 def test_csv_reading():
     """Test that we can read the CSV and extract URLs."""
-    csv_file = "docs/samples/dartconnect_exports/Fall_Winter_2025_By_Leg_export.csv"
+    csv_file = "data/season74/by_leg_export.csv"
     
     if not Path(csv_file).exists():
         print(f"❌ CSV file not found: {csv_file}")

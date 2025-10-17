@@ -55,10 +55,10 @@ pip install -r requirements.txt
 ### Quick Start (Recommended)
 ```bash
 # Auto-detect DartConnect files in data directory
-python main_consolidated.py data/
+python main_consolidated.py data/season74/
 
 # Process specific by_leg export file (most common)
-python main_consolidated.py data/Fall_Winter_2025_By_Leg_export.csv
+python main_consolidated.py data/season74/by_leg_export.csv
 
 # First run: ~20 seconds (builds cache)
 # Subsequent runs: ~1 second (uses cache)
@@ -104,8 +104,8 @@ python enhanced_integration_example.py
 ### First Run of the Season
 ```bash
 # Download your by_leg_export.csv from DartConnect
-# Place in data/ directory or specify path directly
-python main_consolidated.py data/Fall_Winter_2025_By_Leg_export.csv
+# Place in data/season74/ (or your current season folder) or specify the path directly
+python main_consolidated.py data/season74/by_leg_export.csv
 
 # Expected: ~20-30 seconds (builds cache for all historical matches)
 # Generates: Overall-MMDD_HHMMSS.pdf + Individual-MMDD_HHMMSS.pdf
@@ -114,7 +114,7 @@ python main_consolidated.py data/Fall_Winter_2025_By_Leg_export.csv
 ### Weekly Updates
 ```bash
 # Same command with updated export file
-python main_consolidated.py data/Fall_Winter_2025_By_Leg_export.csv
+python main_consolidated.py data/season74/by_leg_export.csv
 
 # Expected: ~1-2 seconds (uses cache, only fetches new games)
 # Performance improvement: 20x faster!

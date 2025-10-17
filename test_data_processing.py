@@ -10,9 +10,9 @@ if __name__ == "__main__":
     config = Config()
     processor = DataProcessor(config)
     
-    # Process the sample data
+    # Process the real data
     print("Processing CSV data...")
-    results = processor.process_file("docs/samples/dartconnect_exports/Fall_Winter_2025_By_Leg_export.csv")
+    results = processor.process_file("data/season74/by_leg_export.csv")
     
     df = results['raw_data']
     

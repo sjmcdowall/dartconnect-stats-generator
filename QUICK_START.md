@@ -8,7 +8,7 @@ python3 test_overall_with_real_data.py
 ```
 
 This will:
-1. Process `docs/samples/dartconnect_exports/Fall_Winter_2025_By_Leg_export.csv`
+1. Process `data/season74/by_leg_export.csv`
 2. Fetch and cache turn-by-turn data from DartConnect URLs
 3. Calculate all statistics (W/L, QPs, Ratings)
 4. Generate PDF in `output/Overall-[timestamp].pdf`
@@ -53,7 +53,7 @@ Rating = ((Wins × 2) / Games) + (QPs / Legs)
 ## File Locations
 
 ### Input Data
-- **Primary**: `docs/samples/dartconnect_exports/Fall_Winter_2025_By_Leg_export.csv`
+- **Primary**: `data/season74/by_leg_export.csv`
 - **Cache**: `cache/dartconnect_urls/[match_id].json` (auto-generated)
 
 ### Output

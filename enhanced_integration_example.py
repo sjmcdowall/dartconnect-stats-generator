@@ -27,10 +27,10 @@ def main():
     config = Config()
     
     # Use the actual DartConnect export file
-    data_file = "docs/samples/dartconnect_exports/Fall_Winter_2025_By_Leg_export.csv"
+    data_file = "data/season74/by_leg_export.csv"
     
     if not Path(data_file).exists():
-        print(f"❌ Sample data file not found: {data_file}")
+        print(f"❌ Data file not found: {data_file}")
         print("Please ensure the DartConnect export file exists.")
         return
     
