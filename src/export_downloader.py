@@ -51,7 +51,7 @@ class DartConnectExporter:
     """Handles automated downloading of DartConnect CSV exports."""
     
     BASE_URL = "https://my.dartconnect.com"
-    LOGIN_URL = f"{BASE_URL}/default.aspx"
+    LOGIN_URL = f"{BASE_URL}/"
     
     # File patterns to look for when downloading
     EXPORT_PATTERNS = {
@@ -194,159 +194,188 @@ class DartConnectExporter:
         Returns:
             Dictionary with file types and their paths: {'by_leg': Path, ...}
         """
-        output_path = Path(output_dir)
+        output_path = Path(output_dir).resolve()
         output_path.mkdir(parents=True, exist_ok=True)
         
-        downloaded_files = {}
-        
         try:
-            # Login first
-            if not self.login():
-                raise RuntimeError("Failed to login to DartConnect")
-            
-            self.logger.info("🔍 Searching for export links...")
-            
-            # Find export links - this will need to be updated based on screenshots
-            export_links = self._find_export_links()
-            
-            if not export_links:
-                self.logger.warning("⚠️ No export links found on the page")
-                return downloaded_files
-            
-            # Download each export file
-            for file_type, url in export_links.items():
-                try:
-                    self.logger.info(f"📥 Downloading {file_type}...")
-                    file_path = self._download_file(url, output_path, file_type)
-                    if file_path:
-                        downloaded_files[file_type] = file_path
-                        self.logger.info(f"✅ Saved: {file_path}")
-                except Exception as e:
-                    self.logger.error(f"❌ Failed to download {file_type}: {e}")
-            
-            return downloaded_files
-            
+            # Full Selenium-driven workflow: login + navigate + export
+            file_path = self._selenium_download_by_leg(output_path)
+            return {'by_leg': file_path} if file_path else {}
         except Exception as e:
             self.logger.error(f"❌ Export download failed: {e}")
-            return downloaded_files
+            return {}
     
-    def _find_export_links(self) -> Dict[str, str]:
-        """
-        Find and trigger export downloads using Selenium.
+    def _selenium_download_by_leg(self, download_dir: Path) -> Optional[Path]:
+        """Login via Selenium and download the By Leg CSV to download_dir.
         
-        Site structure from screenshots:
-        1. Navigate to league.dartconnect.com (hash-based routing)
-        2. Click Home tab
-        3. Fill CSV Reports form:
-           - Division dropdown: "All Divisions"
-           - Season dropdown: "Regular Season"
-           - Report dropdown: "By Leg"
-        4. Click "Export Report" button
-        5. Browser auto-downloads CSV file
-        
-        Returns:
-            Dictionary mapping file types to download URLs (or file paths after download)
+        Flow:
+        1) Open my.dartconnect.com and log in with email/password
+        2) Dismiss any modal, click Manage League to enter league.dartconnect.com
+        3) Ensure Home tab active
+        4) In CSV Reports, set All Divisions / Regular Season / By Leg
+        5) Click Export Report and wait for CSV to appear in download_dir
         """
         if not SELENIUM_AVAILABLE:
-            self.logger.error(
-                "Selenium not installed. Install with: pip install selenium webdriver-manager"
-            )
-            return {}
+            self.logger.error("Selenium not installed. pip install selenium webdriver-manager")
+            return None
         
         driver = None
         try:
-            # Setup Chrome driver with download handling
             options = webdriver.ChromeOptions()
-            
-            # Set download directory
-            download_dir = str(Path.home() / "Downloads")
             prefs = {
-                "download.default_directory": download_dir,
+                "download.default_directory": str(download_dir),
                 "download.prompt_for_download": False,
                 "safebrowsing.enabled": False
             }
             options.add_experimental_option("prefs", prefs)
-            
-            # Run headless if specified
             if self.headless:
-                options.add_argument("--headless")
-            
-            # Create driver
+                options.add_argument("--headless=new")
+            options.add_argument("--window-size=1400,900")
             service = Service(ChromeDriverManager().install())
             driver = webdriver.Chrome(service=service, options=options)
+            wait = WebDriverWait(driver, 20)
             
-            self.logger.info("Navigating to League Portal...")
-            driver.get("https://league.dartconnect.com/")
+            # 1) Login at my.dartconnect.com
+            self.logger.info("Opening My DartConnect login page...")
+            driver.get(self.LOGIN_URL)
             
-            # Wait for page to load
-            time.sleep(2)
+            # Find email/username field
+            def find_email_input():
+                candidates = [
+                    (By.CSS_SELECTOR, "input[type='email']"),
+                    (By.CSS_SELECTOR, "input[name*='email']"),
+                    (By.CSS_SELECTOR, "input[id*='email']"),
+                    (By.CSS_SELECTOR, "input[placeholder*='Email']"),
+                    (By.CSS_SELECTOR, "input[type='text']")
+                ]
+                for by, sel in candidates:
+                    try:
+                        el = driver.find_element(by, sel)
+                        if el.is_displayed():
+                            return el
+                    except Exception:
+                        continue
+                return None
             
-            # Click Home tab if needed
+            email_el = find_email_input()
+            if not email_el:
+                # The site might load via JS; wait briefly and retry
+                time.sleep(2)
+                email_el = find_email_input()
+            if not email_el:
+                raise RuntimeError("Could not locate email/username input on login page")
+            email_el.clear(); email_el.send_keys(self.email)
+            
+            # Password field
+            pwd_el = None
+            for by, sel in [
+                (By.CSS_SELECTOR, "input[type='password']"),
+                (By.CSS_SELECTOR, "input[name*='password']"),
+                (By.CSS_SELECTOR, "input[id*='password']"),
+            ]:
+                try:
+                    pwd_el = driver.find_element(by, sel)
+                    if pwd_el.is_displayed():
+                        break
+                except Exception:
+                    continue
+            if not pwd_el:
+                raise RuntimeError("Could not locate password input on login page")
+            pwd_el.clear(); pwd_el.send_keys(self.password)
+            
+            # Click Login button
+            login_btn = None
+            for by, sel in [
+                (By.XPATH, "//button[contains(., 'Login')]"),
+                (By.XPATH, "//input[@type='submit' and (contains(@value,'Login') or contains(@value,'Sign'))]")
+            ]:
+                try:
+                    login_btn = driver.find_element(by, sel)
+                    if login_btn.is_displayed():
+                        break
+                except Exception:
+                    continue
+            if not login_btn:
+                raise RuntimeError("Could not find Login button")
+            login_btn.click()
+            
+            # 2) Wait for competition organizer page and click Manage League
+            # Possible direct landing to Competition Organizer
+            time.sleep(3)
+            
+            # Dismiss any modal if present
             try:
-                home_tab = WebDriverWait(driver, 10).until(
-                    EC.element_to_be_clickable((By.LINK_TEXT, "Home"))
-                )
+                dismiss = driver.find_element(By.XPATH, "//button[contains(., 'Dismiss') or contains(., 'Got it') or contains(., 'Ok')]")
+                if dismiss.is_displayed():
+                    dismiss.click()
+                    time.sleep(1)
+            except Exception:
+                pass
+            
+            # Click Manage League in "My Leagues" table
+            try:
+                manage_link = driver.find_element(By.LINK_TEXT, "Manage League")
+                manage_link.click()
+            except Exception:
+                # If already in league portal, ignore
+                self.logger.debug("Manage League link not found; assuming already in league portal")
+            
+            # 3) Ensure Home tab
+            try:
+                home_tab = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "Home")))
                 home_tab.click()
-                self.logger.debug("Clicked Home tab")
+            except Exception:
+                pass
+            
+            # 4) Configure CSV Reports dropdowns
+            # Gather selects present in order
+            selects = wait.until(EC.presence_of_all_elements_located((By.TAG_NAME, "select")))
+            if len(selects) < 3:
+                raise RuntimeError("CSV Reports selectors not found")
+            try:
+                Select(selects[0]).select_by_visible_text("All Divisions")
+            except Exception:
+                pass
+            try:
+                Select(selects[1]).select_by_visible_text("Regular Season")
+            except Exception:
+                pass
+            try:
+                # Some pages prefix report type group like "Season Analysis – By Leg"
+                Select(selects[2]).select_by_visible_text("By Leg")
+            except Exception:
+                # Fallback: pick first option that contains 'By Leg'
+                opts = selects[2].find_elements(By.TAG_NAME, 'option')
+                for o in opts:
+                    if 'by leg' in o.text.lower():
+                        o.click(); break
+            
+            # 5) Click Export Report
+            export_btn = driver.find_element(By.XPATH, "//button[contains(., 'Export Report')]")
+            export_btn.click()
+            
+            # Wait for CSV to appear in download_dir (simple poll by newest file)
+            self.logger.info("Waiting for CSV download...")
+            end = time.time() + 30
+            last_size = -1
+            csv_path = None
+            while time.time() < end:
+                csvs = sorted(download_dir.glob("*.csv"), key=lambda p: p.stat().st_mtime, reverse=True)
+                if csvs:
+                    latest = csvs[0]
+                    size = latest.stat().st_size
+                    if size > 0 and size == last_size:
+                        csv_path = latest
+                        break
+                    last_size = size
                 time.sleep(1)
-            except Exception as e:
-                self.logger.debug(f"Home tab click failed (may already be on Home): {e}")
-            
-            # Fill CSV Reports form
-            self.logger.info("Filling CSV Reports form...")
-            
-            # Select Division: "All Divisions"
-            try:
-                division_dropdown = WebDriverWait(driver, 10).until(
-                    EC.presence_of_all_elements_located((By.TAG_NAME, "select"))
-                )[0]  # First dropdown is divisions
-                Select(division_dropdown).select_by_value("All Divisions")
-                self.logger.debug("Selected 'All Divisions'")
-            except Exception as e:
-                self.logger.warning(f"Could not select division: {e}")
-            
-            # Select Season: "Regular Season"
-            try:
-                season_dropdown = WebDriverWait(driver, 10).until(
-                    EC.presence_of_all_elements_located((By.TAG_NAME, "select"))
-                )[1]  # Second dropdown is season type
-                Select(season_dropdown).select_by_value("Regular Season")
-                self.logger.debug("Selected 'Regular Season'")
-            except Exception as e:
-                self.logger.warning(f"Could not select season: {e}")
-            
-            # Select Report: "By Leg"
-            try:
-                report_dropdown = WebDriverWait(driver, 10).until(
-                    EC.presence_of_all_elements_located((By.TAG_NAME, "select"))
-                )[2]  # Third dropdown is report type
-                Select(report_dropdown).select_by_value("By Leg")
-                self.logger.debug("Selected 'By Leg' report")
-            except Exception as e:
-                self.logger.warning(f"Could not select report: {e}")
-            
-            time.sleep(1)
-            
-            # Click Export Report button
-            self.logger.info("Clicking Export Report button...")
-            try:
-                export_button = driver.find_element(By.XPATH, "//button[contains(text(), 'Export Report')]")
-                export_button.click()
-                self.logger.info("✅ Export triggered")
-                
-                # Wait for download
-                time.sleep(3)
-                
-            except Exception as e:
-                self.logger.error(f"Could not click Export button: {e}")
-                return {}
-            
-            # Return success (file will be in downloads folder)
-            return {"by_leg": download_dir}
-            
+            if not csv_path:
+                raise RuntimeError("CSV download not detected in time")
+            self.logger.info(f"CSV downloaded: {csv_path}")
+            return csv_path
         except Exception as e:
-            self.logger.error(f"Error in export process: {e}")
-            return {}
+            self.logger.error(f"Selenium workflow failed: {e}")
+            return None
         finally:
             if driver:
                 driver.quit()
