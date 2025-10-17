@@ -51,6 +51,11 @@ def main():
         help='Enable verbose logging'
     )
     parser.add_argument(
+        '--headless',
+        action='store_true',
+        help='Run browser headless (default: false)'
+    )
+    parser.add_argument(
         '--check-creds',
         action='store_true',
         help='Check if credentials are properly configured and exit'
@@ -87,7 +92,7 @@ def main():
     try:
         logger.info("🚀 Starting DartConnect export downloader")
         
-        exporter = DartConnectExporter()
+        exporter = DartConnectExporter(headless=args.headless)
         files = exporter.download_exports(args.output_dir)
         
         if files:
