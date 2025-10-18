@@ -95,16 +95,19 @@ def main():
     
     # Download exports
     try:
-        logger.info("🚀 Starting DartConnect export downloader")
+        if not args.assist:
+            logger.info("🚀 Starting DartConnect export downloader")
         
         exporter = DartConnectExporter(headless=args.headless)
         files = exporter.download_exports(args.output_dir, assist=args.assist)
         
         if files:
-            print(f"\n✅ Successfully downloaded {len(files)} file(s):")
+            if args.assist:
+                print(f"\n✅ Export Complete! Downloaded {len(files)} file(s):")
+            else:
+                print(f"\n✅ Successfully downloaded {len(files)} file(s):")
             for file_type, path in files.items():
                 print(f"  • {file_type}: {path}")
-            print(f"\nExports saved to: {os.path.abspath(args.output_dir)}")
         else:
             print("\n⚠️ No files were downloaded")
             return 1

@@ -469,14 +469,14 @@ class DartConnectExporter:
         return f"{file_type}_{timestamp}.csv"
     
     def _selenium_assist_download(self, download_dir: Path) -> Optional[Path]:
-        """Assisted mode: log in, open Competition Organizer, then wait for CSV.
-        User clicks: Manage League → Home → CSV Reports → By Leg → Export Report.
-        """
+        """Automated mode: log in, navigate, and export CSV with progress indicators."""
         if not SELENIUM_AVAILABLE:
-            self.logger.error("Selenium not installed. pip install selenium webdriver-manager")
+            print("❌ Selenium not installed. Run: pip install selenium webdriver-manager")
             return None
+        
         driver = None
         try:
+            print("🔧 Starting browser...")
             options = webdriver.ChromeOptions()
             prefs = {
                 "download.default_directory": str(download_dir),
@@ -484,15 +484,20 @@ class DartConnectExporter:
                 "safebrowsing.enabled": False
             }
             options.add_experimental_option("prefs", prefs)
+            options.add_argument("--headless=new")
             options.add_argument("--window-size=1400,900")
+            options.add_argument("--disable-blink-features=AutomationControlled")
+            options.add_experimental_option("excludeSwitches", ["enable-automation"])
+            options.add_experimental_option('useAutomationExtension', False)
             service = Service(ChromeDriverManager().install())
             driver = webdriver.Chrome(service=service, options=options)
-            wait = WebDriverWait(driver, 20)
+            driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
             
-            # Login
+            print("🔑 Logging into DartConnect...", end=" ")
             driver.get(self.LOGIN_URL)
-            time.sleep(1)
-            # Email / password (best-effort selectors)
+            time.sleep(2)
+            
+            # Find and fill login form
             email_el = None
             for by, sel in [
                 (By.CSS_SELECTOR, "input[type='email']"),
@@ -504,39 +509,145 @@ class DartConnectExporter:
                     email_el = driver.find_element(by, sel)
                     if email_el.is_displayed(): break
                 except Exception: continue
+            
             if not email_el:
-                raise RuntimeError("Email field not found")
-            email_el.clear(); email_el.send_keys(self.email)
+                print("❌ FAILED - Login form not found")
+                return None
+            
+            email_el.clear()
+            email_el.send_keys(self.email)
             pwd_el = driver.find_element(By.CSS_SELECTOR, "input[type='password']")
-            pwd_el.clear(); pwd_el.send_keys(self.password)
+            pwd_el.clear()
+            pwd_el.send_keys(self.password)
             btn = driver.find_element(By.XPATH, "//button[contains(., 'Login')]")
             btn.click()
             time.sleep(3)
+            print("✅ SUCCESS!")
             
-            # Open Competition Organizer explicitly
+            print("📂 Navigating to Competition Organizer...", end=" ")
+            # Dismiss any modal
+            try:
+                dismiss = driver.find_element(By.XPATH, "//button[contains(., 'Dismiss') or contains(., 'Got it') or contains(., 'Ok')]")
+                if dismiss.is_displayed():
+                    dismiss.click()
+                    time.sleep(1)
+            except Exception:
+                pass
+            
+            # Click Competition Organizer
+            comp_clicked = False
             for by, sel in [
                 (By.LINK_TEXT, "Competition Organizer"),
                 (By.XPATH, "//a[contains(., 'Competition Organizer')]")
             ]:
                 try:
-                    el = driver.find_element(by, sel); el.click(); break
-                except Exception: continue
+                    el = driver.find_element(by, sel)
+                    el.click()
+                    comp_clicked = True
+                    break
+                except Exception:
+                    continue
             
-            print("\nPlease complete these steps in the opened browser:")
-            print("  1) In 'My Leagues', click 'Manage League'")
-            print("  2) Ensure 'Home' tab is active")
-            print("  3) In CSV Reports: All Divisions / Regular Season / By Leg")
-            print("  4) Click 'Export Report' — I will detect the CSV automatically")
+            if not comp_clicked:
+                print("❌ FAILED - Could not find Competition Organizer")
+                return None
+            print("✅ SUCCESS!")
             
-            # Wait up to 3 minutes for CSV
-            csv = self._wait_for_csv(download_dir, timeout=180)
-            return csv
+            print("🎯 Accessing League Portal...", end=" ")
+            time.sleep(2)
+            
+            # Click Manage League
+            manage_clicked = False
+            for by, sel in [
+                (By.LINK_TEXT, "Manage League"),
+                (By.XPATH, "//a[contains(., 'Manage League')]")
+            ]:
+                try:
+                    ml = driver.find_element(by, sel)
+                    ml.click()
+                    manage_clicked = True
+                    break
+                except Exception:
+                    continue
+            
+            if not manage_clicked:
+                # Fallback: direct URL
+                driver.get("https://league.dartconnect.com/")
+            
+            time.sleep(2)
+            print("✅ SUCCESS!")
+            
+            print("📊 Configuring CSV Export...", end=" ")
+            # Click Home tab
+            try:
+                home_tab = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.LINK_TEXT, "Home"))
+                )
+                home_tab.click()
+                time.sleep(1)
+            except Exception:
+                pass  # May already be on Home
+            
+            # Configure dropdowns with retry logic
+            time.sleep(2)
+            selects = driver.find_elements(By.TAG_NAME, "select")
+            if len(selects) >= 3:
+                # Division
+                try:
+                    Select(selects[0]).select_by_visible_text("All Divisions")
+                except Exception:
+                    try:
+                        Select(selects[0]).select_by_index(0)
+                    except Exception:
+                        pass
+                
+                # Season
+                try:
+                    Select(selects[1]).select_by_visible_text("Regular Season")
+                except Exception:
+                    try:
+                        Select(selects[1]).select_by_index(0)
+                    except Exception:
+                        pass
+                
+                # Report Type
+                try:
+                    Select(selects[2]).select_by_visible_text("By Leg")
+                except Exception:
+                    # Find option containing 'By Leg'
+                    options = selects[2].find_elements(By.TAG_NAME, "option")
+                    for opt in options:
+                        if 'by leg' in opt.text.lower():
+                            opt.click()
+                            break
+            print("✅ SUCCESS!")
+            
+            print("📥 Downloading By Leg CSV...", end=" ")
+            time.sleep(1)
+            
+            # Click Export Report
+            try:
+                export_btn = driver.find_element(By.XPATH, "//button[contains(., 'Export Report')]")
+                driver.execute_script("arguments[0].scrollIntoView({block:'center'});", export_btn)
+                driver.execute_script("arguments[0].click();", export_btn)
+            except Exception as e:
+                print(f"❌ FAILED - Export button: {e}")
+                return None
+            
+            # Wait for CSV with timeout
+            csv = self._wait_for_csv(download_dir, timeout=30)
+            if csv:
+                print("✅ SUCCESS!")
+                return csv
+            else:
+                print("❌ FAILED - CSV not downloaded in time")
+                return None
+                
         except Exception as e:
-            self.logger.error(f"Assist mode failed: {e}")
+            print(f"❌ FAILED - {e}")
             return None
         finally:
             if driver:
-                # Keep browser open until CSV detected; closing afterwards is fine
                 driver.quit()
     
     def close(self):
