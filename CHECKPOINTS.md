@@ -44,3 +44,19 @@ WIP: [component] brief description
 **Notes**:
 - Previous session lost due to image size error
 - Need to be more defensive with large files
+
+### Checkpoint 2: 2025-10-19 (Manual Process Template)
+**Status**: Documented context from previous session
+**Completed**:
+- Created docs/WIX_MANUAL_PROCESS.md (text-only, no images)
+- Established approach: Selenium automation (like fetch_exports.py)
+- Confirmed: Wix API approach failed (404s on documentation)
+
+**Next Steps**:
+- Collect manual upload steps from user (text descriptions only)
+- Build Selenium script incrementally with frequent commits
+
+**Context from Previous Session**:
+- Was documenting manual Wix process step-by-step (~2/3 complete)
+- Image size error stopped progress
+- Goal: Automate PDF upload to Wix website after generation
