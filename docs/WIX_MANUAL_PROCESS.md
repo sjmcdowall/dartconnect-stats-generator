@@ -357,7 +357,11 @@ Start-of-season setup can be documented separately if needed.
 **Action**: Click "Publish" button in upper right corner
 **Button Appearance**: Blue background with "Publish" text (visible in screenshots)
 
-**Result**: Changes are published and go live
+**Result**: Publish confirmation appears
+- Temporary confirmation message displays (fades after a few seconds)
+- Changes are now published and live
+
+**Final Result**:
 - Updated Individual icon link → points to new Individual PDF in Week-09
 - Updated Overall icon link → points to new Overall PDF in Week-09
 - Public visitors now see the latest week's reports when clicking icons

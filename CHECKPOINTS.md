@@ -104,3 +104,27 @@ WIP: [component] brief description
 - Do you click into the Week-XX folder after creating it?
 - What PDFs get uploaded (Individual, Overall, both)?
 - Do you upload AND separately link to page icons?
+
+### Checkpoint 6: 2025-10-19 (Manual Process COMPLETE!) ✅
+**Status**: Full manual workflow documented (Steps 1-20)
+**Completed**:
+- All 20 steps documented with screenshots
+- Complete workflow from login to publish
+- Key insights captured:
+  - Dynamic login form (email first, then password)
+  - 2FA OTP required (needs assisted mode)
+  - Two-step upload process (Upload Media → Upload from Computer)
+  - Upload both PDFs, then link each icon separately
+  - Publish button to make changes live
+- Created automation considerations section
+- Identified Selenium selector requirements
+
+**Documents Created**:
+- WIX_MANUAL_PROCESS.md (complete manual workflow)
+- WEEK_NUMBER_LOGIC.md (week calculation for folder naming)
+- CHECKPOINTS.md (this file, progress tracking)
+
+**Next Steps**:
+- Create wix_uploader.py script skeleton
+- Implement Selenium automation with assisted mode
+- Test and validate full workflow
