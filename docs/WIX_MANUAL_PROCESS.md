@@ -195,6 +195,18 @@ Start-of-season setup can be documented separately if needed.
 **Weekly Workflow**: For each week, create a new folder (e.g., "Week-09" for week 9)
 **Next**: Create new weekly folder (documenting in Step 12)
 
+### Step 12: Create New Weekly Folder
+**Action**: Click "Create New Folder" button
+**Button Location**: Right panel under "Actions"
+**Button Appearance**: Folder icon with + symbol
+**Tooltip**: "Create New Folder"
+**Result**: Prompts for folder name
+
+**Step 12B - Name the Folder**:
+**Naming Convention**: "Week-XX" where XX is the current week number (e.g., "Week-09")
+**Week Number Source**: Based on current week in the season
+**Next**: After creating folder, navigate into it (documenting in Step 13)
+
 ---
 
 ## Steps Still Needed
