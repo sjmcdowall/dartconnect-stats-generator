@@ -35,21 +35,40 @@
 **Action**: Login form page loads
 **Next**: Fill in credentials (documenting in Part C)
 
-### Step 2: Login - Part C (Enter Credentials)
-**Fields**:
-- Email field: User's email address
-- Password field: User's password
-**Credentials**: Will use WIX_EMAIL and WIX_PASSWORD environment variables
-**Action**: Fill in email and password, click submit button
-**Next**: 2FA authentication required (documenting in Part D)
+### Step 2: Login - Part C (Enter Credentials - DYNAMIC FORM)
+**IMPORTANT**: Form is dynamic, fields appear sequentially
 
-### Step 2: Login - Part D (2FA Authentication)
+**Step C1 - Email**:
+- Field: Email address
+- Action: Enter email (WIX_EMAIL env var)
+- Button: Click "Use Email" button
+- Result: Password field appears below
+
+**Step C2 - Password**:
+- Field: Password (appears after clicking "Use Email")
+- Action: Enter password (WIX_PASSWORD env var)
+- Button: Click "Login" button
+- Next: 2FA OTP page opens (Part D)
+
+### Step 2: Login - Part D (2FA OTP Authentication)
 **Trigger**: After submitting email/password
-**Action**: 2FA authentication prompt appears
-**Type**: (documenting details next - SMS, authenticator app, email code, etc.)
+**Type**: 6-digit OTP code
+**Storage**: User keeps OTP secret in 1Password
+**Page**: New 2FA OTP page appears
+**Action**: Enter 6-digit OTP code and submit
+**Automation Note**: Will need "assisted mode" - pause for user to manually enter OTP
+**Next**: After successful OTP, lands on "Manage Wix Dashboard" (Part E)
 
-### Step 3: Upload Process
-<!-- User will provide steps here -->
+### Step 2: Login - Part E (Manage Wix Dashboard)
+**Landing Page**: "Manage Wix Dashboard" (NOT the site editor yet!)
+**Note**: This is the management dashboard, not the website editor
+**Next Action**: Need to navigate to "Edit Site" (Step 3)
+
+### Step 3: Navigate to Edit Site
+**Location**: Upper right area of Manage Dashboard
+**Element**: "Edit Site" button
+**Action**: Click "Edit Site" button
+**Next**: Navigates to site editor (documenting in Step 4)
 
 ### Step 4: Publish/Update
 <!-- User will provide steps here -->
