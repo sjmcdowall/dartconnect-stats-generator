@@ -271,6 +271,31 @@ Start-of-season setup can be documented separately if needed.
 
 **Next**: Files upload to Week-XX folder (documenting upload progress in Step 16)
 
+### Step 16: Upload Complete - Files in Week-09 Folder
+**View**: Back in Week-09 folder view with uploaded files
+**Breadcrumb**: Site Files > SEASON 74 - ... > Week-09
+
+**Uploaded Files Displayed**:
+- Overall-1018_205119.pdf (27KB) - with PDF icon
+- Individual-1018_205120.pdf (6KB) - with PDF icon
+- Both files have bookmark and menu icons (••• three dots)
+
+**Upload Completion Notification** (bottom left):
+- Dark notification panel: "2 Uploads Completed"
+- Shows both files with checkmarks:
+  - Individual-1018_205120.pdf (6KB) ✓
+  - Overall-1018_205119.pdf (27KB) ✓
+
+**Right Panel**:
+- Shows "Overall-10..." (selected file preview)
+- Actions, Tags, File Info sections
+
+**Bottom Right**:
+- "Add to Page" button (grayed out)
+
+**Important**: Files are now archived in Week-09 folder.
+**Next**: Navigate back to STATISTICS page to link icons to these PDFs (documenting in Step 17)
+
 ---
 
 ## Steps Still Needed
