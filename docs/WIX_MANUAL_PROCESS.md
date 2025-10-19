@@ -19,8 +19,11 @@
 **Action**: Navigate to Wix homepage
 **Next**: Login process (Step 2)
 
-### Step 2: Navigation
-<!-- User will provide steps here -->
+### Step 2: Login - Part A (Click Login Button)
+**Location**: Upper right area of wix.com homepage
+**Element**: "Log In" link/button
+**Action**: Click the "Log In" button
+**Next**: Login form appears (documenting in Part B)
 
 ### Step 3: Upload Process
 <!-- User will provide steps here -->
