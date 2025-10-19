@@ -35,6 +35,19 @@
 **Action**: Login form page loads
 **Next**: Fill in credentials (documenting in Part C)
 
+### Step 2: Login - Part C (Enter Credentials)
+**Fields**:
+- Email field: User's email address
+- Password field: User's password
+**Credentials**: Will use WIX_EMAIL and WIX_PASSWORD environment variables
+**Action**: Fill in email and password, click submit button
+**Next**: 2FA authentication required (documenting in Part D)
+
+### Step 2: Login - Part D (2FA Authentication)
+**Trigger**: After submitting email/password
+**Action**: 2FA authentication prompt appears
+**Type**: (documenting details next - SMS, authenticator app, email code, etc.)
+
 ### Step 3: Upload Process
 <!-- User will provide steps here -->
 
