@@ -226,6 +226,25 @@ Start-of-season setup can be documented separately if needed.
 
 **Next**: Click "+ Upload Media" to upload PDFs (documenting in Step 14)
 
+### Step 14: Upload PDFs from Computer
+**Action**: Click "+ Upload Media" button
+**Result**: Opens computer's file browser dialog
+
+**Navigation**:
+- Browse to project output folder: `output/`
+- Contains generated PDFs with timestamp names (e.g., Individual-1018_094513.pdf, Overall-1018_094512.pdf)
+
+**File Selection**:
+- Select BOTH reports: Individual AND Overall
+- Can select multiple files at once (Cmd+Click or Ctrl+Click)
+- Reason: Upload both together to avoid repeating the process
+
+**PDF Files to Upload**:
+1. Individual report (e.g., Individual-1018_094513.pdf)
+2. Overall report (e.g., Overall-1018_094512.pdf)
+
+**Next**: Files upload to Week-XX folder (documenting upload progress in Step 15)
+
 ---
 
 ## Steps Still Needed
