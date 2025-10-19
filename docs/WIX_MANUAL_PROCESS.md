@@ -424,6 +424,26 @@ Start-of-season setup can be documented separately if needed.
 
 ---
 
+## Future API Alternative (Research Notes)
+
+**Note**: A Wix REST API approach was considered as an alternative to Selenium automation.
+
+**Potential Benefits**:
+- Simpler workflow: Upload PDFs with standardized names (Individual.pdf, Overall.pdf)
+- Files overwrite automatically when re-uploaded with same name
+- No UI navigation, 2FA, or browser dependencies
+- One-time manual linking setup, then fully automated uploads
+
+**Current Status**:
+- Wix REST API exists but Media Manager API docs return 404 errors
+- OAuth authentication required (app ID, secret, instance ID)
+- Would need to verify API access and capabilities in Wix account
+- Kept as future enhancement possibility
+
+**Decision**: Proceeding with Selenium approach (proven, working pattern from fetch_exports.py)
+
+---
+
 ## Technical Implementation Notes
 
 ### Selenium Approach
