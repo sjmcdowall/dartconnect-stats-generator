@@ -84,6 +84,17 @@
 **Action**: Click on "STATISTICS"
 **Next**: STATISTICS page context loads (documenting in Step 6)
 
+### Step 6: STATISTICS Page Loads
+**View**: Page switches to STATISTICS page view
+**Content**: 3 main large icons displayed:
+  1. "Individual"
+  2. "schedule"
+  3. "Overall"
+**Nav Menu State**: Left nav menu stays open (doesn't auto-close)
+**Action**: Click somewhere on the page to close/dismiss the nav menu
+**Reason**: Get nav menu out of the way since it's no longer needed
+**Next**: Ready to interact with the PDF icons (documenting in Step 7)
+
 ---
 
 ## Steps Still Needed
