@@ -70,8 +70,12 @@
 **Action**: Click "Edit Site" button
 **Next**: Navigates to site editor (documenting in Step 4)
 
-### Step 4: Publish/Update
-<!-- User will provide steps here -->
+### Step 4: Site Editor - Navigate to Pages & Menus
+**View**: Site editor interface loads
+**Navigation Bar**: Left-hand side vertical menu bar
+**Target Option**: "Pages & Menus" (3rd main option from top)
+**Action**: Click "Pages & Menus" option
+**Next**: Pages & Menus panel opens (documenting in Step 5)
 
 ---
 
