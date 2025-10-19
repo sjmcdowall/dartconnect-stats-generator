@@ -77,6 +77,13 @@
 **Action**: Click "Pages & Menus" option
 **Next**: Pages & Menus panel opens (documenting in Step 5)
 
+### Step 5: Select STATISTICS Page
+**Result**: Pages & Menus menu pops up on the left side
+**Options Shown**: List of pages in the site
+**Target Page**: "STATISTICS" option
+**Action**: Click on "STATISTICS"
+**Next**: STATISTICS page context loads (documenting in Step 6)
+
 ---
 
 ## Steps Still Needed
