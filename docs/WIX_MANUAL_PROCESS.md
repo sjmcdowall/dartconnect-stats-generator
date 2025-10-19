@@ -25,6 +25,16 @@
 **Action**: Click the "Log In" button
 **Next**: Login form appears (documenting in Part B)
 
+### Step 2: Login - Part B (Login Form)
+**URL**: https://users.wix.com/signin
+**Query params**:
+- view=sign-up
+- sendEmail=true
+- postLogin=https://manage.wix.com/account/route
+- originUrl=https://www.wix.com/
+**Action**: Login form page loads
+**Next**: Fill in credentials (documenting in Part C)
+
 ### Step 3: Upload Process
 <!-- User will provide steps here -->
 
