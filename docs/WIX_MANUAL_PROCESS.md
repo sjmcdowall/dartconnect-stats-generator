@@ -352,10 +352,71 @@ Start-of-season setup can be documented separately if needed.
 **Result**: Both Individual and Overall icons are now linked to Week-09 PDFs
 **Next**: Publish changes to make them live (documenting in Step 20)
 
+### Step 20: Publish Changes to Make Live
+**Location**: Still on STATISTICS page in editor
+**Action**: Click "Publish" button in upper right corner
+**Button Appearance**: Blue background with "Publish" text (visible in screenshots)
+
+**Result**: Changes are published and go live
+- Updated Individual icon link → points to new Individual PDF in Week-09
+- Updated Overall icon link → points to new Overall PDF in Week-09
+- Public visitors now see the latest week's reports when clicking icons
+
+**Workflow Complete!** ✅
+
 ---
 
-## Steps Still Needed
-<!-- We'll fill this in as we go -->
+## Workflow Summary
+
+### Complete Weekly Update Process
+
+**Starting Point**: New PDFs generated in `output/` folder
+
+**Steps Overview**:
+1. Navigate to wix.com and login (with 2FA)
+2. Click "Edit Site" to enter site editor
+3. Navigate to STATISTICS page via Pages & Menus
+4. Close nav menu (click on page)
+
+**For Individual Icon**:
+5. Click Individual icon → Linked → Document → Choose File
+6. Navigate to Season folder, create/open Week-XX folder
+7. Upload both Individual and Overall PDFs
+8. Select Individual PDF → Add to Page → Done
+
+**For Overall Icon**:
+9. Click Overall icon → Linked → Document → Choose File
+10. Navigate to Week-XX folder (files already uploaded)
+11. Select Overall PDF → Add to Page → Done
+
+**Finalize**:
+12. Click Publish button (upper right) to make changes live
+
+**Result**: Public site now shows latest week's reports
+
+---
+
+## Key Automation Considerations
+
+### Critical Workflow Points
+1. **Dynamic Login Form**: Email field first, then password field appears
+2. **2FA Required**: Will need assisted mode for OTP entry
+3. **Two-Step Upload**: Upload Media dialog → Upload from Computer
+4. **Dual Icon Linking**: Must repeat linking process for both icons
+5. **Week Number Calculation**: Can reuse existing logic from pdf_generator.py
+
+### Selenium Selectors Needed
+- Login: Email field, "Use Email" button, password field, "Login" button
+- Navigation: "Edit Site" button, "Pages & Menus", "STATISTICS" page
+- Icon linking: Individual icon, Overall icon, "Linked" option
+- File management: "Choose File", folder navigation, "Add to Page"
+- Publish: "Publish" button
+
+### File Management
+- PDFs in `output/` folder with timestamp names
+- Upload to: Site Files > SEASON 74 - 2025 Fall > Week-XX
+- Both PDFs uploaded together (efficiency)
+- Each PDF linked to its respective icon separately
 
 ---
 
