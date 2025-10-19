@@ -15,7 +15,9 @@
 ## Steps Documented So Far
 
 ### Step 1: Initial Access
-<!-- User will provide steps here -->
+**URL**: https://www.wix.com/
+**Action**: Navigate to Wix homepage
+**Next**: Login process (Step 2)
 
 ### Step 2: Navigation
 <!-- User will provide steps here -->
