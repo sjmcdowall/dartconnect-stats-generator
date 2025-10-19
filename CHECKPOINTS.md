@@ -60,3 +60,18 @@ WIP: [component] brief description
 - Was documenting manual Wix process step-by-step (~2/3 complete)
 - Image size error stopped progress
 - Goal: Automate PDF upload to Wix website after generation
+
+### Checkpoint 3: 2025-10-19 (Manual Process Steps 1-7 Complete)
+**Status**: Documented manual Wix upload process through Step 7
+**Completed Steps**:
+- Step 1: Navigate to wix.com
+- Step 2A-E: Complete login flow (dynamic form, OTP, dashboard)
+- Step 3: Navigate to Edit Site
+- Step 4: Click Pages & Menus
+- Step 5: Select STATISTICS page
+- Step 6: View 3 icons (Individual, schedule, Overall)
+- Step 7: Click icon, access "Linked" option
+
+**Current Step**: Step 8 - Modal dialog for linking PDFs
+**Next**: Document modal dialog and upload process
+**Note**: About to view screenshot of modal dialog
