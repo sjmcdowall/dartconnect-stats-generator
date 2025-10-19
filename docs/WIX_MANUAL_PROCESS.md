@@ -203,9 +203,11 @@ Start-of-season setup can be documented separately if needed.
 **Result**: Prompts for folder name
 
 **Step 12B - Name the Folder**:
-**Naming Convention**: "Week-XX" where XX is the current week number (e.g., "Week-09")
-**Week Number Source**: Based on current week in the season
-**Next**: After creating folder, navigate into it (documenting in Step 13)
+**Process**: Click "Create New Folder" adds new folder with text input focused
+**Action**: Type folder name "Week-XX" where XX is the current week number (e.g., "Week-09")
+**Week Number Source**: Based on current week in the season (see WEEK_NUMBER_LOGIC.md)
+**Confirmation**: Press Enter to save folder name
+**Next**: Double-click the newly created folder to open it (documenting in Step 13)
 
 ---
 
