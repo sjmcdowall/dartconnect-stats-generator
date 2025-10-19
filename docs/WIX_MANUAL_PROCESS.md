@@ -181,6 +181,20 @@ Start-of-season setup can be documented separately if needed.
 - Each week gets its own folder with PDFs
 **Next**: View contents of season folder (documenting in Step 11)
 
+### Step 11: Inside Season Folder - View Weekly Folders
+**Breadcrumb**: Site Files > SEASON 74 - 2025 Fall
+**Contents Shown**:
+- Weekly folders: "Week-08", "Week-07" (numbered folders for each week)
+- Loose PDF file: "Individual-00.pdf" (file directly in season folder)
+
+**Naming Convention**: Week folders appear to be named "Week-##" format
+
+**Right Panel - Actions**:
+- "Create New Folder" button available
+
+**Weekly Workflow**: For each week, create a new folder (e.g., "Week-09" for week 9)
+**Next**: Create new weekly folder (documenting in Step 12)
+
 ---
 
 ## Steps Still Needed
