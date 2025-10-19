@@ -133,6 +133,42 @@
 **Action**: Select "Document" radio button (if not already selected)
 **Next**: Click "Choose File" button (documenting in Step 9)
 
+### Step 9: Choose a Doc - Media Library
+**Dialog Title**: "Choose a Doc"
+**View**: Wix media library / file manager interface
+
+**Top Section**:
+- Blue button: "+ Upload Media" (top left - KEY BUTTON for uploading)
+- Search bar: "Search for business, fashion, fitness & more..."
+- Tab: "Site Files" (active)
+- View icons: folder view, filter, list view, grid view
+
+**Left Sidebar - MANAGE**:
+- Site Files (selected)
+- My Boards
+- Trash
+
+**Left Sidebar - EXPLORE**:
+- AI Image Creator
+
+**Main Content Area**:
+- Shows folders organized by season:
+  - "SEASON 74 - 2025 Fall"
+  - "SEASON 73 - 2025 Spring"
+  - "SEASON 72 - 2024 Fall"
+  - "SEASON 71 - 2024 Spring"
+
+**Right Panel - Site Files**:
+- Actions: "Create New Folder"
+- Information: "Organize site files and folders added by you and other site collaborators."
+
+**Bottom**:
+- Storage: "368 MB used out of 3.0 GB"
+- Links: "Manage Storage" | "Upgrade"
+- Button: "Add to Page" (grayed out - bottom right)
+
+**Next**: Navigate to current season folder OR upload new file (documenting in Step 10)
+
 ---
 
 ## Steps Still Needed
