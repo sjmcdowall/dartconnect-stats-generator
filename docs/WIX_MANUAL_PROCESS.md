@@ -317,7 +317,40 @@ Start-of-season setup can be documented separately if needed.
 
 **Action**: Click "Done" button
 **Result**: Completes the linking process for Individual icon
-**Next**: Icon is now linked to the Individual PDF (documenting completion in Step 19)
+**Returns to**: STATISTICS page in editor (Individual icon now linked)
+**Next**: Repeat process for Overall icon (documenting in Step 19)
+
+### Step 19: Link Overall Icon - Repeat Process
+**Starting Point**: Back at STATISTICS page after Individual icon linked
+**Action**: Click "Overall" icon on the page
+
+**Step 19A - Overall Icon Options Menu**:
+- Small mini-options menu appears near icon
+- Click "Linked" option (same as Step 7)
+
+**Step 19B - Link Modal Opens**:
+- "What do you want to link to?" modal appears
+- Select "Document" radio button
+- Click "Choose File" button
+
+**Step 19C - Navigate to Week-09**:
+- "Choose a Doc" dialog opens
+- Navigate: Site Files > SEASON 74 - ... > Week-09
+- **Important**: Files already uploaded from Individual linking! No need to upload again.
+
+**Step 19D - Select Overall PDF**:
+- Click on Overall PDF (e.g., Overall-1018_205119.pdf)
+- PDF becomes highlighted/selected
+- Click "Add to Page" button (bottom right)
+
+**Step 19E - Complete Overall Linking**:
+- Returns to "What do you want to link to?" modal
+- Overall PDF shown with green checkmark
+- Click "Done" button
+- Returns to STATISTICS page with Overall icon now linked
+
+**Result**: Both Individual and Overall icons are now linked to Week-09 PDFs
+**Next**: Publish changes to make them live (documenting in Step 20)
 
 ---
 
