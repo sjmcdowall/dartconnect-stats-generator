@@ -293,8 +293,31 @@ Start-of-season setup can be documented separately if needed.
 **Bottom Right**:
 - "Add to Page" button (grayed out)
 
-**Important**: Files are now archived in Week-09 folder.
-**Next**: Navigate back to STATISTICS page to link icons to these PDFs (documenting in Step 17)
+**Important**: Files are now in Week-09 folder. Still in the linking workflow!
+**Next**: Select the PDF for the icon being linked (documenting in Step 17)
+
+### Step 17: Select PDF and Link to Icon
+**Context**: Still in "Choose a Doc" dialog from Step 7 (clicked Individual icon → Linked)
+**Current View**: Week-09 folder with both uploaded PDFs
+
+**Action**: Click on the Individual PDF to select it
+- PDF becomes highlighted/selected with blue border
+- "Add to Page" button (bottom right) becomes active/clickable
+
+**Next Step**: Click "Add to Page" button (documenting in Step 18)
+
+### Step 18: Add to Page - Return to Link Modal
+**Action**: Click "Add to Page" button
+**Result**: Returns to the "What do you want to link to?" modal (from Step 8)
+
+**Modal State**:
+- "Document" radio button still selected
+- Right side now shows selected PDF: "Individual-1018_205120.pdf" with green checkmark
+- Bottom right: "Done" button (blue, active)
+
+**Action**: Click "Done" button
+**Result**: Completes the linking process for Individual icon
+**Next**: Icon is now linked to the Individual PDF (documenting completion in Step 19)
 
 ---
 
