@@ -87,3 +87,20 @@ WIP: [component] brief description
 **Current Step**: Step 9 - File picker/upload dialog
 **Next**: About to view screenshot of file picker (near size limit - being cautious)
 **Safety**: All progress saved before viewing potentially large image
+
+### Checkpoint 5: 2025-10-19 (Week Number Logic Reviewed)
+**Status**: Reviewed week calculation logic, Steps 9-12 documented
+**Completed**:
+- Steps 9-12: Media library, season folder, weekly folder creation
+- Reviewed week number calculation in pdf_generator.py
+- Created WEEK_NUMBER_LOGIC.md documentation
+- Week formula: (days_diff // 7) + 1, first match = Week 1
+- PDF filenames: Individual-MMDD_HHMMSS.pdf (timestamp, not week #)
+- Week # appears in PDF headers: "74th Season - Fall/Winter 2025 - Week X"
+
+**Current Step**: Step 13 - Upload PDFs to weekly folder
+**Next**: Document PDF upload process and linking to page icons
+**Key Questions Remaining**:
+- Do you click into the Week-XX folder after creating it?
+- What PDFs get uploaded (Individual, Overall, both)?
+- Do you upload AND separately link to page icons?
