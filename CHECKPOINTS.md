@@ -75,3 +75,15 @@ WIP: [component] brief description
 **Current Step**: Step 8 - Modal dialog for linking PDFs
 **Next**: Document modal dialog and upload process
 **Note**: About to view screenshot of modal dialog
+
+### Checkpoint 4: 2025-10-19 (Step 8 Complete - Modal Dialog)
+**Status**: Step 8 fully documented with screenshot
+**Completed**:
+- Step 8: Modal dialog "What do you want to link to?" documented
+- Radio button options identified (Document selected)
+- "Choose File" button identified
+- Screenshot viewed successfully (small size, no issues)
+
+**Current Step**: Step 9 - File picker/upload dialog
+**Next**: About to view screenshot of file picker (near size limit - being cautious)
+**Safety**: All progress saved before viewing potentially large image
