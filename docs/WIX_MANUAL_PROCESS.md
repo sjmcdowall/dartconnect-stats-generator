@@ -209,6 +209,23 @@ Start-of-season setup can be documented separately if needed.
 **Confirmation**: Press Enter to save folder name
 **Next**: Double-click the newly created folder to open it (documenting in Step 13)
 
+### Step 13: Inside Empty Weekly Folder - Upload Area
+**Breadcrumb**: Site Files > SEASON 74 - ... > Week-09
+**View**: Empty folder upload interface
+
+**Main Content Area**:
+- Large dashed border rectangle (drag-and-drop zone)
+- Icon: Folder with document illustration
+- Heading: "Start adding your files"
+- Text: "Drag and drop files or upload from your computer."
+- Link/Button: "+ Upload Media" (blue text, centered)
+
+**Upload Options**:
+1. Drag and drop PDF files into the dashed area
+2. Click "+ Upload Media" to browse for files
+
+**Next**: Click "+ Upload Media" to upload PDFs (documenting in Step 14)
+
 ---
 
 ## Steps Still Needed
