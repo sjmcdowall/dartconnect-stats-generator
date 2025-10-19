@@ -214,13 +214,14 @@ class DartConnectExporter:
     
     def _selenium_download_by_leg(self, download_dir: Path) -> Optional[Path]:
         """Login via Selenium and download the By Leg CSV to download_dir.
-        
+
         Flow:
         1) Open my.dartconnect.com and log in with email/password
         2) Dismiss any modal, click Manage League to enter league.dartconnect.com
-        3) Ensure Home tab active
-        4) In CSV Reports, set All Divisions / Regular Season / By Leg
-        5) Click Export Report and wait for CSV to appear in download_dir
+        3) Check Match Log for errors - if found, abort download
+        4) Ensure Home tab active
+        5) In CSV Reports, set All Divisions / Regular Season / By Leg
+        6) Click Export Report and wait for CSV to appear in download_dir
         """
         if not SELENIUM_AVAILABLE:
             self.logger.error("Selenium not installed. pip install selenium webdriver-manager")
@@ -362,7 +363,16 @@ class DartConnectExporter:
             
             # 3) Wait for league portal to fully load (handle "Please wait a moment..." screen)
             self._wait_for_league_portal_load(driver, wait)
-            
+
+            # 4) Check Match Log for errors before proceeding
+            has_errors, error_messages = self._check_match_log_for_errors(driver, wait)
+            if has_errors:
+                self.logger.error("❌ ABORTING: Errors found in Match Log - data is invalid")
+                self.logger.error("Please fix the following errors in DartConnect before downloading:")
+                for i, error in enumerate(error_messages, 1):
+                    self.logger.error(f"  {i}. {error}")
+                raise RuntimeError(f"Match Log contains {len(error_messages)} error(s) - cannot proceed with invalid data")
+
             # Debug: Dump HTML to understand page structure
             if self.logger.level <= logging.DEBUG:
                 html_file = Path("debug_league_page.html")
@@ -397,7 +407,7 @@ class DartConnectExporter:
                     except Exception:
                         pass
             
-            # Click Home tab to reveal CSV Reports section
+            # 5) Click Home tab to reveal CSV Reports section
             home_clicked = False
             
             # More specific selectors based on the league portal navigation
@@ -455,7 +465,7 @@ class DartConnectExporter:
             if not home_clicked:
                 self.logger.warning("Could not find or click Home tab - CSV Reports may not be accessible")
             
-            # 4) Configure CSV Reports dropdowns using specific IDs
+            # 6) Configure CSV Reports dropdowns using specific IDs
             # Use longer timeout for dropdowns
             long_wait = WebDriverWait(driver, 30)
             
@@ -542,7 +552,7 @@ class DartConnectExporter:
             except Exception as e:
                 self.logger.error(f"Report dropdown configuration failed: {e}")
             
-            # 5) Wait and click Export Report button
+            # 7) Wait and click Export Report button
             time.sleep(2)  # Give page time to update after dropdown selection
             
             export_selectors = [
@@ -606,21 +616,126 @@ class DartConnectExporter:
                 driver.quit()
                 self.logger.debug("Browser closed")
     
+    def _check_match_log_for_errors(self, driver, wait) -> Tuple[bool, List[str]]:
+        """Check Match Log page for any errors in the DartConnect system.
+
+        Returns:
+            Tuple of (has_errors, error_messages)
+            - has_errors: True if errors are found
+            - error_messages: List of error messages found
+        """
+        errors = []
+
+        try:
+            self.logger.info("Checking Match Log for data errors...")
+
+            # Click Match Log tab
+            match_log_clicked = False
+            match_log_selectors = [
+                (By.LINK_TEXT, "Match Log"),
+                (By.PARTIAL_LINK_TEXT, "Match Log"),
+                (By.XPATH, "//a[contains(text(), 'Match Log')]"),
+                (By.XPATH, "//a[normalize-space(text())='Match Log']"),
+            ]
+
+            for by, selector in match_log_selectors:
+                try:
+                    match_log_tab = driver.find_element(by, selector)
+                    if match_log_tab.is_displayed() and match_log_tab.is_enabled():
+                        driver.execute_script("arguments[0].scrollIntoView({block:'center'});", match_log_tab)
+                        time.sleep(1)
+                        driver.execute_script("arguments[0].click();", match_log_tab)
+                        self.logger.debug("Clicked Match Log tab")
+                        match_log_clicked = True
+                        time.sleep(3)  # Wait for content to load
+                        break
+                except Exception as e:
+                    self.logger.debug(f"Match Log selector failed {by}, {selector}: {e}")
+                    continue
+
+            if not match_log_clicked:
+                self.logger.warning("Could not find Match Log tab - skipping error check")
+                return False, []
+
+            # Look for actual error rows in the match exception tables
+            # Strategy: Look for table rows with error styling or error indicators
+            # Avoid false positives like "Learn More" links and informational messages
+
+            error_patterns = [
+                # Look for rows with error/danger styling
+                (By.XPATH, "//tr[contains(@class, 'danger') or contains(@class, 'error')]"),
+                (By.XPATH, "//tr[contains(@style, 'background') and contains(@style, 'red')]"),
+                # Look for cells with explicit error markers
+                (By.XPATH, "//td[contains(@class, 'text-danger') and not(contains(., 'Learn'))]"),
+                (By.XPATH, "//td[contains(@class, 'alert-danger')]"),
+                # Look for specific error text in table cells (not headers or help text)
+                (By.XPATH, "//table//td[contains(text(), 'ERROR') or contains(text(), 'INVALID')]"),
+                (By.XPATH, "//table//td[contains(text(), 'Error:') or contains(text(), 'Invalid:')]"),
+            ]
+
+            # Common false positives to ignore
+            false_positive_phrases = [
+                'learn more',
+                'pro tip',
+                'unknown player',  # This is informational, not an error
+                'what is',
+                'help',
+                'use the action buttons',
+                'review the affected match',
+            ]
+
+            for by, selector in error_patterns:
+                try:
+                    error_elements = driver.find_elements(by, selector)
+                    for elem in error_elements:
+                        if elem.is_displayed():
+                            error_text = elem.text.strip()
+                            if error_text and len(error_text) > 0:
+                                lower_text = error_text.lower()
+
+                                # Skip if it's a false positive
+                                if any(fp in lower_text for fp in false_positive_phrases):
+                                    continue
+
+                                # Skip if it's just whitespace or very short
+                                if len(error_text) < 5:
+                                    continue
+
+                                errors.append(error_text)
+                                self.logger.debug(f"Found error: {error_text[:100]}")
+                except Exception as e:
+                    self.logger.debug(f"Error pattern check failed {selector}: {e}")
+                    continue
+
+            # Remove duplicate errors
+            errors = list(set(errors))
+
+            if errors:
+                self.logger.error(f"❌ Found {len(errors)} error(s) in Match Log")
+                return True, errors
+            else:
+                self.logger.info("✅ No errors found in Match Log")
+                return False, []
+
+        except Exception as e:
+            self.logger.warning(f"Match Log error check failed: {e} - continuing anyway")
+            return False, []
+
     def _wait_for_league_portal_load(self, driver, wait):
         """Wait for the league portal loading screen to disappear and page to be ready."""
         try:
             # Wait for the loading text to disappear
             wait.until_not(
                 EC.text_to_be_present_in_element(
-                    (By.TAG_NAME, "body"), 
+                    (By.TAG_NAME, "body"),
                     "Please wait a moment"
                 )
             )
             self.logger.debug("Loading screen disappeared")
-            
+
             # Additional wait for page elements to be ready
             time.sleep(3)
-            
+
             # Wait for navigation elements to be present
             try:
                 wait.until(
@@ -633,7 +748,7 @@ class DartConnectExporter:
             except Exception:
                 # Fallback - just wait a bit more
                 time.sleep(5)
-                
+
         except Exception as e:
             self.logger.debug(f"Loading wait completed with exception: {e}")
             # Continue anyway - might already be loaded

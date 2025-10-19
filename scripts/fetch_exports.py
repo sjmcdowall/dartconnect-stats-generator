@@ -122,6 +122,27 @@ def main():
         print("  export DARTCONNECT_EMAIL='your.email@example.com'")
         print("  export DARTCONNECT_PASSWORD='your-password'")
         return 1
+    except RuntimeError as e:
+        # Check if this is a Match Log validation error
+        error_msg = str(e)
+        if "Match Log contains" in error_msg and "error(s)" in error_msg:
+            print(f"\n❌ DATA VALIDATION FAILED")
+            print(f"   {error_msg}")
+            print(f"\n⚠️  Action Required:")
+            print(f"   1. Log into DartConnect at https://my.dartconnect.com")
+            print(f"   2. Navigate to Competition Organizer → Manage League → Match Log")
+            print(f"   3. Fix all errors listed in the Match Log")
+            print(f"   4. Re-run this script after errors are resolved")
+            print(f"\n💡 Tip: You can regenerate reports from the existing data file without downloading:")
+            print(f"   python main_consolidated.py {args.output_dir}/")
+            return 2  # Exit code 2 indicates validation failure
+        else:
+            # Other runtime errors
+            logger.error(f"❌ Download failed: {e}")
+            if args.verbose:
+                import traceback
+                traceback.print_exc()
+            return 1
     except Exception as e:
         logger.error(f"❌ Download failed: {e}")
         if args.verbose:
