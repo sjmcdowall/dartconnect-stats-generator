@@ -167,7 +167,19 @@
 - Links: "Manage Storage" | "Upgrade"
 - Button: "Add to Page" (grayed out - bottom right)
 
-**Next**: Navigate to current season folder OR upload new file (documenting in Step 10)
+**Next**: Navigate to current season folder (documenting in Step 10)
+
+**Important Note - Weekly Workflow**:
+This documentation focuses on the WEEKLY UPDATE process (most common use case for automation).
+Assumes season folder already exists (e.g., "SEASON 74 - 2025 Fall").
+Start-of-season setup can be documented separately if needed.
+
+### Step 10: Navigate to Current Season Folder
+**Action**: Click on current season folder (e.g., "SEASON 74 - 2025 Fall")
+**Folder Structure**:
+- Season folders contain weekly sub-folders
+- Each week gets its own folder with PDFs
+**Next**: View contents of season folder (documenting in Step 11)
 
 ---
 
