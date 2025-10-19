@@ -51,12 +51,25 @@ def find_data_files(data_dir: Path) -> Dict[str, Optional[Path]]:
     for csv_file in csv_files:
         name_lower = csv_file.name.lower()
         
-        if 'by_leg' in name_lower or 'by leg' in name_lower:
-            files['by_leg'] = csv_file
+        if ('by_leg' in name_lower or 'by leg' in name_lower) and 'archived' not in name_lower:
+            # Always use the newest by_leg file (in case there are multiple)
+            if files['by_leg'] is None or csv_file.stat().st_mtime > files['by_leg'].stat().st_mtime:
+                files['by_leg'] = csv_file
         elif 'cricket' in name_lower and 'leaderboard' in name_lower:
             files['cricket_leaderboard'] = csv_file
         elif '501' in name_lower and 'leaderboard' in name_lower:
             files['dart_501_leaderboard'] = csv_file
+    
+    # Log which files were found
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    for file_type, file_path in files.items():
+        if file_path:
+            timestamp = file_path.stat().st_mtime
+            import datetime
+            readable_time = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+            logger.info(f"📄 Found {file_type} file: {file_path.name} (modified: {readable_time})")
     
     return files
 

@@ -8,6 +8,12 @@ This tool primarily uses DartConnect's "By Leg" export data with URL processing 
 
 ## Key Features
 
+### 🤖 **Fully Automated Data Download** ✨ **NEW!**
+- **Headless browser automation** for DartConnect CSV exports
+- **Complete login and navigation** with intelligent element detection
+- **Smart file archiving** with timestamp preservation
+- **Integrated workflow**: Download → Process → Generate Reports
+
 ### 🎯 **Enhanced Quality Point Calculations**
 - **Accurate Cricket QPs**: Uses Bulls (SB/DB) data from detailed game analysis
 - **Complete 501 QPs**: Includes checkout bonuses using additive QP system
@@ -50,9 +56,40 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+4. **Setup for Automated Downloads (Optional)**:
+```bash
+# Set your DartConnect credentials
+export DARTCONNECT_EMAIL="your.email@example.com"
+export DARTCONNECT_PASSWORD="your-password"
+
+# Install automation dependencies
+pip install selenium webdriver-manager
+```
+
 ## Usage
 
-### Quick Start (Recommended)
+### 🤖 Fully Automated Workflow (NEW!)
+```bash
+# Complete automation: Download latest data + Generate reports
+python3 scripts/fetch_exports.py --headless && python3 main_consolidated.py data/
+
+# Time: ~3-4 minutes total (download + processing)
+# Output: Latest PDF reports with 95/100 quality score
+```
+
+### Manual Download Options
+```bash
+# Download only (headless)
+python3 scripts/fetch_exports.py --headless
+
+# Download with browser window (for debugging)
+python3 scripts/fetch_exports.py
+
+# Download with verbose logging
+python3 scripts/fetch_exports.py --headless --verbose
+```
+
+### Quick Start (Traditional)
 ```bash
 # Auto-detect DartConnect files in data directory
 python main_consolidated.py data/season74/

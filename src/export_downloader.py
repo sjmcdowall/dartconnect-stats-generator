@@ -198,6 +198,9 @@ class DartConnectExporter:
         output_path = Path(output_dir).resolve()
         output_path.mkdir(parents=True, exist_ok=True)
         
+        # Archive existing by_leg files before downloading new ones
+        self._archive_existing_by_leg_files(output_path)
+        
         try:
             if assist:
                 file_path = self._selenium_assist_download(output_path)
@@ -332,56 +335,265 @@ class DartConnectExporter:
             
             # In 'My Leagues' table, click Manage League
             manage_clicked = False
-            for by, sel in [
+            # Look for the wire:click button for Manage League
+            manage_selectors = [
+                (By.XPATH, "//button[contains(@wire:click, 'loginLeaguePortal')]"),
+                (By.XPATH, "//button[.//span[contains(text(), 'Manage League')]]"),
+                (By.XPATH, "//button[contains(., 'Manage League')]"),
                 (By.LINK_TEXT, "Manage League"),
                 (By.XPATH, "//a[contains(., 'Manage League')]")
-            ]:
+            ]
+            
+            for by, sel in manage_selectors:
                 try:
                     ml = driver.find_element(by, sel)
                     ml.click(); manage_clicked = True; break
                 except Exception:
                     continue
             if not manage_clicked:
-                self.logger.debug("Manage League link not found; attempting direct league portal URL")
-                driver.get("https://league.dartconnect.com/")
+                self.logger.error("Manage League link not found - staying on Competition Organizer page")
+                # Don't use direct URL as it redirects back to dashboard
+                # Instead, dump the page content to see what's available
+                if self.logger.level <= logging.DEBUG:
+                    organizer_file = Path("debug_organizer_page.html")
+                    with open(organizer_file, "w", encoding="utf-8") as f:
+                        f.write(driver.page_source)
+                    self.logger.debug(f"Dumped Competition Organizer HTML to {organizer_file}")
             
-            # 3) Ensure Home tab in league portal
-            try:
-                home_tab = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "Home")))
-                home_tab.click()
-            except Exception:
-                self.logger.debug("Home tab not clickable; may already be active")
+            # 3) Wait for league portal to fully load (handle "Please wait a moment..." screen)
+            self._wait_for_league_portal_load(driver, wait)
             
-            # 4) Configure CSV Reports dropdowns
-            # Gather selects present in order
-            selects = wait.until(EC.presence_of_all_elements_located((By.TAG_NAME, "select")))
-            if len(selects) < 3:
-                raise RuntimeError("CSV Reports selectors not found")
+            # Debug: Dump HTML to understand page structure
+            if self.logger.level <= logging.DEBUG:
+                html_file = Path("debug_league_page.html")
+                with open(html_file, "w", encoding="utf-8") as f:
+                    f.write(driver.page_source)
+                self.logger.debug(f"Dumped page HTML to {html_file}")
+                
+                # Log available elements for debugging
+                self.logger.debug(f"Current URL: {driver.current_url}")
+                self.logger.debug(f"Page title: {driver.title}")
+                
+                # Find all links and buttons
+                links = driver.find_elements(By.TAG_NAME, "a")
+                self.logger.debug(f"Found {len(links)} links on page")
+                for i, link in enumerate(links[:10]):  # Show first 10
+                    try:
+                        text = link.text.strip()
+                        href = link.get_attribute("href") or ""
+                        if text:
+                            self.logger.debug(f"  Link {i}: '{text}' -> {href}")
+                    except Exception:
+                        pass
+                        
+                buttons = driver.find_elements(By.TAG_NAME, "button")
+                self.logger.debug(f"Found {len(buttons)} buttons on page")
+                for i, btn in enumerate(buttons[:10]):  # Show first 10
+                    try:
+                        text = btn.text.strip()
+                        onclick = btn.get_attribute("onclick") or ""
+                        if text or onclick:
+                            self.logger.debug(f"  Button {i}: '{text}' onclick='{onclick[:50]}'")
+                    except Exception:
+                        pass
+            
+            # Click Home tab to reveal CSV Reports section
+            home_clicked = False
+            
+            # More specific selectors based on the league portal navigation
+            home_selectors = [
+                (By.XPATH, "//a[normalize-space(text())='Home' and contains(@href, '#')]"),
+                (By.LINK_TEXT, "Home"),
+                (By.PARTIAL_LINK_TEXT, "Home"), 
+                (By.XPATH, "//a[contains(text(), 'Home')]"),
+                (By.CSS_SELECTOR, "a[href='#']"),
+                (By.CSS_SELECTOR, "a[href='https://league.dartconnect.com/#']"),
+            ]
+            
+            self.logger.debug("Looking for Home tab...")
+            for by, selector in home_selectors:
+                try:
+                    home_elements = driver.find_elements(by, selector)
+                    self.logger.debug(f"Found {len(home_elements)} elements with selector {by}, {selector}")
+                    
+                    for home_tab in home_elements:
+                        if home_tab.is_displayed() and home_tab.is_enabled():
+                            text = home_tab.text.strip()
+                            href = home_tab.get_attribute('href') or ''
+                            self.logger.debug(f"Trying Home tab: text='{text}', href='{href}'")
+                            
+                            if 'home' in text.lower() or href.endswith('#'):
+                                # Use JavaScript click to avoid interception issues
+                                driver.execute_script("arguments[0].scrollIntoView({block:'center'});", home_tab)
+                                time.sleep(1)  # Wait after scroll
+                                driver.execute_script("arguments[0].click();", home_tab)
+                                self.logger.debug(f"Clicked Home tab with JavaScript: text '{text}', href '{href}'")
+                                home_clicked = True
+                                time.sleep(3)  # Wait for content to load
+                                break
+                                
+                    if home_clicked:
+                        break
+                        
+                except Exception as e:
+                    self.logger.debug(f"Home selector failed {by}, {selector}: {e}")
+                    continue
+            
+            # If still not found, try to navigate to the Home section directly via URL
+            if not home_clicked:
+                self.logger.debug("Direct Home tab click failed, trying URL fragment approach")
+                try:
+                    current_url = driver.current_url
+                    if '#' not in current_url:
+                        driver.get(current_url + '#')
+                        time.sleep(3)
+                        home_clicked = True
+                        self.logger.debug("Navigated to Home via URL fragment")
+                except Exception as e:
+                    self.logger.debug(f"URL fragment approach failed: {e}")
+                    
+            if not home_clicked:
+                self.logger.warning("Could not find or click Home tab - CSV Reports may not be accessible")
+            
+            # 4) Configure CSV Reports dropdowns using specific IDs
+            # Use longer timeout for dropdowns
+            long_wait = WebDriverWait(driver, 30)
+            
+            # Scroll to CSV Reports section first
             try:
-                Select(selects[0]).select_by_visible_text("All Divisions")
+                csv_section = driver.find_element(By.XPATH, "//div[contains(text(), 'CSV Reports')]")
+                driver.execute_script("arguments[0].scrollIntoView({block:'center'});", csv_section)
+                time.sleep(2)
             except Exception:
                 pass
-            try:
-                Select(selects[1]).select_by_visible_text("Regular Season")
-            except Exception:
-                pass
-            try:
-                # Some pages prefix report type group like "Season Analysis – By Leg"
-                Select(selects[2]).select_by_visible_text("By Leg")
-            except Exception:
-                # Fallback: pick first option that contains 'By Leg'
-                opts = selects[2].find_elements(By.TAG_NAME, 'option')
-                for o in opts:
-                    if 'by leg' in o.text.lower():
-                        o.click(); break
             
-            # 5) Click Export Report (use JS to avoid interactability issues)
+            # Wait for and configure Division dropdown
             try:
-                export_btn = driver.find_element(By.XPATH, "//button[contains(., 'Export Report')]")
-                driver.execute_script("arguments[0].scrollIntoView({block:'center'});", export_btn)
-                driver.execute_script("arguments[0].click();", export_btn)
+                self.logger.debug("Looking for division dropdown...")
+                division_dropdown = long_wait.until(EC.presence_of_element_located((By.ID, "report_division_id")))
+                self.logger.debug("Found division dropdown, checking if clickable...")
+                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "report_division_id")))
+                Select(division_dropdown).select_by_visible_text("All Divisions")
+                self.logger.debug("Selected All Divisions")
             except Exception as e:
-                raise RuntimeError(f"Could not trigger Export Report: {e}")
+                self.logger.debug(f"Division selection failed: {e}")
+            
+            # Wait for and configure Season dropdown  
+            try:
+                self.logger.debug("Looking for season dropdown...")
+                season_dropdown = long_wait.until(EC.presence_of_element_located((By.ID, "report_season_status")))
+                self.logger.debug("Found season dropdown, checking if clickable...")
+                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "report_season_status")))
+                Select(season_dropdown).select_by_visible_text("Regular Season")
+                self.logger.debug("Selected Regular Season")
+            except Exception as e:
+                self.logger.debug(f"Season selection failed: {e}")
+            
+            # Wait for report selection dropdown to be ready
+            time.sleep(2)
+            # Wait for and configure Report Type dropdown
+            try:
+                self.logger.debug("Looking for report selection dropdown...")
+                report_dropdown = long_wait.until(EC.presence_of_element_located((By.ID, "report_selection")))
+                self.logger.debug("Found report dropdown, checking if clickable...")
+                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "report_selection")))
+                
+                # Debug: show available options in the report type dropdown
+                if self.logger.level <= logging.DEBUG:
+                    opts = report_dropdown.find_elements(By.TAG_NAME, 'option')
+                    self.logger.debug(f"Report type dropdown has {len(opts)} options:")
+                    for i, opt in enumerate(opts):
+                        text = opt.text.strip() or opt.get_attribute('value') or ''
+                        self.logger.debug(f"  Option {i}: '{text}'")
+            
+                # Try multiple strategies to select By Leg
+                by_leg_selected = False
+                report_select = Select(report_dropdown)
+                strategies = [
+                    lambda: report_select.select_by_visible_text("By Leg"),
+                    lambda: report_select.select_by_partial_text("By Leg"),
+                    lambda: report_select.select_by_value("/league-export/seasonperformancebyleg/"),
+                ]
+                
+                for strategy in strategies:
+                    try:
+                        strategy()
+                        by_leg_selected = True
+                        self.logger.debug("Successfully selected By Leg option")
+                        break
+                    except Exception as e:
+                        self.logger.debug(f"Selection strategy failed: {e}")
+                        continue
+                
+                if not by_leg_selected:
+                    # Manual fallback: find and click option containing 'by leg'
+                    opts = report_dropdown.find_elements(By.TAG_NAME, 'option')
+                    for opt in opts:
+                        text = opt.text.lower()
+                        value = opt.get_attribute('value') or ''
+                        if 'by leg' in text or 'byleg' in text or 'seasonperformancebyleg' in value:
+                            opt.click()
+                            by_leg_selected = True
+                            self.logger.debug(f"Manually selected option: '{opt.text}' (value: '{value}')")
+                            break
+                            
+                if not by_leg_selected:
+                    self.logger.warning("Could not select By Leg option - using default selection")
+            except Exception as e:
+                self.logger.error(f"Report dropdown configuration failed: {e}")
+            
+            # 5) Wait and click Export Report button
+            time.sleep(2)  # Give page time to update after dropdown selection
+            
+            export_selectors = [
+                (By.ID, "rexport_report"),  # Use the specific ID from the logs
+                (By.XPATH, "//button[contains(., 'Export Report')]"),
+                (By.XPATH, "//button[contains(text(), 'Export Report')]"),
+                (By.XPATH, "//input[@value='Export Report']"),
+                (By.XPATH, "//input[@type='submit' and contains(@value, 'Export')]"),
+            ]
+            
+            export_clicked = False
+            for by, selector in export_selectors:
+                try:
+                    # Wait for the button to be clickable
+                    export_btn = wait.until(EC.element_to_be_clickable((by, selector)))
+                    
+                    # Scroll into view and click
+                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", export_btn)
+                    time.sleep(1)  # Brief pause after scroll
+                    driver.execute_script("arguments[0].click();", export_btn)
+                    
+                    self.logger.debug(f"Clicked Export Report with selector: {by}, {selector}")
+                    export_clicked = True
+                    break
+                    
+                except Exception as e:
+                    self.logger.debug(f"Export selector failed {by}, {selector}: {e}")
+                    continue
+                    
+            if not export_clicked:
+                # Final debug: show what buttons are actually available
+                buttons = driver.find_elements(By.TAG_NAME, "button")
+                inputs = driver.find_elements(By.XPATH, "//input[@type='submit' or @type='button']")
+                self.logger.error(f"Export button not found. Available buttons: {len(buttons)}, inputs: {len(inputs)}")
+                for i, btn in enumerate(buttons):
+                    try:
+                        text = btn.text.strip()
+                        onclick = btn.get_attribute("onclick") or ""
+                        if text or onclick:
+                            self.logger.error(f"  Button {i}: '{text}' onclick='{onclick[:50]}'")
+                    except Exception:
+                        pass
+                for i, inp in enumerate(inputs):
+                    try:
+                        value = inp.get_attribute("value") or ""
+                        onclick = inp.get_attribute("onclick") or ""
+                        if value or onclick:
+                            self.logger.error(f"  Input {i}: value='{value}' onclick='{onclick[:50]}'")
+                    except Exception:
+                        pass
+                raise RuntimeError("Could not find any Export Report button")
             
             # Wait for CSV to appear in download_dir (simple poll by newest file)
             self.logger.info("Waiting for CSV download...")
@@ -393,6 +605,39 @@ class DartConnectExporter:
             if driver:
                 driver.quit()
                 self.logger.debug("Browser closed")
+    
+    def _wait_for_league_portal_load(self, driver, wait):
+        """Wait for the league portal loading screen to disappear and page to be ready."""
+        try:
+            # Wait for the loading text to disappear
+            wait.until_not(
+                EC.text_to_be_present_in_element(
+                    (By.TAG_NAME, "body"), 
+                    "Please wait a moment"
+                )
+            )
+            self.logger.debug("Loading screen disappeared")
+            
+            # Additional wait for page elements to be ready
+            time.sleep(3)
+            
+            # Wait for navigation elements to be present
+            try:
+                wait.until(
+                    EC.any_of(
+                        EC.presence_of_element_located((By.LINK_TEXT, "Home")),
+                        EC.presence_of_element_located((By.TAG_NAME, "select"))
+                    )
+                )
+                self.logger.debug("Page elements loaded")
+            except Exception:
+                # Fallback - just wait a bit more
+                time.sleep(5)
+                
+        except Exception as e:
+            self.logger.debug(f"Loading wait completed with exception: {e}")
+            # Continue anyway - might already be loaded
+            time.sleep(5)
     
     def _download_file(self, url: str, output_dir: Path, file_type: str) -> Optional[Path]:
         """
@@ -484,14 +729,10 @@ class DartConnectExporter:
                 "safebrowsing.enabled": False
             }
             options.add_experimental_option("prefs", prefs)
-            options.add_argument("--headless=new")
+            # Use visible browser for now (debugging headless mode)
             options.add_argument("--window-size=1400,900")
-            options.add_argument("--disable-blink-features=AutomationControlled")
-            options.add_experimental_option("excludeSwitches", ["enable-automation"])
-            options.add_experimental_option('useAutomationExtension', False)
             service = Service(ChromeDriverManager().install())
             driver = webdriver.Chrome(service=service, options=options)
-            driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
             
             print("🔑 Logging into DartConnect...", end=" ")
             driver.get(self.LOGIN_URL)
@@ -577,16 +818,27 @@ class DartConnectExporter:
             time.sleep(2)
             print("✅ SUCCESS!")
             
+            print("⏳ Waiting for portal to load...", end=" ")
+            # Wait for the "Please wait a moment..." loading screen to disappear
+            self._wait_for_league_portal_load(driver, WebDriverWait(driver, 30))
+            print("✅ SUCCESS!")
+            
             print("📊 Configuring CSV Export...", end=" ")
-            # Click Home tab
+            # Click Home tab to reveal CSV Reports
             try:
                 home_tab = WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable((By.LINK_TEXT, "Home"))
                 )
                 home_tab.click()
-                time.sleep(1)
+                time.sleep(2)  # Wait for CSV Reports section to load
             except Exception:
-                pass  # May already be on Home
+                # Try alternate Home tab selector
+                try:
+                    home_tab = driver.find_element(By.XPATH, "//a[contains(text(), 'Home')]")
+                    home_tab.click()
+                    time.sleep(2)
+                except Exception:
+                    pass  # Continue anyway
             
             # Configure dropdowns with retry logic
             time.sleep(2)
@@ -623,16 +875,46 @@ class DartConnectExporter:
             print("✅ SUCCESS!")
             
             print("📥 Downloading By Leg CSV...", end=" ")
-            time.sleep(1)
+            
+            # Wait for any loading spinners to disappear
+            try:
+                spinner_selectors = [
+                    (By.CLASS_NAME, "spinner"),
+                    (By.CLASS_NAME, "loading"),
+                    (By.XPATH, "//*[contains(@class,'spinner')]"),
+                    (By.XPATH, "//*[contains(@class,'loading')]"),
+                    (By.TAG_NAME, "ngx-spinner"),
+                ]
+                
+                for by, selector in spinner_selectors:
+                    try:
+                        WebDriverWait(driver, 5).until(
+                            EC.invisibility_of_element_located((by, selector))
+                        )
+                        self.logger.debug(f"Loading spinner disappeared: {selector}")
+                    except:
+                        pass  # Spinner not found or already gone
+                
+                # Extra wait to ensure page is fully rendered
+                time.sleep(2)
+            except:
+                pass
             
             # Click Export Report
             try:
-                export_btn = driver.find_element(By.XPATH, "//button[contains(., 'Export Report')]")
+                # Wait for Export Report button to appear after Home tab click
+                export_btn = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Export Report')]")))  
                 driver.execute_script("arguments[0].scrollIntoView({block:'center'});", export_btn)
                 driver.execute_script("arguments[0].click();", export_btn)
             except Exception as e:
-                print(f"❌ FAILED - Export button: {e}")
-                return None
+                # Try input type Export button
+                try:
+                    export_btn = driver.find_element(By.XPATH, "//input[@value='Export Report']")
+                    driver.execute_script("arguments[0].click();", export_btn)
+                except Exception:
+                    print(f"❌ FAILED - Export button: {e}")
+                    return None
             
             # Wait for CSV with timeout
             csv = self._wait_for_csv(download_dir, timeout=30)
@@ -649,6 +931,52 @@ class DartConnectExporter:
         finally:
             if driver:
                 driver.quit()
+    
+    def _archive_existing_by_leg_files(self, output_dir: Path) -> None:
+        """
+        Archive existing by_leg CSV files with timestamp before downloading new ones.
+        
+        Files are moved to an 'archive' subdirectory to keep the main data folder clean.
+        """
+        try:
+            # Find existing by_leg files
+            by_leg_files = []
+            for pattern in ['*by_leg*.csv', '*By_Leg*.csv', '*by-leg*.csv']:
+                by_leg_files.extend(list(output_dir.glob(pattern)))
+            
+            if not by_leg_files:
+                self.logger.debug("No existing by_leg files to archive")
+                return
+            
+            # Create archive directory if it doesn't exist
+            archive_dir = output_dir / "archive"
+            archive_dir.mkdir(exist_ok=True)
+            
+            # Create timestamp for archiving
+            from datetime import datetime
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            
+            archived_count = 0
+            for file_path in by_leg_files:
+                try:
+                    # Create archived filename with timestamp
+                    name_parts = file_path.stem.split('.')
+                    archived_name = f"{name_parts[0]}_archived_{timestamp}.csv"
+                    archived_path = archive_dir / archived_name
+                    
+                    # Move the file to archive directory
+                    file_path.rename(archived_path)
+                    archived_count += 1
+                    self.logger.info(f"📁 Archived: {file_path.name} → archive/{archived_name}")
+                    
+                except Exception as e:
+                    self.logger.warning(f"Could not archive {file_path.name}: {e}")
+            
+            if archived_count > 0:
+                self.logger.info(f"✅ Archived {archived_count} existing by_leg file(s) to archive/ folder")
+                
+        except Exception as e:
+            self.logger.warning(f"File archiving failed: {e} - continuing with download")
     
     def close(self):
         """Close the session."""
