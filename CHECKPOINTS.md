@@ -128,3 +128,30 @@ WIP: [component] brief description
 - Create wix_uploader.py script skeleton
 - Implement Selenium automation with assisted mode
 - Test and validate full workflow
+
+### Checkpoint 7: 2025-10-19 (CLI Skeleton Complete) ✅
+**Status**: wix_uploader.py CLI skeleton created and tested
+**Completed**:
+- Created scripts/wix_uploader.py (183 lines)
+- CLI interface matching fetch_exports.py pattern
+- Arguments: --assist, --headless, --dry-run, --check-creds, --verbose
+- PDF detection working (finds latest Individual and Overall)
+- Environment variables: WIX_EMAIL, WIX_PASSWORD
+- Dry-run mode tested successfully
+- Full help documentation
+
+**What Works**:
+✅ Argument parsing
+✅ PDF file detection
+✅ Credentials check
+✅ Dry-run mode
+
+**Still TODO**:
+- Implement WixUploader Selenium class
+- Login automation (with 2FA pause)
+- Navigation to STATISTICS page
+- File upload automation
+- Icon linking automation
+- Publish automation
+
+**Next Step**: Implement src/wix_uploader_selenium.py class
