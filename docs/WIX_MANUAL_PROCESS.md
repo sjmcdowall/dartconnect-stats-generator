@@ -90,10 +90,20 @@
   1. "Individual"
   2. "schedule"
   3. "Overall"
+**Icon Purpose**: Each icon links to corresponding PDF file on published site
 **Nav Menu State**: Left nav menu stays open (doesn't auto-close)
 **Action**: Click somewhere on the page to close/dismiss the nav menu
 **Reason**: Get nav menu out of the way since it's no longer needed
 **Next**: Ready to interact with the PDF icons (documenting in Step 7)
+
+### Step 7: Click Icon to Access Options Menu
+**Mode**: Editor mode (site editor)
+**Action**: Click on one of the icons (e.g., "Individual")
+**Result**: Small mini-option menu appears near the icon
+**Options Shown**: Various options including "Linked"
+**Target Option**: "Linked" (has a URL link icon next to it)
+**Note**: Despite the link icon, this is NOT a URL link - it's for linking to files/content
+**Next**: Click "Linked" option (documenting in Step 8)
 
 ---
 
