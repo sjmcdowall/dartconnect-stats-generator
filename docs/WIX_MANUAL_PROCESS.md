@@ -105,6 +105,34 @@
 **Note**: Despite the link icon, this is NOT a URL link - it's for linking to files/content
 **Next**: Click "Linked" option (documenting in Step 8)
 
+### Step 8: Link Modal Dialog Opens
+**Modal Title**: "What do you want to link to?"
+**Layout**: Split view - link type options on left, file selection on right
+
+**Left Side - Link Type Options (Radio Buttons)**:
+- None
+- Page
+- Web address
+- Section or anchor
+- Top/bottom of page
+- **Document** ← (THIS ONE - selected)
+- Email
+- Phone number
+- Lightbox
+
+**Right Side - File Selection**:
+- Title: "What doc are you linking to?"
+- Button: "Choose File" (blue button)
+- Currently selected file shown: "Individual-1018_094513.pdf" with green checkmark
+- Option link: "Show this PDF in search results"
+
+**Bottom Buttons**:
+- "Cancel" (left, gray)
+- "Done" (right, blue)
+
+**Action**: Select "Document" radio button (if not already selected)
+**Next**: Click "Choose File" button (documenting in Step 9)
+
 ---
 
 ## Steps Still Needed
