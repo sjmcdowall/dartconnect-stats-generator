@@ -226,8 +226,34 @@ Start-of-season setup can be documented separately if needed.
 
 **Next**: Click "+ Upload Media" to upload PDFs (documenting in Step 14)
 
-### Step 14: Upload PDFs from Computer
+### Step 14: Upload Media Dialog Opens
 **Action**: Click "+ Upload Media" button
+**Result**: "Upload Media" modal dialog appears
+
+**Dialog Layout**:
+- Title: "Upload Media"
+- Left sidebar with upload source icons:
+  - Computer (monitor icon) ← DEFAULT/TARGET
+  - Wix
+  - Google Drive
+  - Facebook
+  - Instagram
+  - Dropbox
+  - Other services...
+  - Link/URL
+  - Vimeo
+
+**Main Area**:
+- Large dashed border (drag-and-drop zone)
+- Text: "Drag & drop files here"
+- "or"
+- Blue button: "Upload from Computer"
+- Bottom link: "Want to see which file types are supported? Read more"
+
+**Next**: Click "Upload from Computer" button (documenting in Step 15)
+
+### Step 15: Select PDFs from Computer
+**Action**: Click "Upload from Computer" button
 **Result**: Opens computer's file browser dialog
 
 **Navigation**:
@@ -243,7 +269,7 @@ Start-of-season setup can be documented separately if needed.
 1. Individual report (e.g., Individual-1018_094513.pdf)
 2. Overall report (e.g., Overall-1018_094512.pdf)
 
-**Next**: Files upload to Week-XX folder (documenting upload progress in Step 15)
+**Next**: Files upload to Week-XX folder (documenting upload progress in Step 16)
 
 ---
 
