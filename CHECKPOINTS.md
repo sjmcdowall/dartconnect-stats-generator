@@ -155,3 +155,31 @@ WIP: [component] brief description
 - Publish automation
 
 **Next Step**: Implement src/wix_uploader_selenium.py class
+
+### Session Summary: 2025-10-19
+
+**Total Commits**: 31
+**Branch**: feature/wix-pdf-upload (pushed to GitHub)
+**Status**: Ready to implement Selenium automation
+
+**What We Built:**
+1. Complete 20-step manual workflow documentation (with screenshots)
+2. Week number calculation logic documentation
+3. API alternative research and documentation
+4. Working CLI skeleton (scripts/wix_uploader.py)
+5. Comprehensive checkpoint system (prevented data loss!)
+
+**Key Decisions:**
+- Using Selenium automation (proven pattern from fetch_exports.py)
+- --assist mode for 2FA (10 seconds of user time)
+- Will test session persistence (might work for weeks!)
+- Future: Build overall weekly_update.sh script
+- Long-term: Explore cron job with retry logic
+
+**Next Session Goals:**
+1. Implement WixUploader Selenium class (src/wix_uploader_selenium.py)
+2. Test login automation with 2FA pause
+3. Test session persistence behavior
+4. Implement navigation and upload automation
+
+**User Note**: Tired after F1 Austin race - good stopping point!
