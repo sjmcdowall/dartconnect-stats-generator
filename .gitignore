@@ -109,22 +109,14 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
-# Output files
-output/*.pdf
-*.pdf
-output/*.json
+# Output files (all generated content)
+output/
 
 # Cache files (regeneratable)
 cache/
 
-# Data files (except samples)
-data/*.csv
-data/*.xlsx
-data/*.xls
-!data/sample_data.csv
-
-# Ignore season data directories (real data, not tracked)
-data/season*/
+# Data files (all data - regeneratable from DartConnect)
+data/
 
 # DartConnect exports (regeneratable from DC)
 docs/samples/dartconnect_exports/*.csv
