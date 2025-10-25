@@ -11,6 +11,38 @@ from urllib.parse import urlparse
 from .config import Config
 from .url_fetcher import DartConnectURLFetcher
 
+# Common name lists for gender inference
+COMMON_MALE_NAMES = {
+    "john","michael","david","james","robert","william","richard","thomas","charles","joseph",
+    "christopher","daniel","matthew","anthony","mark","donald","steven","paul","andrew","joshua",
+    "kenneth","kevin","brian","george","timothy","ronald","edward","jason","ryan","gary",
+    "nicholas","eric","stephen","larry","justin","scott","brandon","benjamin","adam","samuel",
+    "gregory","alexander","patrick","tyler","frank","peter","marc","marcus","matt","mike","jeff",
+    "jeffrey","steve","bryan","bruce","shaun","sean","ian","craig","barry","dave","shane",
+    "josh","lee","clifford","landon","blake","erston","chris","casey","bill","rodel","rick",
+    "robbie","martin"
+}
+
+COMMON_FEMALE_NAMES = {
+    "mary","patricia","jennifer","linda","elizabeth","barbara","susan","jessica","sarah","karen",
+    "nancy","lisa","betty","margaret","sandra","ashley","kimberly","emily","donna","michelle",
+    "carol","amanda","melissa","deborah","stephanie","rebecca","laura","sharon","cynthia","kathleen",
+    "amy","angela","rachel","heather","nicole","christine","julie","anna","maria","victoria",
+    "bonnie","bonny","samantha","megan","katherine","catherine","jenny","lindsay","lindsey","amber",
+    "beth","betsy","jade","sherrie","shannon","misty"
+}
+
+# Unisex names to avoid guessing (removed casey, chris, lee since we have manual classifications)
+UNISEX_NAMES = {
+    "alex","sam","jordan","taylor","jamie","morgan","bailey","skyler","skye","cameron",
+    "devon","drew","parker","reese","riley","sydney","syd","avery","quinn","kyle"
+}
+
+# Placeholder names to exclude from reports
+PLACEHOLDER_NAMES = {
+    "ghost","placeholder","test","dummy"
+}
+
 
 class DataProcessor:
     """Processes DartConnect league data and calculates statistics."""
@@ -90,6 +122,14 @@ class DataProcessor:
     
     def _clean_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Clean and validate the data."""
+        # Preserve First Name column before mapping (needed for gender inference)
+        # Clean whitespace from First Name to ensure proper matching
+        has_first_name = 'First Name' in df.columns
+        if has_first_name:
+            # Strip leading/trailing whitespace from first names
+            df['First Name'] = df['First Name'].str.strip()
+            df['_first_name_original'] = df['First Name']
+        
         # Check if essential columns exist (flexible column names)
         column_mapping = self._map_columns(df.columns)
         
@@ -121,6 +161,14 @@ class DataProcessor:
         if essential_columns:
             df = df.dropna(subset=essential_columns)
         
+        # Filter out placeholder players
+        if '_first_name_original' in df.columns:
+            placeholder_mask = df['_first_name_original'].str.lower().isin(PLACEHOLDER_NAMES)
+            if placeholder_mask.any():
+                removed_count = placeholder_mask.sum()
+                self.logger.info(f"🚫 Filtered out {removed_count} placeholder player records (e.g., Ghost Player)")
+                df = df[~placeholder_mask]
+        
         # Convert date column to datetime
         try:
             df['game_date'] = pd.to_datetime(df['game_date'])
@@ -132,6 +180,14 @@ class DataProcessor:
         for col in numeric_columns:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
+        
+        # Normalize gender per player (use most recent value)
+        if 'M/F' in df.columns and 'player_name' in df.columns and 'game_date' in df.columns:
+            df = self._normalize_player_gender(df)
+        
+        # Infer missing gender from first names
+        if 'M/F' in df.columns and 'player_name' in df.columns and '_first_name_original' in df.columns:
+            df = self._infer_missing_gender(df)
         
         self.logger.info(f"Cleaned data: {len(df)} rows remaining")
         return df
@@ -163,6 +219,160 @@ class DataProcessor:
                     break
         
         return column_mapping
+    
+    def _normalize_player_gender(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Normalize gender per player by using the most recent non-empty value.
+        
+        This handles cases where a player's gender was incorrectly recorded in
+        earlier games but corrected in later games. We take the gender from the
+        most recent game as the authoritative value.
+        """
+        if df.empty or 'M/F' not in df.columns or 'player_name' not in df.columns:
+            return df
+        
+        # Ensure game_date is datetime
+        if 'game_date' not in df.columns:
+            return df
+        
+        # Track corrections
+        corrections = []
+        
+        # For each player, find their most recent gender value
+        for player in df['player_name'].unique():
+            player_mask = df['player_name'] == player
+            player_df = df[player_mask].copy()
+            
+            # Get all non-empty gender values
+            gender_values = player_df['M/F'].dropna()
+            gender_values = gender_values[gender_values.str.strip() != '']
+            
+            if len(gender_values) == 0:
+                continue  # No gender data for this player - will be handled by inference
+            
+            # Check if there are inconsistencies OR missing values for some rows
+            unique_genders = gender_values.unique()
+            has_missing = len(gender_values) < len(player_df)  # Some rows missing gender
+            
+            if len(unique_genders) > 1 or has_missing:
+                # Sort by date (most recent first) and get the latest gender
+                player_df_sorted = player_df.sort_values('game_date', ascending=False)
+                latest_gender = None
+                
+                for idx, row in player_df_sorted.iterrows():
+                    gender = row.get('M/F', '')
+                    if pd.notna(gender) and str(gender).strip() != '':
+                        latest_gender = str(gender).strip()
+                        break
+                
+                if latest_gender:
+                    # Count how many records will be changed
+                    old_genders = player_df['M/F'].value_counts().to_dict()
+                    corrections.append({
+                        'player': player,
+                        'old_values': old_genders,
+                        'new_value': latest_gender,
+                        'records_updated': len(player_df[player_df['M/F'] != latest_gender])
+                    })
+                    
+                    # Update all records for this player
+                    df.loc[player_mask, 'M/F'] = latest_gender
+        
+        # Log corrections
+        if corrections:
+            self.logger.info(f"🔧 Normalized gender for {len(corrections)} player(s) with inconsistent values:")
+            for correction in corrections:
+                old_vals_str = ', '.join([f"{k}({v})" for k, v in correction['old_values'].items()])
+                self.logger.info(
+                    f"  • {correction['player']}: {old_vals_str} → {correction['new_value']} "
+                    f"({correction['records_updated']} records updated)"
+                )
+        
+        return df
+    
+    def _infer_missing_gender(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Infer gender for players with missing M/F data based on first name.
+        
+        Uses common name lists to make educated guesses. Conservative approach:
+        only infers when confident, avoids unisex names.
+        """
+        if df.empty or 'M/F' not in df.columns or '_first_name_original' not in df.columns:
+            return df
+        
+        # Track inferences
+        inferences = []
+        
+        # Find players with missing gender
+        for player in df['player_name'].unique():
+            player_mask = df['player_name'] == player
+            player_df = df[player_mask]
+            
+            # Check if all rows for this player have missing gender
+            gender_values = player_df['M/F'].dropna()
+            gender_values = gender_values[gender_values.str.strip() != '']
+            
+            if len(gender_values) > 0:
+                continue  # Player already has gender data
+            
+            # Get first name
+            first_name = player_df['_first_name_original'].iloc[0]
+            if pd.isna(first_name) or str(first_name).strip() == '':
+                continue
+            
+            first_name_lower = str(first_name).strip().lower()
+            
+            # Skip unisex names
+            if first_name_lower in UNISEX_NAMES:
+                continue
+            
+            # Infer gender based on name lists
+            inferred_gender = None
+            confidence = "unknown"
+            
+            if first_name_lower in COMMON_MALE_NAMES:
+                inferred_gender = 'M'
+                confidence = "high"
+            elif first_name_lower in COMMON_FEMALE_NAMES:
+                inferred_gender = 'F'
+                confidence = "high"
+            elif len(first_name_lower) >= 3 and first_name_lower.endswith('a'):
+                # Simple heuristic: names ending in 'a' often female
+                inferred_gender = 'F'
+                confidence = "low"
+            
+            if inferred_gender:
+                inferences.append({
+                    'player': player,
+                    'first_name': first_name,
+                    'inferred_gender': inferred_gender,
+                    'confidence': confidence,
+                    'records_updated': len(player_df)
+                })
+                
+                # Update all records for this player
+                df.loc[player_mask, 'M/F'] = inferred_gender
+        
+        # Log inferences
+        if inferences:
+            high_conf = [i for i in inferences if i['confidence'] == 'high']
+            low_conf = [i for i in inferences if i['confidence'] == 'low']
+            
+            self.logger.info(
+                f"🔍 Inferred gender for {len(inferences)} player(s) with missing data "
+                f"({len(high_conf)} high confidence, {len(low_conf)} low confidence):"
+            )
+            
+            for inference in inferences:
+                conf_icon = "✓" if inference['confidence'] == 'high' else "~"
+                self.logger.info(
+                    f"  {conf_icon} {inference['player']} (first: {inference['first_name']}) → {inference['inferred_gender']} "
+                    f"({inference['records_updated']} records)"
+                )
+        
+        # Clean up temporary column
+        if '_first_name_original' in df.columns:
+            df = df.drop(columns=['_first_name_original'])
+        
+        return df
     
     def _calculate_statistics(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Calculate basic statistics from the data."""
