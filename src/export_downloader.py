@@ -657,64 +657,45 @@ class DartConnectExporter:
                 self.logger.warning("Could not find Match Log tab - skipping error check")
                 return False, []
 
-            # Look for actual error rows in the match exception tables
-            # Strategy: Look for table rows with error styling or error indicators
-            # Avoid false positives like "Learn More" links and informational messages
+            # Simple strategy: Check if "Match Exceptions" tab has a count
+            # Example: "Match Exceptions (5)" means 5 errors
+            #          "Match Exceptions" (no count) means clean
 
-            error_patterns = [
-                # Look for rows with error/danger styling
-                (By.XPATH, "//tr[contains(@class, 'danger') or contains(@class, 'error')]"),
-                (By.XPATH, "//tr[contains(@style, 'background') and contains(@style, 'red')]"),
-                # Look for cells with explicit error markers
-                (By.XPATH, "//td[contains(@class, 'text-danger') and not(contains(., 'Learn'))]"),
-                (By.XPATH, "//td[contains(@class, 'alert-danger')]"),
-                # Look for specific error text in table cells (not headers or help text)
-                (By.XPATH, "//table//td[contains(text(), 'ERROR') or contains(text(), 'INVALID')]"),
-                (By.XPATH, "//table//td[contains(text(), 'Error:') or contains(text(), 'Invalid:')]"),
+            import re
+
+            # Look for Match Exceptions tab with various selectors
+            exception_tab_selectors = [
+                (By.XPATH, "//a[contains(text(), 'Match Exceptions')]"),
+                (By.PARTIAL_LINK_TEXT, "Match Exceptions"),
+                (By.XPATH, "//button[contains(text(), 'Match Exceptions')]"),
             ]
 
-            # Common false positives to ignore
-            false_positive_phrases = [
-                'learn more',
-                'pro tip',
-                'unknown player',  # This is informational, not an error
-                'what is',
-                'help',
-                'use the action buttons',
-                'review the affected match',
-            ]
+            exception_count = 0
+            tab_text = None
 
-            for by, selector in error_patterns:
+            for by, selector in exception_tab_selectors:
                 try:
-                    error_elements = driver.find_elements(by, selector)
-                    for elem in error_elements:
-                        if elem.is_displayed():
-                            error_text = elem.text.strip()
-                            if error_text and len(error_text) > 0:
-                                lower_text = error_text.lower()
+                    exception_tab = driver.find_element(by, selector)
+                    if exception_tab.is_displayed():
+                        tab_text = exception_tab.text.strip()
+                        self.logger.debug(f"Found Match Exceptions tab: '{tab_text}'")
 
-                                # Skip if it's a false positive
-                                if any(fp in lower_text for fp in false_positive_phrases):
-                                    continue
-
-                                # Skip if it's just whitespace or very short
-                                if len(error_text) < 5:
-                                    continue
-
-                                errors.append(error_text)
-                                self.logger.debug(f"Found error: {error_text[:100]}")
+                        # Extract number from "Match Exceptions (X)" format
+                        match = re.search(r'Match\s+Exceptions?\s*\((\d+)\)', tab_text, re.IGNORECASE)
+                        if match:
+                            exception_count = int(match.group(1))
+                            self.logger.debug(f"Extracted exception count: {exception_count}")
+                        break
                 except Exception as e:
-                    self.logger.debug(f"Error pattern check failed {selector}: {e}")
+                    self.logger.debug(f"Exception tab selector failed {by}, {selector}: {e}")
                     continue
 
-            # Remove duplicate errors
-            errors = list(set(errors))
-
-            if errors:
-                self.logger.error(f"❌ Found {len(errors)} error(s) in Match Log")
-                return True, errors
+            if exception_count > 0:
+                error_msg = f"{exception_count} match exception(s) need review in Match Log"
+                self.logger.error(f"❌ Found {exception_count} exception(s) in Match Log")
+                return True, [error_msg]
             else:
-                self.logger.info("✅ No errors found in Match Log")
+                self.logger.info("✅ No errors found in Match Log (Match Exceptions tab clean)")
                 return False, []
 
         except Exception as e:
