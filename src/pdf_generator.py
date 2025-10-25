@@ -515,20 +515,30 @@ class PDFGenerator:
         return achievements
     
     def _format_name(self, full_name: str, count: int) -> str:
-        """Format player name for achievement display (first name + count if > 1)."""
-        # Extract first name
+        """Format player name for achievement display (first name + last initial + count if > 1)."""
+        # Extract first name and last initial
         parts = full_name.split()
-        first_name = parts[0] if parts else full_name
-        
+        if not parts:
+            return full_name
+
+        first_name = parts[0]
+        # Get last initial if there's a last name
+        display_name = f"{first_name} {parts[-1][0]}." if len(parts) > 1 else first_name
+
         # Add count if more than 1
         if count > 1:
-            return f"{first_name}({count})"
-        return first_name
+            return f"{display_name}({count})"
+        return display_name
     
     def _format_name_simple(self, full_name: str) -> str:
-        """Format player name to first name only."""
+        """Format player name to first name + last initial."""
         parts = full_name.split()
-        return parts[0] if parts else full_name
+        if not parts:
+            return full_name
+
+        first_name = parts[0]
+        # Get last initial if there's a last name
+        return f"{first_name} {parts[-1][0]}." if len(parts) > 1 else first_name
     
     def _create_individual_footer(self) -> List:
         """Create footer with calculation notes."""
