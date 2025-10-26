@@ -58,6 +58,20 @@ export DARTCONNECT_PASSWORD="your-password"
 ```
 
 ### Running the Application
+
+#### Complete Weekly Workflow (Recommended)
+```bash
+# All-in-one script: Download → Generate → Upload (no 2FA!)
+./scripts/weekly-update.sh
+
+# This single command:
+# 1. Downloads latest CSV from DartConnect
+# 2. Generates Individual and Overall PDF reports
+# 3. Uploads PDFs to Wix and publishes site
+# Takes ~30-60 seconds total, stops on any error
+```
+
+#### Manual Commands (Individual Steps)
 ```bash
 # Auto-detect and process data files
 python main_consolidated.py data/
@@ -88,6 +102,24 @@ python3 scripts/fetch_exports.py --assist
 
 # Check credentials
 python3 scripts/fetch_exports.py --check-creds
+```
+
+### Wix PDF Upload (API Mode - No 2FA!)
+```bash
+# Test API connectivity
+python3 scripts/test_wix_api.py
+
+# Upload PDFs to Wix (API mode - recommended)
+source .env && python3 scripts/wix_uploader.py --api-mode
+
+# Check API credentials
+python3 scripts/wix_uploader.py --api-mode --check-creds
+
+# Dry run (show what would be uploaded)
+python3 scripts/wix_uploader.py --api-mode --dry-run
+
+# Selenium mode (requires 2FA - fallback only)
+python3 scripts/wix_uploader.py --assist
 ```
 
 ### Cache Management
