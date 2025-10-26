@@ -100,6 +100,11 @@ def main():
         action='store_true',
         help='Dry run: show what would be uploaded without making changes'
     )
+    parser.add_argument(
+        '--api-mode',
+        action='store_true',
+        help='Use Wix REST API instead of Selenium (requires WIX_API_KEY and WIX_SITE_ID)'
+    )
 
     args = parser.parse_args()
 
@@ -112,24 +117,46 @@ def main():
     )
     logger = logging.getLogger(__name__)
 
-    # Check if credentials are configured
-    email = os.getenv('WIX_EMAIL')
-    password = os.getenv('WIX_PASSWORD')
-
+    # Check credentials based on mode
     if args.check_creds:
-        if email and password:
-            print("✅ Wix credentials are configured")
-            print(f"   Email: {email[:3]}...{email[-8:]}")  # Show partial email for privacy
-            print("\n⚠️  Note: 2FA OTP must be entered manually during upload")
-            print("   Use --assist mode for best experience")
-            return 0
+        if args.api_mode:
+            # Check API credentials
+            api_key = os.getenv('WIX_API_KEY')
+            site_id = os.getenv('WIX_SITE_ID')
+
+            if api_key and site_id:
+                print("✅ Wix API credentials are configured")
+                print(f"   API Key: {api_key[:8]}...{api_key[-4:]}" if len(api_key) > 12 else "   API Key: ***")
+                print(f"   Site ID: {site_id}")
+                print("\n✅ No 2FA required with API mode!")
+                return 0
+            else:
+                print("❌ Wix API credentials are NOT configured")
+                print("\nTo set API credentials, run:")
+                print("  export WIX_API_KEY='your-api-key'")
+                print("  export WIX_SITE_ID='your-site-id'")
+                print("\nGet API key from: https://manage.wix.com/account/api-keys")
+                print("Get Site ID from: dashboard URL after '/dashboard/'")
+                return 1
         else:
-            print("❌ Wix credentials are NOT configured")
-            print("\nTo set credentials, run:")
-            print("  export WIX_EMAIL='your.email@example.com'")
-            print("  export WIX_PASSWORD='your-password'")
-            print("\n⚠️  2FA OTP will be required during upload (use --assist mode)")
-            return 1
+            # Check Selenium credentials
+            email = os.getenv('WIX_EMAIL')
+            password = os.getenv('WIX_PASSWORD')
+
+            if email and password:
+                print("✅ Wix Selenium credentials are configured")
+                print(f"   Email: {email[:3]}...{email[-8:]}")
+                print("\n⚠️  Note: 2FA OTP must be entered manually during upload")
+                print("   Use --assist mode for best experience")
+                return 0
+            else:
+                print("❌ Wix Selenium credentials are NOT configured")
+                print("\nTo set credentials, run:")
+                print("  export WIX_EMAIL='your.email@example.com'")
+                print("  export WIX_PASSWORD='your-password'")
+                print("\n⚠️  2FA OTP will be required during upload (use --assist mode)")
+                print("\nTip: Use --api-mode to avoid 2FA entirely!")
+                return 1
 
     # Check if PDF directory exists
     pdf_dir = Path(args.pdf_dir)
@@ -169,14 +196,87 @@ def main():
         print("  python3 scripts/wix_uploader.py --assist")
         return 0
 
-    # TODO: Implement actual upload
-    print("\n⚠️  Upload functionality not yet implemented")
-    print("\nNext steps:")
-    print("  1. Implement WixUploader class in src/")
-    print("  2. Add Selenium automation for login, navigation, upload, linking, publish")
-    print("  3. Handle 2FA OTP with --assist mode")
+    # TODO: Calculate week number from data
+    week_number = 9  # Placeholder - will implement proper calculation
 
-    return 1
+    # Choose uploader based on mode
+    if args.api_mode:
+        # API Mode - No 2FA required!
+        print("\n📡 Using Wix REST API (no 2FA required)")
+
+        try:
+            from src.wix_api_uploader import WixAPIUploader
+        except ImportError as e:
+            logger.error(f"❌ Failed to import WixAPIUploader: {e}")
+            logger.error("Install dependencies: pip install requests")
+            return 1
+
+        # Create API uploader
+        try:
+            uploader = WixAPIUploader()
+        except ValueError as e:
+            logger.error(f"❌ {e}")
+            return 1
+
+        # Run upload workflow
+        print(f"\n🚀 Starting API upload for Week-{week_number:02d}...")
+        print(f"   Individual: {individual_pdf.name}")
+        print(f"   Overall: {overall_pdf.name}")
+        print()
+
+        success = uploader.upload_weekly_pdfs(
+            individual_pdf=individual_pdf,
+            overall_pdf=overall_pdf,
+            week_number=week_number
+        )
+
+    else:
+        # Selenium Mode - Requires 2FA
+        print("\n🌐 Using Selenium browser automation (2FA required)")
+
+        try:
+            from src.wix_uploader_core import WixUploader
+        except ImportError as e:
+            logger.error(f"❌ Failed to import WixUploader: {e}")
+            logger.error("Install dependencies: pip install selenium webdriver-manager")
+            return 1
+
+        # Check Selenium credentials
+        email = os.getenv('WIX_EMAIL')
+        password = os.getenv('WIX_PASSWORD')
+
+        if not email or not password:
+            logger.error("❌ Selenium credentials not configured")
+            logger.error("Set WIX_EMAIL and WIX_PASSWORD environment variables")
+            logger.error("\nTip: Use --api-mode to avoid 2FA!")
+            return 1
+
+        # Create Selenium uploader
+        uploader = WixUploader(
+            email=email,
+            password=password,
+            headless=args.headless,
+            assist_mode=args.assist
+        )
+
+        # Run upload workflow
+        print(f"\n🚀 Starting Selenium upload for Week-{week_number:02d}...")
+        print(f"   Individual: {individual_pdf.name}")
+        print(f"   Overall: {overall_pdf.name}")
+        print()
+
+        success = uploader.upload_weekly_pdfs(
+            individual_pdf=individual_pdf,
+            overall_pdf=overall_pdf,
+            week_number=week_number
+        )
+
+    if success:
+        print("\n✅ Upload completed successfully!")
+        return 0
+    else:
+        print("\n❌ Upload failed - check logs above")
+        return 1
 
 
 if __name__ == '__main__':
