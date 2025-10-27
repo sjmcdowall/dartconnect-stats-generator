@@ -54,6 +54,52 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import argparse
 import logging
 from pathlib import Path
+from datetime import datetime
+import pandas as pd
+
+
+def calculate_week_number_from_csv(csv_path: Path) -> int:
+    """
+    Calculate week number from CSV data.
+
+    Uses the same logic as PDF generator:
+    - Find earliest and latest match dates
+    - Calculate weeks between them: (days_diff // 7) + 1
+
+    Args:
+        csv_path: Path to CSV file
+
+    Returns:
+        Week number (1-based)
+    """
+    try:
+        # Read CSV - the Date column should be column 30 (index 29)
+        # Read with minimal parsing for speed
+        df = pd.read_csv(csv_path, usecols=['Date'], parse_dates=['Date'])
+
+        if len(df) == 0 or 'Date' not in df.columns:
+            return 1
+
+        # Get unique dates
+        unique_dates = df['Date'].dt.date.unique()
+
+        if len(unique_dates) > 0:
+            # Sort dates to get first and last
+            sorted_dates = sorted(unique_dates)
+            first_match_date = sorted_dates[0]  # Season start (Week 1)
+            most_recent_date = sorted_dates[-1]  # Current week
+
+            # Calculate the number of weeks between first and last match
+            days_diff = (most_recent_date - first_match_date).days
+            week_number = (days_diff // 7) + 1  # +1 because first week is Week 1, not Week 0
+
+            return max(1, week_number)  # At least week 1
+
+        return 1  # Default to week 1
+
+    except Exception as e:
+        # If we can't read the CSV, default to week 1
+        return 1
 
 
 def main():
@@ -196,8 +242,15 @@ def main():
         print("  python3 scripts/wix_uploader.py --assist")
         return 0
 
-    # TODO: Calculate week number from data
-    week_number = 9  # Placeholder - will implement proper calculation
+    # Calculate week number from the most recent CSV file
+    csv_files = sorted(pdf_dir.parent.glob('data/*_by_leg_export.csv'), reverse=True)
+    if not csv_files:
+        csv_files = sorted(pdf_dir.parent.glob('data/*.csv'), reverse=True)
+
+    week_number = 1  # Default
+    if csv_files:
+        week_number = calculate_week_number_from_csv(csv_files[0])
+        logger.info(f"📅 Calculated week number: {week_number} from {csv_files[0].name}")
 
     # Choose uploader based on mode
     if args.api_mode:

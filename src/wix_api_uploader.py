@@ -203,6 +203,81 @@ class WixAPIUploader:
 
         return parent_id
 
+    def list_files(self, parent_folder_id: str) -> List[Dict]:
+        """
+        List files in a folder.
+
+        Args:
+            parent_folder_id: Parent folder to list files from
+
+        Returns:
+            List of file objects
+        """
+        self.logger.debug(f"Listing files in folder {parent_folder_id}")
+
+        params = {}
+        if parent_folder_id and parent_folder_id != "media-root":
+            params['parentFolderId'] = parent_folder_id
+
+        response = self._make_request(
+            'GET',
+            '/site-media/v1/files',
+            params=params
+        )
+
+        result = response.json()
+        files = result.get('files', [])
+        self.logger.debug(f"Found {len(files)} file(s)")
+        return files
+
+    def delete_file(self, file_id: str) -> bool:
+        """
+        Delete a file by ID.
+
+        Args:
+            file_id: File ID to delete
+
+        Returns:
+            True if successful
+        """
+        self.logger.debug(f"Deleting file: {file_id}")
+
+        try:
+            self._make_request(
+                'DELETE',
+                f'/site-media/v1/files/{file_id}'
+            )
+            self.logger.debug(f"✅ Deleted file: {file_id}")
+            return True
+        except Exception as e:
+            self.logger.error(f"❌ Failed to delete file {file_id}: {e}")
+            return False
+
+    def delete_files_by_name(self, folder_id: str, filename: str) -> int:
+        """
+        Delete all files with a specific name in a folder.
+
+        Args:
+            folder_id: Folder to search in
+            filename: Display name to match
+
+        Returns:
+            Number of files deleted
+        """
+        files = self.list_files(folder_id)
+        deleted_count = 0
+
+        for file in files:
+            if file.get('displayName') == filename:
+                file_id = file.get('id')
+                if self.delete_file(file_id):
+                    deleted_count += 1
+
+        if deleted_count > 0:
+            self.logger.info(f"🗑️  Deleted {deleted_count} existing file(s) named '{filename}'")
+
+        return deleted_count
+
     def generate_upload_url(self, filename: str, parent_folder_id: str,
                            mime_type: str = "application/pdf") -> Dict:
         """
@@ -382,6 +457,11 @@ class WixAPIUploader:
 
             # Upload to Current/ folder (overwrites - what icons link to)
             self.logger.info(f"📤 Uploading to Current/ (icon targets)...")
+
+            # Delete existing files with same names to avoid duplicates
+            self.delete_files_by_name(current_folder_id, "Individual.pdf")
+            self.delete_files_by_name(current_folder_id, "Overall.pdf")
+
             if not self.upload_file(individual_pdf, current_folder_id, "Individual.pdf"):
                 return False
             if not self.upload_file(overall_pdf, current_folder_id, "Overall.pdf"):
