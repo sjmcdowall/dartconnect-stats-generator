@@ -238,7 +238,7 @@ class WixAPIUploader:
             file_id: File ID to delete
 
         Returns:
-            True if successful
+            True if successful, False if failed (404 is silent)
         """
         self.logger.debug(f"Deleting file: {file_id}")
 
@@ -249,6 +249,14 @@ class WixAPIUploader:
             )
             self.logger.debug(f"✅ Deleted file: {file_id}")
             return True
+        except requests.HTTPError as e:
+            # 404 is expected if file already deleted or doesn't exist - don't log error
+            if e.response.status_code == 404:
+                self.logger.debug(f"File {file_id} not found (already deleted or doesn't exist)")
+                return False
+            else:
+                self.logger.error(f"❌ Failed to delete file {file_id}: {e}")
+                return False
         except Exception as e:
             self.logger.error(f"❌ Failed to delete file {file_id}: {e}")
             return False

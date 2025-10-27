@@ -243,9 +243,17 @@ def main():
         return 0
 
     # Calculate week number from the most recent CSV file
-    csv_files = sorted(pdf_dir.parent.glob('data/*_by_leg_export.csv'), reverse=True)
+    data_dir = Path(args.data_dir) if hasattr(args, 'data_dir') and args.data_dir else Path('data')
+
+    # Look for by_leg export first (best source) - case insensitive search
+    all_csvs = list(data_dir.glob('*.csv'))
+    csv_files = [f for f in all_csvs if 'by_leg' in f.name.lower() and 'export' in f.name.lower()]
+    csv_files = sorted([f for f in csv_files if 'archive' not in str(f).lower()], reverse=True)
+
     if not csv_files:
-        csv_files = sorted(pdf_dir.parent.glob('data/*.csv'), reverse=True)
+        # Fallback to any CSV (exclude samples and archives)
+        csv_files = sorted(data_dir.glob('*.csv'), reverse=True)
+        csv_files = [f for f in csv_files if 'archive' not in str(f).lower() and 'sample' not in f.name.lower()]
 
     week_number = 1  # Default
     if csv_files:
