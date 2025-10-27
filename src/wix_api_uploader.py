@@ -230,61 +230,65 @@ class WixAPIUploader:
         self.logger.debug(f"Found {len(files)} file(s)")
         return files
 
-    def delete_file(self, file_id: str) -> bool:
+    def delete_files(self, file_ids: List[str], permanent: bool = False) -> bool:
         """
-        Delete a file by ID.
+        Delete files by IDs using bulk delete API.
 
         Args:
-            file_id: File ID to delete
+            file_ids: List of file IDs to delete
+            permanent: If True, permanently delete (can't restore). Default: move to trash.
 
         Returns:
-            True if successful, False if failed (404 is silent)
+            True if successful
         """
-        self.logger.debug(f"Deleting file: {file_id}")
+        if not file_ids:
+            return True  # Nothing to delete
+
+        self.logger.debug(f"Bulk deleting {len(file_ids)} file(s)")
 
         try:
+            payload = {
+                "fileIds": file_ids
+            }
+            if permanent:
+                payload["permanent"] = True
+
             self._make_request(
-                'DELETE',
-                f'/site-media/v1/files/{file_id}'
+                'POST',
+                '/site-media/v1/bulk/files/delete',
+                json=payload
             )
-            self.logger.debug(f"✅ Deleted file: {file_id}")
+            self.logger.debug(f"✅ Deleted {len(file_ids)} file(s)")
             return True
-        except requests.HTTPError as e:
-            # 404 is expected if file already deleted or doesn't exist - don't log error
-            if e.response.status_code == 404:
-                self.logger.debug(f"File {file_id} not found (already deleted or doesn't exist)")
-                return False
-            else:
-                self.logger.error(f"❌ Failed to delete file {file_id}: {e}")
-                return False
         except Exception as e:
-            self.logger.error(f"❌ Failed to delete file {file_id}: {e}")
+            self.logger.error(f"❌ Failed to delete files: {e}")
             return False
 
-    def delete_files_by_name(self, folder_id: str, filename: str) -> int:
+    def delete_files_by_name(self, folder_id: str, filename: str, permanent: bool = False) -> int:
         """
         Delete all files with a specific name in a folder.
 
         Args:
             folder_id: Folder to search in
             filename: Display name to match
+            permanent: If True, permanently delete. Default: move to trash.
 
         Returns:
             Number of files deleted
         """
         files = self.list_files(folder_id)
-        deleted_count = 0
+        file_ids_to_delete = []
 
         for file in files:
             if file.get('displayName') == filename:
-                file_id = file.get('id')
-                if self.delete_file(file_id):
-                    deleted_count += 1
+                file_ids_to_delete.append(file.get('id'))
 
-        if deleted_count > 0:
-            self.logger.info(f"🗑️  Deleted {deleted_count} existing file(s) named '{filename}'")
+        if file_ids_to_delete:
+            if self.delete_files(file_ids_to_delete, permanent):
+                self.logger.info(f"🗑️  Deleted {len(file_ids_to_delete)} existing file(s) named '{filename}'")
+                return len(file_ids_to_delete)
 
-        return deleted_count
+        return 0
 
     def generate_upload_url(self, filename: str, parent_folder_id: str,
                            mime_type: str = "application/pdf") -> Dict:
@@ -467,6 +471,7 @@ class WixAPIUploader:
             self.logger.info(f"📤 Uploading to Current/ (icon targets)...")
 
             # Delete existing files with same names to avoid duplicates
+            # Files moved to trash (can be restored if needed)
             self.delete_files_by_name(current_folder_id, "Individual.pdf")
             self.delete_files_by_name(current_folder_id, "Overall.pdf")
 
