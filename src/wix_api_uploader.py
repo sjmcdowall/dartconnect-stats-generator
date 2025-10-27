@@ -467,13 +467,14 @@ class WixAPIUploader:
             if not self.upload_file(overall_pdf, week_folder_id, f"Overall-Week{week_number:02d}.pdf"):
                 return False
 
-            # Upload to Current/ folder (overwrites - what icons link to)
+            # Upload to Current/ folder (what icons link to)
             self.logger.info(f"📤 Uploading to Current/ (icon targets)...")
 
-            # Delete existing files with same names to avoid duplicates
-            # Files moved to trash (can be restored if needed)
-            self.delete_files_by_name(current_folder_id, "Individual.pdf")
-            self.delete_files_by_name(current_folder_id, "Overall.pdf")
+            # Delete old files to avoid confusion (keeps only latest files)
+            # NOTE: Wix icons link by file ID - deleting creates new IDs
+            # MANUAL STEP REQUIRED: Re-link icons in editor after upload (~30 seconds)
+            self.delete_files_by_name(current_folder_id, "Individual.pdf", permanent=True)
+            self.delete_files_by_name(current_folder_id, "Overall.pdf", permanent=True)
 
             if not self.upload_file(individual_pdf, current_folder_id, "Individual.pdf"):
                 return False
