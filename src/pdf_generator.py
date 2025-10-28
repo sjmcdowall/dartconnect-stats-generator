@@ -416,47 +416,56 @@ class PDFGenerator:
         """Create the Special Quality Point Register box with actual achievements."""
         # Extract achievements from data
         achievements = self._extract_special_achievements(division)
-        
+
         qp_data = []
-        
-        # Add 180s
+
+        # Style for wrapped text in cells
+        achievement_style = ParagraphStyle(
+            'Achievement',
+            parent=self.styles['Normal'],
+            fontSize=7,
+            textColor=colors.red,
+            alignment=1,  # CENTER
+            leading=9
+        )
+
+        # Add 180s with text wrapping
         if achievements['perfect_180s']:
-            names = ', '.join([self._format_name(name, achievements['perfect_180s'][name]) 
+            names = ', '.join([self._format_name(name, achievements['perfect_180s'][name])
                               for name in sorted(achievements['perfect_180s'].keys())])
-            qp_data.append([f'180 - {names}'])
-        
+            qp_data.append([Paragraph(f'180 - {names}', achievement_style)])
+
         # Add highest out
         if achievements['highest_out']:
             player, score = achievements['highest_out']
-            qp_data.append([f'{int(score)} OUT - {self._format_name_simple(player)}'])
-        
-        # Add 6 Bulls
+            qp_data.append([Paragraph(f'{int(score)} OUT - {self._format_name_simple(player)}', achievement_style)])
+
+        # Add 6 Bulls with text wrapping
         if achievements['six_bulls']:
-            names = ', '.join([self._format_name(name, achievements['six_bulls'][name]) 
+            names = ', '.join([self._format_name(name, achievements['six_bulls'][name])
                               for name in sorted(achievements['six_bulls'].keys())])
-            qp_data.append([f'6B - {names}'])
-        
-        # Add 9 Hits (9+ marks)
+            qp_data.append([Paragraph(f'6B - {names}', achievement_style)])
+
+        # Add 9 Hits (9+ marks) with text wrapping
         if achievements['nine_hits']:
-            names = ', '.join([self._format_name(name, achievements['nine_hits'][name]) 
+            names = ', '.join([self._format_name(name, achievements['nine_hits'][name])
                               for name in sorted(achievements['nine_hits'].keys())])
-            qp_data.append([f'9H - {names}'])
-        
+            qp_data.append([Paragraph(f'9H - {names}', achievement_style)])
+
         # If no achievements, show message
         if not qp_data:
-            qp_data = [['No special achievements yet']]
-        
+            qp_data = [[Paragraph('No special achievements yet', achievement_style)]]
+
         table_data = [['Special Quality Point Register']] + qp_data
         table = Table(table_data, colWidths=[2.8*inch])
-        
+
         style = [
-            ('FONTSIZE', (0, 0), (-1, -1), 7),
+            ('FONTSIZE', (0, 0), (-1, 0), 8),  # Header font size
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#FFFF99')),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TEXTCOLOR', (0, 1), (-1, -1), colors.red),  # Red text for achievements
         ]
         table.setStyle(TableStyle(style))
         return table
