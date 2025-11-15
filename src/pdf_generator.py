@@ -1260,14 +1260,14 @@ class PDFGenerator:
             "games": games_played,
             "qualify": games_remaining,
             "eligibility": eligibility,
-            "s01_w": game_stats.get('501 SIDO', {}).get('wins', 0),
-            "s01_l": game_stats.get('501 SIDO', {}).get('losses', 0),
-            "sc_w": game_stats.get('Cricket', {}).get('wins', 0),
-            "sc_l": game_stats.get('Cricket', {}).get('losses', 0),
-            "d01_w": 0,  # Would need doubles data
-            "d01_l": 0,  # Would need doubles data
-            "dc_w": 0,   # Would need doubles data
-            "dc_l": 0,   # Would need doubles data
+            "s01_w": game_stats.get('501 SIDO_S', {}).get('wins', 0),
+            "s01_l": game_stats.get('501 SIDO_S', {}).get('losses', 0),
+            "sc_w": game_stats.get('Cricket_S', {}).get('wins', 0),
+            "sc_l": game_stats.get('Cricket_S', {}).get('losses', 0),
+            "d01_w": game_stats.get('501 SIDO_D', {}).get('wins', 0),
+            "d01_l": game_stats.get('501 SIDO_D', {}).get('losses', 0),
+            "dc_w": game_stats.get('Cricket_D', {}).get('wins', 0),
+            "dc_l": game_stats.get('Cricket_D', {}).get('losses', 0),
             "total_w": total_wins,
             "total_l": total_losses,
             "win_pct": win_pct,
@@ -1291,39 +1291,51 @@ class PDFGenerator:
             return max(1, len(player_df) // 3)
     
     def _calculate_game_specific_stats(self, player_df):
-        """Calculate wins/losses by game type (counting games, not legs)."""
+        """Calculate wins/losses by game type and play format (PF), counting games, not legs.
+        
+        Produces keys like:
+          - '501 SIDO_S' (Singles 501)
+          - '501 SIDO_D' (Doubles 501)
+          - 'Cricket_S'  (Singles Cricket)
+          - 'Cricket_D'  (Doubles Cricket)
+        """
         stats = {}
         
         if 'report_url' not in player_df.columns or 'Set #' not in player_df.columns:
             # Fallback: count legs if we don't have Set # info
             for game_type in player_df['game_name'].unique():
-                game_df = player_df[player_df['game_name'] == game_type]
-                wins = len(game_df[game_df['win'] == 'W'])
-                losses = len(game_df[game_df['win'] == 'L'])
-                stats[game_type] = {'wins': wins, 'losses': losses}
+                for pf in player_df['PF'].unique():
+                    game_df = player_df[(player_df['game_name'] == game_type) & (player_df['PF'] == pf)]
+                    if len(game_df) == 0:
+                        continue
+                    wins = len(game_df[game_df['win'] == 'W'])
+                    losses = len(game_df[game_df['win'] == 'L'])
+                    stats[f"{game_type}_{pf}"] = {'wins': wins, 'losses': losses}
             return stats
         
         # Proper calculation: determine who won each game (Set)
         for game_type in player_df['game_name'].unique():
-            game_df = player_df[player_df['game_name'] == game_type]
-            
-            wins = 0
-            losses = 0
-            
-            # Group by match and Set to determine game winners
-            for (match_url, set_num), set_data in game_df.groupby(['report_url', 'Set #']):
-                # Count legs won in this set
-                legs_won = (set_data['win'] == 'W').sum()
-                legs_lost = (set_data['win'] == 'L').sum()
+            for pf in player_df['PF'].unique():
+                game_df = player_df[(player_df['game_name'] == game_type) & (player_df['PF'] == pf)]
+                if len(game_df) == 0:
+                    continue
+                wins = 0
+                losses = 0
                 
-                # Determine if player won this game (best of 3/5)
-                if legs_won > legs_lost:
-                    wins += 1
-                elif legs_lost > legs_won:
-                    losses += 1
-                # If tied, it might be incomplete - count as neither for now
-            
-            stats[game_type] = {'wins': wins, 'losses': losses}
+                # Group by match and Set to determine game winners
+                for (match_url, set_num), set_data in game_df.groupby(['report_url', 'Set #']):
+                    # Count legs won in this set
+                    legs_won = (set_data['win'] == 'W').sum()
+                    legs_lost = (set_data['win'] == 'L').sum()
+                    
+                    # Determine if player won this game (best of 3/5)
+                    if legs_won > legs_lost:
+                        wins += 1
+                    elif legs_lost > legs_won:
+                        losses += 1
+                    # If tied, it might be incomplete - count as neither for now
+                
+                stats[f"{game_type}_{pf}"] = {'wins': wins, 'losses': losses}
         
         return stats
     
