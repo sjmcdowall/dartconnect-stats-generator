@@ -671,20 +671,24 @@ class DataProcessor:
         return enhanced_stats
 
     def generate_team_statistics(self, df: pd.DataFrame, enhanced_data: Dict[str, Any]) -> Dict[str, List[Dict]]:
-        """Generate statistics grouped by division and team."""
+        """Generate statistics grouped by division and team using the vectorized summary."""
         team_stats = {}
-        
-        if 'Division' not in df.columns:
-            self.logger.warning("'Division' column not found, cannot generate team statistics.")
+        if 'Division' not in df.columns or 'Team' not in df.columns:
+            self.logger.warning("Missing 'Division' or 'Team' columns, cannot generate team statistics.")
             return {}
-            
-        divisions = df['Division'].dropna().unique()
+
+        # Generate the comprehensive player stats summary
+        player_summary = self._generate_player_stats_summary(df, enhanced_data)
+        
+        # Add team and division info to the summary for easy filtering
+        player_team_info = df[['player_name', 'Team', 'Division']].drop_duplicates()
+        player_summary = pd.merge(player_summary, player_team_info, on='player_name')
+        
+        divisions = player_summary['Division'].dropna().unique()
         
         for division in divisions:
             division_clean = division.strip()
-            
-            division_df = df[df['Division'] == division]
-            division_teams = sorted(division_df['Team'].dropna().unique())
+            division_teams = sorted(player_summary[player_summary['Division'] == division]['Team'].dropna().unique())
             
             num_teams = len(division_teams)
             matches_per_team = (num_teams - 1) * 2
@@ -692,141 +696,125 @@ class DataProcessor:
             
             teams_data = []
             for team_name in division_teams:
-                team_df = df[df['Team'] == team_name]
+                team_df = player_summary[player_summary['Team'] == team_name]
                 
-                player_names = team_df['player_name'].unique()
-                player_list = []
-                for name in player_names:
-                    parts = str(name).split()
-                    last_name = parts[-1] if parts else str(name)
-                    player_list.append((last_name, name))
+                # Sort players by last name
+                team_df['last_name'] = team_df['player_name'].apply(lambda x: str(x).split()[-1] if ' ' in str(x) else str(x))
+                team_df = team_df.sort_values('last_name').drop(columns=['last_name'])
                 
-                player_list.sort(key=lambda x: x[0])
-                
-                players = []
-                for _, full_name in player_list:
-                    player_data = self._calculate_player_stats(team_df, full_name, games_to_qualify, enhanced_data)
-                    players.append(player_data)
-                
+                # Add 'qualify' column
+                team_df['qualify'] = team_df['games'].apply(lambda x: max(0, games_to_qualify - x))
+                team_df['eligibility'] = team_df['games'].apply(lambda x: "QUALIFIED" if x >= games_to_qualify else "INELIGIBLE")
+
                 teams_data.append({
                     "name": team_name,
-                    "players": players
+                    "players": team_df.to_dict('records')
                 })
             
             team_stats[division_clean] = teams_data
             
         return team_stats
+        hi_turn_conditions = [
+            (df['Hi Turn'] >= 164), (df['Hi Turn'] >= 148),
+            (df['Hi Turn'] >= 132), (df['Hi Turn'] >= 116), (df['Hi Turn'] >= 95)
+        ]
+        hi_turn_choices = [5, 4, 3, 2, 1]
+        df['hi_turn_qp'] = np.select(hi_turn_conditions, hi_turn_choices, default=0)
 
-    def _calculate_player_stats(self, team_df, player_name: str, games_to_qualify_threshold: int, enhanced_data: Dict = None) -> Dict:
-        """Calculate comprehensive player statistics."""
-        player_df = team_df[team_df['player_name'] == player_name]
+        # Define conditions and choices for DO (checkout) QPs
+        do_conditions = [
+            (df['DO'] >= 151), (df['DO'] >= 129), (df['DO'] >= 107),
+            (df['DO'] >= 85), (df['DO'] >= 61)
+        ]
+        do_choices = [5, 4, 3, 2, 1]
+        df['do_qp'] = np.select(do_conditions, do_choices, default=0)
         
-        if len(player_df) == 0:
-            return self._empty_player_stats(player_name, games_to_qualify_threshold)
+        # Calculate total 501 QP for each leg
+        df['501_qp'] = df['hi_turn_qp'] + df['do_qp']
+        df.drop(columns=['hi_turn_qp', 'do_qp'], inplace=True)
         
-        legs_played = len(player_df)
-        games_played = self._estimate_games_played(player_df)
-        games_remaining = max(0, games_to_qualify_threshold - games_played)
-        eligibility = "QUALIFIED" if games_played >= games_to_qualify_threshold else "INELIGIBLE"
+        return df
+
+    def _calculate_game_outcomes_vectorized(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Determine win/loss outcomes for each game (Set) in a vectorized manner."""
+        if 'report_url' not in df.columns or 'Set #' not in df.columns:
+            # Fallback for data without Set # info - treat each leg as a game
+            game_outcomes = df.copy()
+            game_outcomes['game_win'] = (game_outcomes['win'] == 'W').astype(int)
+            game_outcomes['game_loss'] = (game_outcomes['win'] == 'L').astype(int)
+            return game_outcomes
+
+        # Determine the winner of each game (set)
+        game_groups = df.groupby(['report_url', 'Set #', 'player_name', 'game_name', 'PF'])
         
-        game_stats = self._calculate_game_specific_stats(player_df)
+        # In each group (game), count legs won and lost
+        legs_won = game_groups['win'].apply(lambda x: (x == 'W').sum())
+        legs_lost = game_groups['win'].apply(lambda x: (x == 'L').sum())
         
-        total_wins = sum(stats.get('wins', 0) for stats in game_stats.values())
-        total_losses = sum(stats.get('losses', 0) for stats in game_stats.values())
+        # Create a DataFrame from the results
+        game_outcomes = legs_won.to_frame(name='legs_won').join(legs_lost.to_frame(name='legs_lost')).reset_index()
         
-        total_games = total_wins + total_losses
-        win_pct = f"{(total_wins / total_games * 100):.2f}%" if total_games > 0 else "0.00%"
+        # Determine game outcome
+        game_outcomes['game_win'] = (game_outcomes['legs_won'] > game_outcomes['legs_lost']).astype(int)
+        game_outcomes['game_loss'] = (game_outcomes['legs_lost'] > game_outcomes['legs_won']).astype(int)
         
-        qps = self._calculate_total_qps(player_df, player_name, enhanced_data)
-        qp_pct = f"{(qps / legs_played * 100):.2f}%" if legs_played > 0 else "0.00%"
+        return game_outcomes[['player_name', 'game_name', 'PF', 'game_win', 'game_loss']]
+
+    def _generate_player_stats_summary(self, df: pd.DataFrame, enhanced_data: Dict) -> pd.DataFrame:
+        """Create a comprehensive summary DataFrame of all player stats using vectorized operations."""
+        # Step 1: Calculate 501 QPs for each leg
+        df_with_qps = self._calculate_501_qps_vectorized(df)
+
+        # Step 2: Determine game outcomes
+        game_outcomes = self._calculate_game_outcomes_vectorized(df_with_qps)
+
+        # Step 3: Aggregate wins and losses using pivot_table
+        win_loss_summary = game_outcomes.pivot_table(
+            index='player_name',
+            columns=['game_name', 'PF'],
+            values=['game_win', 'game_loss'],
+            aggfunc='sum',
+            fill_value=0
+        )
+        win_loss_summary.columns = [f'{val}_{pf}_{col}'.lower().replace(' ', '_').replace('-', '') for val, pf, col in win_loss_summary.columns]
         
-        rating = 0.0
-        if games_played > 0 and legs_played > 0:
-            rating = ((total_wins * 2) / games_played) + (qps / legs_played)
-        
-        return {
-            "name": player_name, "legs": legs_played, "games": games_played,
-            "qualify": games_remaining, "eligibility": eligibility,
-            "s01_w": game_stats.get('501 SIDO_S', {}).get('wins', 0),
-            "s01_l": game_stats.get('501 SIDO_S', {}).get('losses', 0),
-            "sc_w": game_stats.get('Cricket_S', {}).get('wins', 0),
-            "sc_l": game_stats.get('Cricket_S', {}).get('losses', 0),
-            "d01_w": game_stats.get('501 SIDO_D', {}).get('wins', 0),
-            "d01_l": game_stats.get('501 SIDO_D', {}).get('losses', 0),
-            "dc_w": game_stats.get('Cricket_D', {}).get('wins', 0),
-            "dc_l": game_stats.get('Cricket_D', {}).get('losses', 0),
-            "total_w": total_wins, "total_l": total_losses, "win_pct": win_pct,
-            "qps": qps, "qp_pct": qp_pct, "rating": f"{rating:.4f}"
+        # Rename columns to match the PDF generator's expectations
+        column_renames = {
+            '501_sido_s_game_win': 's01_w', '501_sido_s_game_loss': 's01_l',
+            'cricket_s_game_win': 'sc_w', 'cricket_s_game_loss': 'sc_l',
+            '501_sido_d_game_win': 'd01_w', '501_sido_d_game_loss': 'd01_l',
+            'cricket_d_game_win': 'dc_w', 'cricket_d_game_loss': 'dc_l'
         }
+        win_loss_summary.rename(columns=column_renames, inplace=True)
 
-    def _estimate_games_played(self, player_df):
-        """Calculate actual games played by counting unique Set# combinations."""
-        if len(player_df) == 0:
-            return 0
-        if 'report_url' in player_df.columns and 'Set #' in player_df.columns:
-            return player_df.groupby(['report_url', 'Set #']).ngroups
-        else:
-            return max(1, len(player_df) // 3)
-
-    def _calculate_game_specific_stats(self, player_df):
-        """Calculate wins/losses by game type and play format (PF), counting games, not legs."""
-        stats = {}
-        if 'report_url' not in player_df.columns or 'Set #' not in player_df.columns:
-            for game_type in player_df['game_name'].unique():
-                for pf in player_df['PF'].unique():
-                    game_df = player_df[(player_df['game_name'] == game_type) & (player_df['PF'] == pf)]
-                    if not game_df.empty:
-                        wins = (game_df['win'] == 'W').sum()
-                        losses = (game_df['win'] == 'L').sum()
-                        stats[f"{game_type}_{pf}"] = {'wins': wins, 'losses': losses}
-            return stats
+        # Step 4: Aggregate legs, games played, and QPs
+        legs_played = df.groupby('player_name').size().to_frame('legs')
+        games_played = df.groupby(['player_name', 'report_url', 'Set #']).ngroups
         
-        for game_type in player_df['game_name'].unique():
-            for pf in player_df['PF'].unique():
-                game_df = player_df[(player_df['game_name'] == game_type) & (player_df['PF'] == pf)]
-                if not game_df.empty:
-                    wins = 0
-                    losses = 0
-                    for _, set_data in game_df.groupby(['report_url', 'Set #']):
-                        legs_won = (set_data['win'] == 'W').sum()
-                        legs_lost = (set_data['win'] == 'L').sum()
-                        if legs_won > legs_lost: wins += 1
-                        elif legs_lost > legs_won: losses += 1
-                    stats[f"{game_type}_{pf}"] = {'wins': wins, 'losses': losses}
-        return stats
+        # Combine QP sources
+        qp_501 = df_with_qps.groupby('player_name')['501_qp'].sum()
+        cricket_qps = {p: d.get('total_qp', 0) for p, d in enhanced_data.get('enhanced_statistics', {}).get('cricket_enhanced_qp', {}).items()}
+        cricket_qp_series = pd.Series(cricket_qps, name='cricket_qp').rename_axis('player_name')
+        
+        # Merge all stats
+        summary = legs_played.join(games_played, how='left').join(qp_501, how='left').join(win_loss_summary, how='left').join(cricket_qp_series, how='left').fillna(0)
+        summary['qps'] = summary['501_qp'] + summary['cricket_qp']
+        
+        # Calculate derived stats
+        win_cols = [col for col in summary.columns if col.endswith('_w')]
+        loss_cols = [col for col in summary.columns if col.endswith('_l')]
+        summary['total_w'] = summary[win_cols].sum(axis=1)
+        summary['total_l'] = summary[loss_cols].sum(axis=1)
+        
+        total_games_played = summary['total_w'] + summary['total_l']
+        summary['win_pct'] = (summary['total_w'] / total_games_played * 100).fillna(0).map('{:.2f}%'.format)
+        
+        summary['rating'] = (((summary['total_w'] * 2) / summary['games']) + (summary['qps'] / summary['legs'])).fillna(0)
+        summary['rating'] = summary['rating'].map('{:.4f}'.format)
+        
+        summary['qp_pct'] = (summary['qps'] / summary['legs'] * 100).fillna(0).map('{:.2f}%'.format)
 
-    def _calculate_total_qps(self, player_df, player_name: str, enhanced_data: Dict = None) -> int:
-        """Calculate total Quality Points from 501 (CSV) and Cricket (enhanced data)."""
-        total_qps = self._calculate_501_qps_from_csv(player_df)
-        if enhanced_data:
-            total_qps += self._get_cricket_qps_for_player(player_name, enhanced_data)
-        return total_qps
-
-    def _calculate_501_qps_from_csv(self, player_df) -> int:
-        """Calculate 501 QPs using Hi Turn and DO columns from CSV."""
-        if 'game_name' not in player_df.columns: return 0
-        games_501 = player_df[player_df['game_name'] == '501 SIDO']
-        total_qps = 0
-        for _, row in games_501.iterrows():
-            leg_qps = 0
-            for col, rules in [('Hi Turn', [(164, 5), (148, 4), (132, 3), (116, 2), (95, 1)]), ('DO', [(151, 5), (129, 4), (107, 3), (85, 2), (61, 1)])]:
-                val = row.get(col, 0)
-                if pd.notna(val):
-                    try:
-                        score = float(val)
-                        for limit, qp in rules:
-                            if score >= limit:
-                                leg_qps += qp
-                                break
-                    except (ValueError, TypeError): pass
-            total_qps += leg_qps
-        return total_qps
-
-    def _get_cricket_qps_for_player(self, player_name: str, enhanced_data: Dict) -> int:
-        """Extract Cricket QPs for a player from enhanced data."""
-        if not enhanced_data: return 0
-        cricket_qp_data = enhanced_data.get('enhanced_statistics', {}).get('cricket_enhanced_qp', {})
-        return cricket_qp_data.get(player_name, {}).get('total_qp', 0)
+        return summary.reset_index()
 
     def _empty_player_stats(self, player_name: str, games_to_qualify: int):
         """Return empty stats structure for players with no data."""
