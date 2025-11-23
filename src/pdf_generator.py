@@ -212,36 +212,79 @@ class PDFGenerator:
         content.append(header_table)
         content.append(Spacer(1, 10))
         
-        # Get player statistics for this division
-        women_stats = self._extract_player_stats(data, division, 'F')
-        men_stats = self._extract_player_stats(data, division, 'M')
+        # Get pre-calculated team statistics for the division
+        team_stats = data.get('team_statistics', {}).get(division, [])
+        all_players = [player for team in team_stats for player in team['players']]
         
+        if not all_players:
+            content.append(Paragraph(f"No player data available for {division} division.", self.styles['Normal']))
+            return content
+
+        # Separate players by gender (from raw_data)
+        df = data.get('raw_data', pd.DataFrame())
+        player_genders = df[['player_name', 'M/F']].drop_duplicates().set_index('player_name')['M/F'].to_dict()
+        
+        women_players = [p for p in all_players if player_genders.get(p['name']) == 'F']
+        men_players = [p for p in all_players if player_genders.get(p['name']) == 'M']
+
+        # Helper to format and sort rankings
+        def get_rankings(players, category):
+            player_list = []
+            for p in players:
+                if category == 'singles':
+                    wins = p['s01_w'] + p['sc_w']
+                    losses = p['s01_l'] + p['sc_l']
+                    total = wins + losses
+                    if total > 0:
+                        win_pct = (wins / total) * 100
+                        player_list.append([p['name'], wins, losses, f"{win_pct:.2f}%", win_pct])
+                elif category == 'all_events':
+                    total = p['total_w'] + p['total_l']
+                    if total > 0:
+                        win_pct = (p['total_w'] / total) * 100
+                        player_list.append([p['name'], p['total_w'], p['total_l'], f"{win_pct:.2f}%", win_pct])
+                elif category == 'qp':
+                    if p['legs'] > 0:
+                        qp_pct = (p['qps'] / p['legs']) * 100
+                        player_list.append([p['name'], p['qps'], f"{qp_pct:.2f}%", qp_pct])
+                elif category == 'ratings':
+                    rating = float(p['rating'])
+                    if rating > 0:
+                        player_list.append([p['name'], f"{rating:.4f}", rating])
+            
+            sort_key_index = -1
+            player_list.sort(key=lambda x: x[sort_key_index], reverse=True)
+            return [row[:-1] for row in player_list[:5]]
+
+        women_stats = {
+            'singles': get_rankings(women_players, 'singles'),
+            'all_events': get_rankings(women_players, 'all_events'),
+            'qp': get_rankings(women_players, 'qp'),
+            'ratings': get_rankings(women_players, 'ratings')
+        }
+        men_stats = {
+            'singles': get_rankings(men_players, 'singles'),
+            'all_events': get_rankings(men_players, 'all_events'),
+            'qp': get_rankings(men_players, 'qp'),
+            'ratings': get_rankings(men_players, 'ratings')
+        }
+
         # Create 3-column layout: Singles, All Events, Quality Points
-        # Women first row
         women_row = Table([
             [self._create_category_table("Singles - Women", women_stats['singles'], ['Name', 'W', 'L', 'Win%']),
              self._create_category_table("All Events - Women", women_stats['all_events'], ['Name', 'W', 'L', 'Win%']),
              self._create_category_table("Quality Points - Women", women_stats['qp'], ['Name', "Qp's", 'QP%'])]
         ], colWidths=[2.4*inch, 2.4*inch, 2.4*inch])
-        women_row.setStyle(TableStyle([
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 5),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 5),
-        ]))
+        women_row.setStyle(TableStyle([('VALIGN', (0,0), (-1,-1), 'TOP'), ('LEFTPADDING', (0,0), (-1,-1), 5), ('RIGHTPADDING', (0,0), (-1,-1), 5)]))
         content.append(women_row)
         content.append(Spacer(1, 15))
         
-        # Men second row
         men_row = Table([
             [self._create_category_table("Singles - Men", men_stats['singles'], ['Name', 'W', 'L', 'Win%']),
              self._create_category_table("All Events - Men", men_stats['all_events'], ['Name', 'W', 'L', 'Win%']),
              self._create_category_table("Quality Points - Men", men_stats['qp'], ['Name', "Qp's", 'QP%'])]
         ], colWidths=[2.4*inch, 2.4*inch, 2.4*inch])
-        men_row.setStyle(TableStyle([
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 5),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 5),
-        ]))
+        men_row.setStyle(TableStyle([('VALIGN', (0,0), (-1,-1), 'TOP'), ('LEFTPADDING', (0,0), (-1,-1), 5), ('RIGHTPADDING', (0,0), (-1,-1), 5)]))
         content.append(men_row)
         content.append(Spacer(1, 15))
         
@@ -251,99 +294,6 @@ class PDFGenerator:
         content.append(Spacer(1, 20))
         
         return content
-    
-    def _extract_player_stats(self, data: Dict[str, Any], division: str, gender: str) -> Dict:
-        """Extract player statistics for a specific division and gender."""
-        if 'raw_data' not in data:
-            return {'singles': [], 'all_events': [], 'qp': [], 'ratings': []}
-        
-        df = data['raw_data']
-        
-        # Filter by division and gender
-        division_df = df[df['Division'] == division]
-        
-        # Filter by gender - the column is 'M/F' in the CSV
-        if gender in ['M', 'F']:
-            division_df = division_df[division_df['M/F'] == gender]
-        # If gender is empty string or other, still include those players
-        elif gender == '':
-            division_df = division_df[division_df['M/F'].isna() | (division_df['M/F'] == '')]
-        
-        # Calculate stats per player (Singles = PF='S', All Events = all)
-        player_stats = {}
-        
-        for player_name in division_df['player_name'].unique():
-            player_df = division_df[division_df['player_name'] == player_name]
-            
-            # Singles stats (PF='S')
-            singles_df = player_df[player_df['PF'] == 'S']
-            singles_games = self._estimate_games_played(singles_df) if len(singles_df) > 0 else 0
-            singles_game_stats = self._calculate_game_specific_stats(singles_df) if len(singles_df) > 0 else {}
-            singles_wins = sum([singles_game_stats.get(g, {}).get('wins', 0) for g in singles_game_stats])
-            singles_losses = sum([singles_game_stats.get(g, {}).get('losses', 0) for g in singles_game_stats])
-            
-            # All events stats (all PF types)
-            all_games = self._estimate_games_played(player_df)
-            all_game_stats = self._calculate_game_specific_stats(player_df)
-            all_wins = sum([all_game_stats.get(g, {}).get('wins', 0) for g in all_game_stats])
-            all_losses = sum([all_game_stats.get(g, {}).get('losses', 0) for g in all_game_stats])
-            
-            # QPs
-            total_qps = self._calculate_total_qps(player_df, player_name, self.enhanced_data)
-            legs_played = len(player_df)
-            
-            # Rating
-            if all_games > 0:
-                rating = ((all_wins * 2) / all_games) + (total_qps / legs_played) if legs_played > 0 else 0
-            else:
-                rating = 0
-            
-            player_stats[player_name] = {
-                'singles_wins': singles_wins,
-                'singles_losses': singles_losses,
-                'singles_games': singles_games,
-                'all_wins': all_wins,
-                'all_losses': all_losses,
-                'all_games': all_games,
-                'qps': total_qps,
-                'legs': legs_played,
-                'rating': rating
-            }
-        
-        # Format for tables (top 5 each)
-        singles_list = []
-        all_events_list = []
-        qp_list = []
-        ratings_list = []
-        
-        for name, stats in player_stats.items():
-            if stats['singles_games'] > 0:
-                singles_win_pct = (stats['singles_wins'] / (stats['singles_wins'] + stats['singles_losses']) * 100) if (stats['singles_wins'] + stats['singles_losses']) > 0 else 0
-                singles_list.append((name, stats['singles_wins'], stats['singles_losses'], singles_win_pct, singles_win_pct))
-            
-            if stats['all_games'] > 0:
-                all_win_pct = (stats['all_wins'] / (stats['all_wins'] + stats['all_losses']) * 100) if (stats['all_wins'] + stats['all_losses']) > 0 else 0
-                all_events_list.append((name, stats['all_wins'], stats['all_losses'], all_win_pct, all_win_pct))
-            
-            if stats['legs'] > 0:
-                qp_pct = (stats['qps'] / stats['legs'] * 100)
-                qp_list.append((name, stats['qps'], qp_pct, qp_pct))
-            
-            if stats['rating'] > 0:
-                ratings_list.append((name, stats['rating'], stats['rating']))
-        
-        # Sort and take top 5
-        singles_list.sort(key=lambda x: x[4], reverse=True)
-        all_events_list.sort(key=lambda x: x[4], reverse=True)
-        qp_list.sort(key=lambda x: x[3], reverse=True)
-        ratings_list.sort(key=lambda x: x[2], reverse=True)
-        
-        return {
-            'singles': [[row[0], str(row[1]), str(row[2]), f"{row[3]:.2f}%"] for row in singles_list[:5]],
-            'all_events': [[row[0], str(row[1]), str(row[2]), f"{row[3]:.2f}%"] for row in all_events_list[:5]],
-            'qp': [[row[0], str(row[1]), f"{row[2]:.2f}%"] for row in qp_list[:5]],
-            'ratings': [[row[0], f"{row[1]:.4f}"] for row in ratings_list[:5]]
-        }
     
     def _create_category_table(self, title: str, data: List, headers: List) -> Table:
         """Create a ranking table for one category."""
@@ -734,8 +684,117 @@ class PDFGenerator:
             content.append(Spacer(1, 20))
         
         return content
-    
-    def _get_sample_teams(self, division: str) -> List[Dict]:
+
+    def _create_division_teams_table(self, teams: List[Dict]) -> List:
+        """Create a single table containing all teams in the division."""
+        content = []
+        
+        # Headers matching Overall-14.pdf
+        headers_row1 = [
+            '', 'Legs\nPlayed', 'Games\nPlayed', 'Games To\nQualify', 'Tournament\nEligibility',
+            'S01', '', 'SC', '', 'D01', '', 'DC', '', 'Total', '', 'Win %', 'QPs', 'QP%', 'Rating'
+        ]
+        
+        headers_row2 = [
+            '', '', '', '', '',
+            'W', 'L', 'W', 'L', 'W', 'L', 'W', 'L', 'W', 'L', '', '', '', ''
+        ]
+        
+        table_data = [headers_row1, headers_row2]
+        
+        # Add data for each team
+        for team in teams:
+            # Team name row
+            team_row = [team["name"]] + [''] * 18
+            table_data.append(team_row)
+            
+            # Player rows
+            for player in team["players"]:
+                row = [
+                    player["name"],
+                    str(player["legs"]),
+                    str(player["games"]),
+                    str(player["qualify"]),
+                    player["eligibility"],
+                    str(player["s01_w"]), str(player["s01_l"]),
+                    str(player["sc_w"]), str(player["sc_l"]),
+                    str(player["d01_w"]), str(player["d01_l"]),
+                    str(player["dc_w"]), str(player["dc_l"]),
+                    str(player["total_w"]), str(player["total_l"]),
+                    player["win_pct"],
+                    str(player["qps"]),
+                    player["qp_pct"],
+                    player["rating"]
+                ]
+                table_data.append(row)
+            
+            # Empty row after each team
+            table_data.append([''] * 19)
+            
+        # Calculate column widths
+        col_widths = [
+            1.0*inch,   # Name
+            0.35*inch,  # Legs
+            0.35*inch,  # Games
+            0.35*inch,  # Qualify
+            0.6*inch,   # Eligibility
+            0.2*inch, 0.2*inch, # S01
+            0.2*inch, 0.2*inch, # SC
+            0.2*inch, 0.2*inch, # D01
+            0.2*inch, 0.2*inch, # DC
+            0.2*inch, 0.2*inch, # Total
+            0.4*inch,   # Win %
+            0.3*inch,   # QPs
+            0.4*inch,   # QP%
+            0.4*inch    # Rating
+        ]
+        
+        table = Table(table_data, colWidths=col_widths, repeatRows=2)
+        
+        # Styling
+        style = [
+            ('FONTSIZE', (0, 0), (-1, -1), 6),
+            ('FONTNAME', (0, 0), (-1, 1), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+            ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
+            
+            # Span headers
+            ('SPAN', (5, 0), (6, 0)),  # S01
+            ('SPAN', (7, 0), (8, 0)),  # SC
+            ('SPAN', (9, 0), (10, 0)), # D01
+            ('SPAN', (11, 0), (12, 0)), # DC
+            ('SPAN', (13, 0), (14, 0)), # Total
+        ]
+        
+        # Apply team-specific styling
+        row_index = 2
+        for team in teams:
+            # Team header style
+            style.extend([
+                ('SPAN', (0, row_index), (-1, row_index)),
+                ('BACKGROUND', (0, row_index), (-1, row_index), colors.lightblue),
+                ('FONTNAME', (0, row_index), (-1, row_index), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, row_index), (-1, row_index), 8),
+                ('ALIGN', (0, row_index), (-1, row_index), 'LEFT'),
+            ])
+            
+            # Player rows logic
+            for i, player in enumerate(team["players"]):
+                player_row = row_index + 1 + i
+                if player["eligibility"] == "QUALIFIED":
+                    style.append(('TEXTCOLOR', (4, player_row), (4, player_row), colors.green))
+                else:
+                    style.append(('TEXTCOLOR', (4, player_row), (4, player_row), colors.red))
+            
+            # Advance row index: team header + players + empty row
+            row_index += 1 + len(team["players"]) + 1
+            
+        table.setStyle(TableStyle(style))
+        content.append(table)
+        
+        return content
         """Get sample team data."""
         if "WINSTON" in division:
             return [
@@ -1006,19 +1065,29 @@ class PDFGenerator:
         
         return content
     
-    def _create_overall_division_section(self, data: Dict[str, Any], division_name: str) -> List:
-        """Create a division section with teams matching Overall-14.pdf format."""
+    def _create_overall_division_section(self, data: Dict[str, Any], division_title: str) -> List:
+        """Create overall division section with team tables."""
         content = []
         
-        # Get teams for this division
-        teams = self._get_division_teams(data, division_name)
+        # Get pre-calculated team statistics
+        team_stats = data.get('team_statistics', {})
         
-        if not teams:
-            return content
+        # Map division title to key (e.g., "WINSTON DIVISION" -> "Winston")
+        division_key = "Winston" if "WINSTON" in division_title else "Salem"
+        if division_key not in team_stats:
+            for key in team_stats.keys():
+                if key.lower() in division_title.lower():
+                    division_key = key
+                    break
+        
+        teams = team_stats.get(division_key, [])
+        
+        # Create combined table for all teams in division
+        if teams:
+            content.extend(self._create_division_teams_table(teams))
+        else:
+            content.append(Paragraph(f"No team data available for {division_title}.", self.styles['Normal']))
             
-        # Create one large table for the entire division
-        content.extend(self._create_division_table(teams, division_name))
-        
         return content
     
     def _create_division_table(self, teams: List[Dict], division_name: str) -> List:
@@ -1155,290 +1224,6 @@ class PDFGenerator:
         content.append(table)
         
         return content
-    
-    def _get_division_teams(self, data: Dict[str, Any], division_name: str) -> List[Dict]:
-        """Get teams for a specific division from processed data."""
-        if 'raw_data' not in data:
-            return []
-        
-        # Store enhanced_data for QP calculations
-        self.enhanced_data = data.get('enhanced_data', {})
-        
-        df = data['raw_data']
-        
-        # Map division names
-        division_map = {
-            "WINSTON DIVISION": "Winston",
-            "SALEM DIVISION": "Salem"
-        }
-        
-        target_division = division_map.get(division_name, division_name)
-        
-        # Get teams for this division, sorted alphabetically
-        division_teams = sorted(df[df['Division'] == target_division]['Team'].unique())
-        
-        # Calculate games to qualify for this division
-        # Round robin: each team plays every other team twice
-        # Games to qualify = (number of matches) × 1.5
-        num_teams = len(division_teams)
-        matches_per_team = (num_teams - 1) * 2  # Play each other team twice
-        games_to_qualify = int(matches_per_team * 1.5)
-        
-        teams = []
-        for team_name in division_teams:
-            team_data = self._extract_team_data(df, team_name, games_to_qualify)
-            teams.append(team_data)
-        
-        return teams
-    
-    def _extract_team_data(self, df, team_name: str, games_to_qualify: int) -> Dict:
-        """Extract team and player data from the DataFrame."""
-        team_df = df[df['Team'] == team_name]
-        
-        # Get unique players for this team, sorted alphabetically by last name
-        # Create a list of (last_name, full_name) tuples for proper sorting
-        player_names = team_df['player_name'].unique()
-        player_list = []
-        for name in player_names:
-            # Extract last name (assumed to be last word)
-            parts = name.split()
-            last_name = parts[-1] if parts else name
-            player_list.append((last_name, name))
-        
-        # Sort by last name, then get player data
-        player_list.sort(key=lambda x: x[0])
-        
-        players = []
-        for _, full_name in player_list:
-            player_data = self._calculate_player_stats(team_df, full_name, games_to_qualify, self.enhanced_data)
-            players.append(player_data)
-        
-        return {
-            "name": team_name,
-            "players": players
-        }
-    
-    def _calculate_player_stats(self, team_df, player_name: str, games_to_qualify_threshold: int, enhanced_data: Dict = None) -> Dict:
-        """Calculate comprehensive player statistics."""
-        player_df = team_df[team_df['player_name'] == player_name]
-        
-        if len(player_df) == 0:
-            # Return empty stats for players with no data
-            return self._empty_player_stats(player_name, games_to_qualify_threshold)
-        
-        # Calculate basic stats
-        legs_played = len(player_df)
-        games_played = self._estimate_games_played(player_df)
-        games_remaining = max(0, games_to_qualify_threshold - games_played)
-        eligibility = "QUALIFIED" if games_played >= games_to_qualify_threshold else "INELIGIBLE"
-        
-        # Calculate game-specific W/L records
-        game_stats = self._calculate_game_specific_stats(player_df)
-        
-        # Calculate total wins/losses
-        total_wins = sum([game_stats[game]['wins'] for game in game_stats])
-        total_losses = sum([game_stats[game]['losses'] for game in game_stats])
-        
-        # Calculate win percentage
-        total_games = total_wins + total_losses
-        win_pct = f"{(total_wins / total_games * 100):.2f}%" if total_games > 0 else "0.00%"
-        
-        # Calculate QPs properly using CSV data for 501 and enhanced data for Cricket
-        qps = self._calculate_total_qps(player_df, player_name, enhanced_data)
-        qp_pct = f"{(qps / legs_played * 100):.2f}%" if legs_played > 0 else "0.00%"
-        
-        # Calculate rating
-        if games_played > 0:
-            rating = ((total_wins * 2) / games_played) + (qps / legs_played)
-            rating = f"{rating:.4f}"
-        else:
-            rating = "0.0000"
-        
-        return {
-            "name": player_name,  # Full name from data
-            "legs": legs_played,
-            "games": games_played,
-            "qualify": games_remaining,
-            "eligibility": eligibility,
-            "s01_w": game_stats.get('501 SIDO_S', {}).get('wins', 0),
-            "s01_l": game_stats.get('501 SIDO_S', {}).get('losses', 0),
-            "sc_w": game_stats.get('Cricket_S', {}).get('wins', 0),
-            "sc_l": game_stats.get('Cricket_S', {}).get('losses', 0),
-            "d01_w": game_stats.get('501 SIDO_D', {}).get('wins', 0),
-            "d01_l": game_stats.get('501 SIDO_D', {}).get('losses', 0),
-            "dc_w": game_stats.get('Cricket_D', {}).get('wins', 0),
-            "dc_l": game_stats.get('Cricket_D', {}).get('losses', 0),
-            "total_w": total_wins,
-            "total_l": total_losses,
-            "win_pct": win_pct,
-            "qps": qps,
-            "qp_pct": qp_pct,
-            "rating": rating
-        }
-    
-    def _estimate_games_played(self, player_df):
-        """Calculate actual games played by counting unique Set# combinations."""
-        if len(player_df) == 0:
-            return 0
-        
-        # Each unique combination of report_url + Set # represents one game
-        if 'report_url' in player_df.columns and 'Set #' in player_df.columns:
-            # Count unique games (Set numbers) across all matches
-            games = player_df.groupby(['report_url', 'Set #']).ngroups
-            return games
-        else:
-            # Fallback: estimate based on legs (best of 3, so ~2-3 legs per game)
-            return max(1, len(player_df) // 3)
-    
-    def _calculate_game_specific_stats(self, player_df):
-        """Calculate wins/losses by game type and play format (PF), counting games, not legs.
-        
-        Produces keys like:
-          - '501 SIDO_S' (Singles 501)
-          - '501 SIDO_D' (Doubles 501)
-          - 'Cricket_S'  (Singles Cricket)
-          - 'Cricket_D'  (Doubles Cricket)
-        """
-        stats = {}
-        
-        if 'report_url' not in player_df.columns or 'Set #' not in player_df.columns:
-            # Fallback: count legs if we don't have Set # info
-            for game_type in player_df['game_name'].unique():
-                for pf in player_df['PF'].unique():
-                    game_df = player_df[(player_df['game_name'] == game_type) & (player_df['PF'] == pf)]
-                    if len(game_df) == 0:
-                        continue
-                    wins = len(game_df[game_df['win'] == 'W'])
-                    losses = len(game_df[game_df['win'] == 'L'])
-                    stats[f"{game_type}_{pf}"] = {'wins': wins, 'losses': losses}
-            return stats
-        
-        # Proper calculation: determine who won each game (Set)
-        for game_type in player_df['game_name'].unique():
-            for pf in player_df['PF'].unique():
-                game_df = player_df[(player_df['game_name'] == game_type) & (player_df['PF'] == pf)]
-                if len(game_df) == 0:
-                    continue
-                wins = 0
-                losses = 0
-                
-                # Group by match and Set to determine game winners
-                for (match_url, set_num), set_data in game_df.groupby(['report_url', 'Set #']):
-                    # Count legs won in this set
-                    legs_won = (set_data['win'] == 'W').sum()
-                    legs_lost = (set_data['win'] == 'L').sum()
-                    
-                    # Determine if player won this game (best of 3/5)
-                    if legs_won > legs_lost:
-                        wins += 1
-                    elif legs_lost > legs_won:
-                        losses += 1
-                    # If tied, it might be incomplete - count as neither for now
-                
-                stats[f"{game_type}_{pf}"] = {'wins': wins, 'losses': losses}
-        
-        return stats
-    
-    def _calculate_total_qps(self, player_df, player_name: str, enhanced_data: Dict = None) -> int:
-        """Calculate total Quality Points from 501 (CSV) and Cricket (enhanced data)."""
-        total_qps = 0
-        
-        # Calculate 501 QPs from CSV columns (Hi Turn and DO)
-        total_qps += self._calculate_501_qps_from_csv(player_df)
-        
-        # Add Cricket QPs from enhanced data if available
-        if enhanced_data:
-            cricket_qps = self._get_cricket_qps_for_player(player_name, enhanced_data)
-            total_qps += cricket_qps
-        
-        return total_qps
-    
-    def _calculate_501_qps_from_csv(self, player_df) -> int:
-        """Calculate 501 QPs using Hi Turn and DO columns from CSV.
-        
-        QP Rules for 501:
-        Turn Score QPs (Hi Turn):     Checkout QPs (DO):
-        1: 95-115                     1: 61-84 out
-        2: 116-131                    2: 85-106 out
-        3: 132-147                    3: 107-128 out
-        4: 148-163                    4: 129-150 out
-        5: 164-180                    5: 151-170 out
-        
-        QPs are ADDITIVE - a leg can earn QPs from both columns!
-        """
-        total_qps = 0
-        
-        # Filter for 501 games only
-        games_501 = player_df[player_df['game_name'] == '501 SIDO']
-        
-        for _, row in games_501.iterrows():
-            leg_qps = 0
-            
-            # QPs from Hi Turn (high score in one turn)
-            hi_turn = row.get('Hi Turn', 0)
-            if pd.notna(hi_turn):
-                try:
-                    hi_turn = float(hi_turn)
-                    if 164 <= hi_turn <= 180:
-                        leg_qps += 5
-                    elif 148 <= hi_turn <= 163:
-                        leg_qps += 4
-                    elif 132 <= hi_turn <= 147:
-                        leg_qps += 3
-                    elif 116 <= hi_turn <= 131:
-                        leg_qps += 2
-                    elif 95 <= hi_turn <= 115:
-                        leg_qps += 1
-                except (ValueError, TypeError):
-                    pass
-            
-            # QPs from DO (checkout score)
-            do_score = row.get('DO', 0)
-            if pd.notna(do_score):
-                try:
-                    do_score = float(do_score)
-                    if 151 <= do_score <= 170:
-                        leg_qps += 5
-                    elif 129 <= do_score <= 150:
-                        leg_qps += 4
-                    elif 107 <= do_score <= 128:
-                        leg_qps += 3
-                    elif 85 <= do_score <= 106:
-                        leg_qps += 2
-                    elif 61 <= do_score <= 84:
-                        leg_qps += 1
-                except (ValueError, TypeError):
-                    pass
-            
-            total_qps += leg_qps
-        
-        return total_qps
-    
-    def _get_cricket_qps_for_player(self, player_name: str, enhanced_data: Dict) -> int:
-        """Extract Cricket QPs for a player from enhanced data."""
-        if not enhanced_data:
-            return 0
-        
-        # Check if we have cricket QP data
-        cricket_qp_data = enhanced_data.get('enhanced_statistics', {}).get('cricket_enhanced_qp', {})
-        
-        if player_name in cricket_qp_data:
-            return cricket_qp_data[player_name].get('total_qp', 0)
-        
-        return 0
-    
-    def _empty_player_stats(self, player_name: str, games_to_qualify: int):
-        """Return empty stats structure for players with no data."""
-        return {
-            "name": player_name,
-            "legs": 0, "games": 0, "qualify": games_to_qualify, "eligibility": "INELIGIBLE",
-            "s01_w": 0, "s01_l": 0, "sc_w": 0, "sc_l": 0,
-            "d01_w": 0, "d01_l": 0, "dc_w": 0, "dc_l": 0,
-            "total_w": 0, "total_l": 0, "win_pct": "0.00%",
-            "qps": 0, "qp_pct": "0.00%", "rating": "0.0000"
-        }
-    
-    def _create_team_section(self, team_data: Dict) -> List:
         """Create a team section table matching Overall-14.pdf format."""
         content = []
         
