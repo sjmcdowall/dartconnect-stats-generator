@@ -1,0 +1,31 @@
+# Claude Code Approved Commands
+# This file stores commands that have been approved for automatic execution
+# without requiring user confirmation each time.
+
+# Development Tools
+python3:*
+pip3:*
+pytest:*
+
+# Version Control
+git:*
+
+# File Operations
+ls:*
+cat:*
+head:*
+tail:*
+wc:*
+find:*
+grep:*
+
+# Build & Test
+black:*
+flake8:*
+
+# Environment
+source .env
+./scripts/weekly-update.sh:*
+
+# PDF Tools
+pdftotext:*

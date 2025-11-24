@@ -28,7 +28,7 @@ import logging
 import time
 import requests
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 
 class WixAPIUploader:
@@ -44,8 +44,8 @@ class WixAPIUploader:
             api_key: Wix API key (or from WIX_API_KEY env var)
             site_id: Wix Site ID (or from WIX_SITE_ID env var)
         """
-        self.api_key = api_key or os.getenv('WIX_API_KEY')
-        self.site_id = site_id or os.getenv('WIX_SITE_ID')
+        self.api_key = api_key or os.getenv("WIX_API_KEY")
+        self.site_id = site_id or os.getenv("WIX_SITE_ID")
         self.logger = logging.getLogger(__name__)
 
         if not self.api_key:
@@ -61,11 +61,13 @@ class WixAPIUploader:
             )
 
         self.session = requests.Session()
-        self.session.headers.update({
-            'Authorization': self.api_key,
-            'wix-site-id': self.site_id,
-            'Content-Type': 'application/json'
-        })
+        self.session.headers.update(
+            {
+                "Authorization": self.api_key,
+                "wix-site-id": self.site_id,
+                "Content-Type": "application/json",
+            }
+        )
 
         self.logger.info("✅ Wix API uploader initialized")
 
@@ -111,21 +113,18 @@ class WixAPIUploader:
         # Build query parameters
         params = {}
         if parent_folder_id and parent_folder_id != "media-root":
-            params['parentFolderId'] = parent_folder_id
+            params["parentFolderId"] = parent_folder_id
 
-        response = self._make_request(
-            'GET',
-            '/site-media/v1/folders',
-            params=params
-        )
+        response = self._make_request("GET", "/site-media/v1/folders", params=params)
 
         result = response.json()
-        folders = result.get('folders', [])
+        folders = result.get("folders", [])
         self.logger.debug(f"Found {len(folders)} folder(s)")
         return folders
 
-    def get_folder_by_name(self, folder_name: str,
-                          parent_folder_id: Optional[str] = None) -> Optional[Dict]:
+    def get_folder_by_name(
+        self, folder_name: str, parent_folder_id: Optional[str] = None
+    ) -> Optional[Dict]:
         """
         Find folder by name within parent folder.
 
@@ -139,13 +138,14 @@ class WixAPIUploader:
         folders = self.list_folders(parent_folder_id)
 
         for folder in folders:
-            if folder.get('displayName') == folder_name:
+            if folder.get("displayName") == folder_name:
                 return folder
 
         return None
 
-    def create_folder(self, folder_name: str,
-                     parent_folder_id: str = "media-root") -> Dict:
+    def create_folder(
+        self, folder_name: str, parent_folder_id: str = "media-root"
+    ) -> Dict:
         """
         Create a new folder in Media Manager.
 
@@ -158,21 +158,15 @@ class WixAPIUploader:
         """
         self.logger.info(f"Creating folder: {folder_name}")
 
-        payload = {
-            "displayName": folder_name
-        }
+        payload = {"displayName": folder_name}
 
         if parent_folder_id and parent_folder_id != "media-root":
             payload["parentFolderId"] = parent_folder_id
 
-        response = self._make_request(
-            'POST',
-            '/site-media/v1/folders',
-            json=payload
-        )
+        response = self._make_request("POST", "/site-media/v1/folders", json=payload)
 
-        folder = response.json().get('folder', {})
-        folder_id = folder.get('id')
+        folder = response.json().get("folder", {})
+        folder_id = folder.get("id")
 
         self.logger.info(f"✅ Created folder: {folder_name} (ID: {folder_id})")
         return folder
@@ -194,12 +188,12 @@ class WixAPIUploader:
             folder = self.get_folder_by_name(folder_name, parent_id)
 
             if folder:
-                parent_id = folder['id']
+                parent_id = folder["id"]
                 self.logger.debug(f"Found existing folder: {folder_name}")
             else:
                 # Create folder
                 folder = self.create_folder(folder_name, parent_id)
-                parent_id = folder['id']
+                parent_id = folder["id"]
 
         return parent_id
 
@@ -217,16 +211,12 @@ class WixAPIUploader:
 
         params = {}
         if parent_folder_id and parent_folder_id != "media-root":
-            params['parentFolderId'] = parent_folder_id
+            params["parentFolderId"] = parent_folder_id
 
-        response = self._make_request(
-            'GET',
-            '/site-media/v1/files',
-            params=params
-        )
+        response = self._make_request("GET", "/site-media/v1/files", params=params)
 
         result = response.json()
-        files = result.get('files', [])
+        files = result.get("files", [])
         self.logger.debug(f"Found {len(files)} file(s)")
         return files
 
@@ -247,24 +237,20 @@ class WixAPIUploader:
         self.logger.debug(f"Bulk deleting {len(file_ids)} file(s)")
 
         try:
-            payload = {
-                "fileIds": file_ids
-            }
+            payload = {"fileIds": file_ids}
             if permanent:
                 payload["permanent"] = True
 
-            self._make_request(
-                'POST',
-                '/site-media/v1/bulk/files/delete',
-                json=payload
-            )
+            self._make_request("POST", "/site-media/v1/bulk/files/delete", json=payload)
             self.logger.debug(f"✅ Deleted {len(file_ids)} file(s)")
             return True
         except Exception as e:
             self.logger.error(f"❌ Failed to delete files: {e}")
             return False
 
-    def delete_files_by_name(self, folder_id: str, filename: str, permanent: bool = False) -> int:
+    def delete_files_by_name(
+        self, folder_id: str, filename: str, permanent: bool = False
+    ) -> int:
         """
         Delete all files with a specific name in a folder.
 
@@ -280,18 +266,21 @@ class WixAPIUploader:
         file_ids_to_delete = []
 
         for file in files:
-            if file.get('displayName') == filename:
-                file_ids_to_delete.append(file.get('id'))
+            if file.get("displayName") == filename:
+                file_ids_to_delete.append(file.get("id"))
 
         if file_ids_to_delete:
             if self.delete_files(file_ids_to_delete, permanent):
-                self.logger.info(f"🗑️  Deleted {len(file_ids_to_delete)} existing file(s) named '{filename}'")
+                self.logger.info(
+                    f"🗑️  Deleted {len(file_ids_to_delete)} existing file(s) named '{filename}'"
+                )
                 return len(file_ids_to_delete)
 
         return 0
 
-    def generate_upload_url(self, filename: str, parent_folder_id: str,
-                           mime_type: str = "application/pdf") -> Dict:
+    def generate_upload_url(
+        self, filename: str, parent_folder_id: str, mime_type: str = "application/pdf"
+    ) -> Dict:
         """
         Generate an upload URL for a file.
 
@@ -305,27 +294,24 @@ class WixAPIUploader:
         """
         self.logger.debug(f"Generating upload URL for: {filename}")
 
-        payload = {
-            "mimeType": mime_type,
-            "displayName": filename
-        }
+        payload = {"mimeType": mime_type, "displayName": filename}
 
         if parent_folder_id and parent_folder_id != "media-root":
             payload["parentFolderId"] = parent_folder_id
 
         response = self._make_request(
-            'POST',
-            '/site-media/v1/files/generate-upload-url',
-            json=payload
+            "POST", "/site-media/v1/files/generate-upload-url", json=payload
         )
 
         result = response.json()
-        upload_url = result.get('uploadUrl')
+        upload_url = result.get("uploadUrl")
 
         self.logger.debug(f"Got upload URL for {filename}")
         return result
 
-    def upload_file_to_url(self, file_path: Path, upload_url: str, display_name: str) -> bool:
+    def upload_file_to_url(
+        self, file_path: Path, upload_url: str, display_name: str
+    ) -> bool:
         """
         Upload file bytes to generated upload URL.
 
@@ -342,21 +328,18 @@ class WixAPIUploader:
         try:
             # Try multipart form upload (common for file uploads)
             # Use display_name instead of file_path.name
-            with open(file_path, 'rb') as f:
-                files = {'file': (display_name, f, 'application/pdf')}
-                response = requests.post(
-                    upload_url,
-                    files=files
-                )
+            with open(file_path, "rb") as f:
+                files = {"file": (display_name, f, "application/pdf")}
+                response = requests.post(upload_url, files=files)
 
             # If that fails, try direct PUT
             if response.status_code >= 400:
-                self.logger.debug(f"Multipart failed, trying direct PUT...")
-                with open(file_path, 'rb') as f:
+                self.logger.debug("Multipart failed, trying direct PUT...")
+                with open(file_path, "rb") as f:
                     response = requests.put(
                         upload_url,
                         data=f,
-                        headers={'Content-Type': 'application/octet-stream'}
+                        headers={"Content-Type": "application/octet-stream"},
                     )
 
             response.raise_for_status()
@@ -366,12 +349,17 @@ class WixAPIUploader:
 
         except Exception as e:
             self.logger.error(f"❌ Upload failed for {file_path.name}: {e}")
-            self.logger.debug(f"Response status: {response.status_code if 'response' in locals() else 'N/A'}")
-            self.logger.debug(f"Response body: {response.text[:500] if 'response' in locals() else 'N/A'}")
+            self.logger.debug(
+                f"Response status: {response.status_code if 'response' in locals() else 'N/A'}"
+            )
+            self.logger.debug(
+                f"Response body: {response.text[:500] if 'response' in locals() else 'N/A'}"
+            )
             return False
 
-    def upload_file(self, file_path: Path, folder_id: str,
-                   display_name: Optional[str] = None) -> bool:
+    def upload_file(
+        self, file_path: Path, folder_id: str, display_name: Optional[str] = None
+    ) -> bool:
         """
         Complete file upload workflow: generate URL, upload file, wait for processing.
 
@@ -387,7 +375,7 @@ class WixAPIUploader:
 
         # Generate upload URL
         upload_info = self.generate_upload_url(display_name, folder_id)
-        upload_url = upload_info.get('uploadUrl')
+        upload_url = upload_info.get("uploadUrl")
 
         if not upload_url:
             self.logger.error("Failed to generate upload URL")
@@ -412,10 +400,7 @@ class WixAPIUploader:
         self.logger.info("🚀 Publishing site...")
 
         try:
-            response = self._make_request(
-                'POST',
-                '/site-publisher/v1/site/publish'
-            )
+            response = self._make_request("POST", "/site-publisher/v1/site/publish")
 
             self.logger.info("✅ Site published successfully!")
             return True
@@ -424,8 +409,13 @@ class WixAPIUploader:
             self.logger.error(f"❌ Publish failed: {e}")
             return False
 
-    def upload_weekly_pdfs(self, individual_pdf: Path, overall_pdf: Path,
-                          week_number: int, season_name: str = "SEASON 74 - 2025 Fall") -> bool:
+    def upload_weekly_pdfs(
+        self,
+        individual_pdf: Path,
+        overall_pdf: Path,
+        week_number: int,
+        season_name: str = "SEASON 74 - 2025 Fall",
+    ) -> bool:
         """
         Complete workflow: upload PDFs to weekly folder and Current/ folder, then publish.
 
@@ -451,7 +441,7 @@ class WixAPIUploader:
             week_folder_name = f"Week-{week_number:02d}"
 
             # Ensure season folder exists
-            self.logger.info(f"📁 Ensuring folder structure exists...")
+            self.logger.info("📁 Ensuring folder structure exists...")
             season_folder_id = self.ensure_folder_path([season_name])
 
             # Ensure Current/ folder exists (for icons to link to)
@@ -462,21 +452,29 @@ class WixAPIUploader:
 
             # Upload to weekly folder (archive)
             self.logger.info(f"📤 Uploading to {week_folder_name}/ (archive)...")
-            if not self.upload_file(individual_pdf, week_folder_id, f"Individual-Week{week_number:02d}.pdf"):
+            if not self.upload_file(
+                individual_pdf, week_folder_id, f"Individual-Week{week_number:02d}.pdf"
+            ):
                 return False
-            if not self.upload_file(overall_pdf, week_folder_id, f"Overall-Week{week_number:02d}.pdf"):
+            if not self.upload_file(
+                overall_pdf, week_folder_id, f"Overall-Week{week_number:02d}.pdf"
+            ):
                 return False
 
             # Upload to Current/ folder (what icons link to)
-            self.logger.info(f"📤 Uploading to Current/ (icon targets)...")
+            self.logger.info("📤 Uploading to Current/ (icon targets)...")
 
             # Delete old files to avoid confusion (keeps only latest files)
             # NOTE: Wix icons link by file ID - deleting creates new IDs
             # MANUAL STEP REQUIRED: Re-link icons in editor after upload (~30 seconds)
-            self.delete_files_by_name(current_folder_id, "Individual.pdf", permanent=True)
+            self.delete_files_by_name(
+                current_folder_id, "Individual.pdf", permanent=True
+            )
             self.delete_files_by_name(current_folder_id, "Overall.pdf", permanent=True)
 
-            if not self.upload_file(individual_pdf, current_folder_id, "Individual.pdf"):
+            if not self.upload_file(
+                individual_pdf, current_folder_id, "Individual.pdf"
+            ):
                 return False
             if not self.upload_file(overall_pdf, current_folder_id, "Overall.pdf"):
                 return False
