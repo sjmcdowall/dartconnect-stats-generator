@@ -54,7 +54,7 @@ echo ""
 echo -e "${BLUE}📥 Step 1: Downloading latest CSV export from DartConnect...${NC}"
 echo ""
 cd "$PROJECT_ROOT"
-if python3 scripts/fetch_exports.py --headless; then
+if venv/bin/python scripts/fetch_exports.py --headless; then
     echo ""
     echo -e "${GREEN}✅ Step 1 Complete: CSV downloaded successfully${NC}"
 else
@@ -72,7 +72,7 @@ echo ""
 # Step 2: Generate PDF reports
 echo -e "${BLUE}📊 Step 2: Generating PDF reports (Individual + Overall)...${NC}"
 echo ""
-if python3 main_consolidated.py data/; then
+if venv/bin/python main_consolidated.py data/; then
     echo ""
     echo -e "${GREEN}✅ Step 2 Complete: PDFs generated successfully${NC}"
 else
@@ -90,7 +90,7 @@ echo ""
 # Step 3: Upload to Wix
 echo -e "${BLUE}🚀 Step 3: Uploading PDFs to Wix website (no 2FA required)...${NC}"
 echo ""
-if python3 scripts/wix_uploader.py --api-mode; then
+if venv/bin/python scripts/wix_uploader.py --api-mode; then
     echo ""
     echo -e "${GREEN}✅ Step 3 Complete: PDFs uploaded and site published${NC}"
 else
