@@ -1,10 +1,138 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Instructions for AI agents (Warp, Claude, etc.) working on this project.
 
 ## Project Overview
 
 DartConnect Statistics Generator is a Python application that processes DartConnect league data and generates professional PDF reports. The key innovation is enhanced Quality Point (QP) calculations using URL fetching to retrieve turn-by-turn game data.
+
+## New Season Setup Checklist
+
+When starting a new dart league season, complete these steps:
+
+### 1. Update `config.yaml`
+
+Update the following fields:
+
+```yaml
+league:
+  season: '2026'              # Current year
+  contact_info: 'board@wssndl.com'
+
+season:
+  number: '75th'              # Increment from previous (74th → 75th)
+  name: 'Spring/Summer 2026'  # Season name (Spring/Summer or Fall/Winter + year)
+
+directories:
+  data: 'data/season75'       # Update season number
+  output: 'output/season75'   # Update season number
+  wix_folder: 'SEASON 75 - 2026 Spring'  # Wix Media Manager folder
+```
+
+### 2. Create Season Directories
+
+```bash
+mkdir -p data/seasonNN output/seasonNN
+```
+
+Replace `NN` with the new season number.
+
+### 3. Archive Previous Season
+
+Move old season data and reports to their season folder:
+
+```bash
+# Move data files
+mv data/*_export.csv data/seasonPREV/
+mv data/*_players*.csv data/seasonPREV/
+
+# Move reports
+mkdir -p output/seasonPREV
+mv output/*.pdf output/*.json output/seasonPREV/
+```
+
+### 4. Update `weekly.sh`
+
+Update the directory variables at the top of `weekly.sh`:
+
+```bash
+DATA_DIR="data/seasonNN"
+OUTPUT_DIR="output/seasonNN"
+```
+
+Also update the banner text:
+```bash
+echo "🎯 Season NN Weekly Update - Season Name Year"
+```
+
+### 5. Verify DartConnect Credentials
+
+Ensure credentials are set for automated downloads:
+
+```bash
+python3 scripts/fetch_exports.py --check-creds
+```
+
+If not configured:
+```bash
+export DARTCONNECT_EMAIL="your.email@example.com"
+export DARTCONNECT_PASSWORD="your-password"
+```
+
+### 6. Test the Setup
+
+Run a quick test to ensure everything works:
+
+```bash
+./weekly.sh --download  # Test download only
+```
+
+### 7. Re-link Wix Icons (One-time per season)
+
+After the first upload to a new season folder, manually re-link the PDF icons on the Wix Statistics page:
+1. Go to Wix Editor → Statistics page
+2. Click the Individual report icon → Link to `Current/Individual.pdf` in the new season folder
+3. Click the Overall report icon → Link to `Current/Overall.pdf` in the new season folder
+4. Publish the site
+
+(Wix API cannot update icon links - this must be done manually once per season)
+
+## Weekly Workflow
+
+After initial setup, the weekly process is simple:
+
+```bash
+./weekly.sh              # Full workflow: download + reports + upload to Wix
+./weekly.sh --reports    # Reports + upload (skip download)
+./weekly.sh --download   # Download only
+./weekly.sh --no-upload  # Download + reports, skip Wix upload
+```
+
+**Requirements for Wix upload:**
+- `.env` file with `WIX_API_KEY` and `WIX_SITE_ID` configured
+- See `scripts/wix_uploader.py --api-mode --check-creds` to verify
+
+## Directory Structure
+
+```
+data/
+  season74/           # Previous season data
+  season75/           # Current season data
+  archive/            # Old/backup files
+
+output/
+  season74/           # Previous season reports
+  season75/           # Current season reports
+```
+
+## Season History
+
+| Season | Name              | Directory    |
+|--------|-------------------|--------------|
+| 74     | Fall/Winter 2025  | season74/    |
+| 75     | Spring/Summer 2026| season75/    |
+
+---
 
 ## Core Architecture
 
@@ -61,50 +189,45 @@ export DARTCONNECT_PASSWORD="your-password"
 
 #### Complete Weekly Workflow (Recommended)
 ```bash
-# All-in-one script: Download → Generate → Upload (no 2FA!)
-./scripts/weekly-update.sh
+# All-in-one script
+./weekly.sh
 
-# This single command:
-# 1. Downloads latest CSV from DartConnect
-# 2. Generates Individual and Overall PDF reports
-# 3. Uploads PDFs to Wix and publishes site
-# Takes ~30-60 seconds total, stops on any error
+# Or with individual steps:
+./weekly.sh --download  # Download only
+./weekly.sh --reports   # Reports only
 ```
 
-#### Manual Commands (Individual Steps)
+#### Manual Commands
 ```bash
 # Auto-detect and process data files
-python main_consolidated.py data/
+python main_consolidated.py data/season75/
 
 # Process specific file
-python main_consolidated.py data/season74/by_leg_export.csv
+python main_consolidated.py data/season75/by_leg_export.csv
 
 # Verbose logging for debugging
-python main_consolidated.py data/ --verbose
+python main_consolidated.py data/season75/ --verbose
 
 # Custom output directory
-python main_consolidated.py data/ --output-dir reports/
+python main_consolidated.py data/season75/ -o output/season75/
 ```
 
 ### Automated Export Downloads
 ```bash
-# Fully automated workflow (download + process)
-python3 scripts/fetch_exports.py --headless && python3 main_consolidated.py data/
-
-# Download only (headless)
-python3 scripts/fetch_exports.py --headless
+# Download to current season directory
+python3 scripts/fetch_exports.py --headless -o data/season75
 
 # Download with browser visible (debugging)
-python3 scripts/fetch_exports.py
+python3 scripts/fetch_exports.py -o data/season75
 
 # Assisted mode: Opens portal, waits for manual export click
-python3 scripts/fetch_exports.py --assist
+python3 scripts/fetch_exports.py --assist -o data/season75
 
 # Check credentials
 python3 scripts/fetch_exports.py --check-creds
 ```
 
-### Wix PDF Upload (API Mode - No 2FA!)
+### Wix PDF Upload (API Mode)
 ```bash
 # Test API connectivity
 python3 scripts/test_wix_api.py
@@ -117,9 +240,6 @@ python3 scripts/wix_uploader.py --api-mode --check-creds
 
 # Dry run (show what would be uploaded)
 python3 scripts/wix_uploader.py --api-mode --dry-run
-
-# Selenium mode (requires 2FA - fallback only)
-python3 scripts/wix_uploader.py --assist
 ```
 
 ### Cache Management
@@ -127,7 +247,7 @@ python3 scripts/wix_uploader.py --assist
 # View cache statistics
 python cache_manager.py info
 
-# Clear expired cache (automatic, but can run manually)
+# Clear expired cache
 python cache_manager.py clear-expired
 
 # Clear all cache
@@ -136,10 +256,7 @@ python cache_manager.py clear-all
 
 ### Testing
 ```bash
-# Run test suite
 pytest
-
-# Test specific components
 python test_url_fetcher.py
 python test_consolidated_approach.py
 python test_overall_with_real_data.py
@@ -153,6 +270,7 @@ python test_individual_with_real_data.py
 - Season information (season number, name)
 - Data processing thresholds
 - Statistics calculations
+- Directory paths for current season
 - **Note**: Week numbers are automatically calculated from match dates in CSV
 
 ## Important Implementation Details
@@ -179,38 +297,13 @@ The application evaluates data quality after processing:
 - Rookie indicators: `®` = 1st season, `®®` = 2nd season
 - Eligibility status shown as "QUALIFIED" (green) or "INELIGIBLE" (red)
 
-### Export Automation (`src/export_downloader.py`)
-Uses Selenium WebDriver to:
-1. Log into DartConnect using environment credentials
-2. Navigate to league portal via Competition Organizer
-3. Click Export button and download by_leg CSV
-4. Archive previous exports with timestamps
-5. Handle common failure modes with intelligent retries
-
-## Common Workflows
-
-### Weekly Report Generation
-```bash
-# First run of season (builds cache)
-python main_consolidated.py data/season74/by_leg_export.csv
-# Expected: ~20-30 seconds
-
-# Weekly updates (uses cache)
-python main_consolidated.py data/season74/by_leg_export.csv
-# Expected: ~1-2 seconds (20x faster)
-```
-
-### Debugging Data Processing
-```bash
-# Enable verbose logging
-python main_consolidated.py data/ --verbose
-
-# Examine enhanced integration
-python enhanced_integration_example.py
-
-# Check specific URL fetching
-python test_url_fetcher.py
-```
+### Gender Inference
+DartConnect often has missing gender data. The system automatically infers gender from first names:
+- Name lists in `src/data_processor.py`: `COMMON_MALE_NAMES`, `COMMON_FEMALE_NAMES`, `UNISEX_NAMES`
+- Check processed results (not raw CSV) to see actual missing count after inference
+- **Awards depend on gender** - ensure no players are missing gender before publishing
+- To verify: check `processed_results.json` or run reports with `--verbose`
+- Add missing names to the appropriate list in `data_processor.py` if needed
 
 ## Critical Code Locations
 

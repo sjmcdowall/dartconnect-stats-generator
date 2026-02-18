@@ -56,6 +56,7 @@ import logging
 from pathlib import Path
 from datetime import datetime
 import pandas as pd
+import yaml
 
 
 def calculate_week_number_from_csv(csv_path: Path) -> int:
@@ -260,6 +261,19 @@ def main():
         week_number = calculate_week_number_from_csv(csv_files[0])
         logger.info(f"📅 Calculated week number: {week_number} from {csv_files[0].name}")
 
+    # Load Wix folder name from config
+    wix_folder = None
+    config_path = Path('config.yaml')
+    if config_path.exists():
+        try:
+            with open(config_path) as f:
+                config = yaml.safe_load(f)
+            wix_folder = config.get('directories', {}).get('wix_folder')
+            if wix_folder:
+                logger.info(f"📁 Using Wix folder from config: {wix_folder}")
+        except Exception as e:
+            logger.warning(f"Could not read config.yaml: {e}")
+
     # Choose uploader based on mode
     if args.api_mode:
         # API Mode - No 2FA required!
@@ -285,11 +299,15 @@ def main():
         print(f"   Overall: {overall_pdf.name}")
         print()
 
-        success = uploader.upload_weekly_pdfs(
-            individual_pdf=individual_pdf,
-            overall_pdf=overall_pdf,
-            week_number=week_number
-        )
+        upload_kwargs = {
+            'individual_pdf': individual_pdf,
+            'overall_pdf': overall_pdf,
+            'week_number': week_number
+        }
+        if wix_folder:
+            upload_kwargs['season_name'] = wix_folder
+        
+        success = uploader.upload_weekly_pdfs(**upload_kwargs)
 
     else:
         # Selenium Mode - Requires 2FA

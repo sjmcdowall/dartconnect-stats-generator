@@ -147,6 +147,7 @@ COMMON_FEMALE_NAMES = {
     "sherrie",
     "shannon",
     "misty",
+    "desiree",
 }
 
 # Unisex names to avoid guessing (removed casey, chris, lee since we have manual classifications)

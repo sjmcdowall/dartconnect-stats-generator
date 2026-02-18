@@ -32,12 +32,18 @@ statistics:
 # League-specific settings (customize as needed)
 league:
   name: 'Dart League'
-  season: '2024'
-  contact_info: 'league@example.com'
+  season: '2026'
+  contact_info: 'board@wssndl.com'
 
 # Season information for reports
 season:
-  number: '74th'  # e.g., '73rd', '74th', etc.
-  name: 'Fall/Winter 2025'  # e.g., 'Spring 2025', 'Fall/Winter 2025'
+  number: '75th'  # e.g., '73rd', '74th', etc.
+  name: 'Spring/Summer 2026'  # e.g., 'Spring 2025', 'Fall/Winter 2025'
   # Note: Week number is automatically calculated from match dates in the CSV
   # The first match date is considered Week 1
+
+# Directory settings (update each season)
+directories:
+  data: 'data/season75'
+  output: 'output/season75'
+  wix_folder: 'SEASON 75 - 2026 Spring'  # Wix Media Manager folder name
