@@ -2,6 +2,16 @@
 
 Instructions for AI agents (Warp, Claude, etc.) working on this project.
 
+## Mandatory first step (read this before doing anything)
+
+At the start of every new session in this repo:
+
+1. Read `WARP.md` and `AGENTS.md`.
+2. In your first substantive response, confirm you read them and call out any constraints that affect the user’s request (1–5 bullets).
+3. If you cannot see prior context (e.g. the user started a new agent session), ask the user to paste the missing prompt/output instead of assuming.
+
+If `WARP.md` and `AGENTS.md` ever conflict, ask the user which one should win (do not silently choose).
+
 ## Project Overview
 
 DartConnect Statistics Generator is a Python application that processes DartConnect league data and generates professional PDF reports. The key innovation is enhanced Quality Point (QP) calculations using URL fetching to retrieve turn-by-turn game data.

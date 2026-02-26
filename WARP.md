@@ -2,6 +2,18 @@
 
 This file provides guidance to WARP (warp.dev) when working with code in this repository.
 
+## Agent startup (required)
+
+If you are an AI agent working in this repo, do this at the start of every new session **before** proposing changes:
+
+**Hard stop:** If you have not read `AGENTS.md`, stop and read it now before responding.
+
+1. Read `WARP.md` and `AGENTS.md`.
+2. In your first substantive response, briefly confirm you read them and summarize any constraints that affect the user’s request (1–5 bullets).
+3. If the user references a prior session and you do not have the full context, ask them to paste the relevant snippet rather than guessing.
+
+Note: `AGENTS.md` contains additional operational details (weekly workflow, season setup, and “source of truth” behaviors) that are easy to miss if you only skim this file.
+
 ## Project Overview
 
 DartConnect Statistics Generator is a comprehensive Python application that provides **fully automated data extraction and processing** from DartConnect league software. The system features headless browser automation for downloading CSV exports, intelligent data processing with URL enhancement, and professional PDF report generation.
