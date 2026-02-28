@@ -778,6 +778,7 @@ class DataProcessor:
             "urls_failed": 0,
             "enhanced_games": [],
             "cricket_qp_data": [],
+            "501_qp_data": [],
             "enhanced_statistics": {},
         }
 
@@ -807,6 +808,11 @@ class DataProcessor:
                     cricket_games = self.url_fetcher.extract_cricket_stats(game_data)
                     if cricket_games:
                         enhanced_data["cricket_qp_data"].extend(cricket_games)
+
+                    # Extract 501 games for enhanced turn-by-turn QP calculation
+                    games_501 = self.url_fetcher.extract_501_stats(game_data)
+                    if games_501:
+                        enhanced_data["501_qp_data"].extend(games_501)
                 else:
                     enhanced_data["urls_failed"] += 1
 
@@ -819,6 +825,10 @@ class DataProcessor:
             enhanced_data["enhanced_statistics"] = self._calculate_enhanced_qp_stats(
                 df, enhanced_data["cricket_qp_data"]
             )
+
+        # Enhanced 501 turn-by-turn QP calculations
+        if enhanced_data["501_qp_data"]:
+            self._calculate_enhanced_501_qp_stats(enhanced_data)
 
         # Store enhanced games data
         enhanced_data["enhanced_games"] = list(url_to_game_data.values())
@@ -891,6 +901,31 @@ class DataProcessor:
         enhanced_stats["cricket_enhanced_qp"] = player_qp_totals
 
         return enhanced_stats
+
+    def _calculate_enhanced_501_qp_stats(self, enhanced_data: Dict[str, Any]) -> None:
+        """Aggregate 501 turn QPs per player from URL turn-by-turn data."""
+        player_501_qp_totals = {}
+
+        for game in enhanced_data.get("501_qp_data", []):
+            for player_stats in game.get("players", []):
+                player_name = player_stats.get("name")
+                if not player_name:
+                    continue
+
+                turn_qp = player_stats.get("total_turn_qp", 0)
+
+                if player_name not in player_501_qp_totals:
+                    player_501_qp_totals[player_name] = {
+                        "total_turn_qp": 0,
+                        "games": 0,
+                    }
+
+                player_501_qp_totals[player_name]["total_turn_qp"] += turn_qp
+                player_501_qp_totals[player_name]["games"] += 1
+
+        if "enhanced_statistics" not in enhanced_data:
+            enhanced_data["enhanced_statistics"] = {}
+        enhanced_data["enhanced_statistics"]["501_enhanced_qp"] = player_501_qp_totals
 
     def generate_team_statistics(
         self, df: pd.DataFrame, enhanced_data: Dict[str, Any]
@@ -1619,16 +1654,38 @@ class DataProcessor:
     def _calculate_total_qps(
         self, player_df, player_name: str, enhanced_data: Dict = None
     ) -> int:
-        """Calculate total Quality Points from 501 (CSV) and Cricket (enhanced data)."""
+        """Calculate total Quality Points from 501 and Cricket.
+
+        501 QPs: If URL turn-by-turn data is available, sum QPs from ALL
+        qualifying turns (not just Hi Turn) plus checkout (DO) QPs from CSV.
+        Otherwise fall back to CSV Hi Turn + DO.
+
+        Cricket QPs: Always from URL enhanced data (sum of all qualifying turns).
+        """
         total_qps = 0
 
-        # Calculate 501 QPs from CSV columns (Hi Turn and DO)
-        total_qps += self._calculate_501_qps_from_csv(player_df)
+        # 501 QPs
+        has_enhanced_501 = (
+            enhanced_data
+            and player_name
+            in enhanced_data.get("enhanced_statistics", {}).get(
+                "501_enhanced_qp", {}
+            )
+        )
 
-        # Add Cricket QPs from enhanced data if available
+        if has_enhanced_501:
+            # URL turn-by-turn QPs (all qualifying turns) + CSV checkout QPs
+            total_qps += self._get_501_turn_qps_for_player(
+                player_name, enhanced_data
+            )
+            total_qps += self._calculate_501_do_qps_from_csv(player_df)
+        else:
+            # Fallback: CSV Hi Turn + DO
+            total_qps += self._calculate_501_qps_from_csv(player_df)
+
+        # Cricket QPs from enhanced data
         if enhanced_data:
-            cricket_qps = self._get_cricket_qps_for_player(player_name, enhanced_data)
-            total_qps += cricket_qps
+            total_qps += self._get_cricket_qps_for_player(player_name, enhanced_data)
 
         return total_qps
 
@@ -1690,7 +1747,6 @@ class DataProcessor:
         if not enhanced_data:
             return 0
 
-        # Check if we have cricket QP data
         cricket_qp_data = enhanced_data.get("enhanced_statistics", {}).get(
             "cricket_enhanced_qp", {}
         )
@@ -1699,6 +1755,59 @@ class DataProcessor:
             return cricket_qp_data[player_name].get("total_qp", 0)
 
         return 0
+
+    def _get_501_turn_qps_for_player(
+        self, player_name: str, enhanced_data: Dict
+    ) -> int:
+        """Get enhanced 501 turn QPs for a player from URL turn-by-turn data."""
+        if not enhanced_data:
+            return 0
+
+        qp_data = enhanced_data.get("enhanced_statistics", {}).get(
+            "501_enhanced_qp", {}
+        )
+
+        if player_name in qp_data:
+            return qp_data[player_name].get("total_turn_qp", 0)
+
+        return 0
+
+    def _calculate_501_do_qps_from_csv(self, player_df) -> int:
+        """Calculate 501 checkout (DO) QPs only from CSV.
+
+        Checkout QPs:
+        1: 61-84 out
+        2: 85-106 out
+        3: 107-128 out
+        4: 129-150 out
+        5: 151-170 out
+        """
+        total_qps = 0
+
+        if "game_name" not in player_df.columns:
+            return 0
+
+        games_501 = player_df[player_df["game_name"] == "501 SIDO"]
+
+        for _, row in games_501.iterrows():
+            do_score = row.get("DO", 0)
+            if pd.notna(do_score):
+                try:
+                    do_score = float(do_score)
+                    if 151 <= do_score <= 170:
+                        total_qps += 5
+                    elif 129 <= do_score <= 150:
+                        total_qps += 4
+                    elif 107 <= do_score <= 128:
+                        total_qps += 3
+                    elif 85 <= do_score <= 106:
+                        total_qps += 2
+                    elif 61 <= do_score <= 84:
+                        total_qps += 1
+                except (ValueError, TypeError):
+                    pass
+
+        return total_qps
 
     def _empty_player_stats(self, player_name: str, games_to_qualify: int):
         """Return empty stats structure for players with no data."""

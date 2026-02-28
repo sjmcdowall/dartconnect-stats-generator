@@ -205,17 +205,38 @@ def main():
                 print("\nTip: Use --api-mode to avoid 2FA entirely!")
                 return 1
 
-    # Check if PDF directory exists
+    # Load config.yaml early — used for directory defaults and Wix folder
+    config_path = Path('config.yaml')
+    config = {}
+    if config_path.exists():
+        try:
+            with open(config_path) as f:
+                config = yaml.safe_load(f) or {}
+        except Exception:
+            pass
+
+    # Determine PDF directory: CLI flag > config.yaml > default 'output'
     pdf_dir = Path(args.pdf_dir)
+    if args.pdf_dir == 'output':
+        # No explicit --pdf-dir given; try config.yaml
+        config_output = config.get('directories', {}).get('output')
+        if config_output:
+            candidate = Path(config_output)
+            if candidate.exists():
+                pdf_dir = candidate
+                logger.info(f"📁 Using output dir from config: {pdf_dir}")
+
     if not pdf_dir.exists():
         print(f"❌ PDF directory not found: {pdf_dir}")
         print("\nGenerate PDFs first:")
         print("  python3 main_consolidated.py data/")
         return 1
 
-    # Find PDFs
-    individual_pdfs = sorted(pdf_dir.glob('Individual-*.pdf'), reverse=True)
-    overall_pdfs = sorted(pdf_dir.glob('Overall-*.pdf'), reverse=True)
+    # Find PDFs — pick the most recently modified file
+    individual_pdfs = sorted(pdf_dir.glob('Individual-*.pdf'),
+                             key=lambda f: f.stat().st_mtime, reverse=True)
+    overall_pdfs = sorted(pdf_dir.glob('Overall-*.pdf'),
+                          key=lambda f: f.stat().st_mtime, reverse=True)
 
     if not individual_pdfs or not overall_pdfs:
         print(f"❌ PDFs not found in {pdf_dir}")
@@ -244,7 +265,12 @@ def main():
         return 0
 
     # Calculate week number from the most recent CSV file
-    data_dir = Path(args.data_dir) if hasattr(args, 'data_dir') and args.data_dir else Path('data')
+    data_dir = Path(args.data_dir)
+    if args.data_dir == 'data':
+        # No explicit --data-dir; try config.yaml
+        config_data = config.get('directories', {}).get('data')
+        if config_data and Path(config_data).exists():
+            data_dir = Path(config_data)
 
     # Look for by_leg export first (best source) - case insensitive search
     all_csvs = list(data_dir.glob('*.csv'))
@@ -261,18 +287,10 @@ def main():
         week_number = calculate_week_number_from_csv(csv_files[0])
         logger.info(f"📅 Calculated week number: {week_number} from {csv_files[0].name}")
 
-    # Load Wix folder name from config
-    wix_folder = None
-    config_path = Path('config.yaml')
-    if config_path.exists():
-        try:
-            with open(config_path) as f:
-                config = yaml.safe_load(f)
-            wix_folder = config.get('directories', {}).get('wix_folder')
-            if wix_folder:
-                logger.info(f"📁 Using Wix folder from config: {wix_folder}")
-        except Exception as e:
-            logger.warning(f"Could not read config.yaml: {e}")
+    # Load Wix folder name from config (already loaded above)
+    wix_folder = config.get('directories', {}).get('wix_folder')
+    if wix_folder:
+        logger.info(f"📁 Using Wix folder from config: {wix_folder}")
 
     # Choose uploader based on mode
     if args.api_mode:

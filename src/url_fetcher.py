@@ -381,7 +381,7 @@ class DartConnectURLFetcher:
                         players[name] = {
                             "name": name,
                             "turn_data": [],  # Store each turn's marks and bulls
-                            "max_qp": 0,  # Best single turn QP
+                            "total_qp": 0,  # Sum of QPs from all qualifying turns
                         }
 
                     # Parse this turn's score to get marks and bulls
@@ -394,9 +394,8 @@ class DartConnectURLFetcher:
                     # Calculate QP for this turn
                     turn_qp = self._calculate_turn_qp(marks, bulls)
 
-                    # Track the maximum QP from any single turn
-                    if turn_qp > players[name]["max_qp"]:
-                        players[name]["max_qp"] = turn_qp
+                    # Accumulate QPs from all qualifying turns
+                    players[name]["total_qp"] += turn_qp
 
             # Add game-level information
             game_info = {
@@ -528,18 +527,124 @@ class DartConnectURLFetcher:
 
     def calculate_cricket_qp(self, player_stats: Dict[str, Any]) -> int:
         """
-        Get the maximum QP earned by a player in any single turn of the game.
+        Get the total QPs earned by a player across all qualifying turns.
 
-        The QP has already been calculated per-turn in _parse_cricket_game().
-        We simply return the max_qp value.
+        The QP has already been accumulated per-turn in _parse_cricket_game().
+        We simply return the total_qp value.
 
         Args:
-            player_stats: Player statistics from cricket game with 'max_qp' field
+            player_stats: Player statistics from cricket game with 'total_qp' field
 
         Returns:
-            Maximum QP earned in any single turn (0-5)
+            Total QPs earned across all qualifying turns in the game
         """
-        return player_stats.get("max_qp", 0)
+        return player_stats.get("total_qp", 0)
+
+    def extract_501_stats(self, game_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Extract 501-specific statistics from game data.
+
+        Args:
+            game_data: Game data dictionary from fetch_game_data()
+
+        Returns:
+            List of 501 game statistics with per-player turn QPs
+        """
+        games_501 = []
+
+        try:
+            segments = game_data.get("segments", {})
+
+            for segment_key, segment_games in segments.items():
+                if not isinstance(segment_games, list):
+                    continue
+
+                for game_group in segment_games:
+                    if not isinstance(game_group, list):
+                        continue
+
+                    for game in game_group:
+                        if game.get("game_name") == "501 SIDO":
+                            stats = self._parse_501_game(game)
+                            if stats:
+                                games_501.append(stats)
+
+            return games_501
+
+        except Exception as e:
+            self.logger.error(f"Error extracting 501 stats: {e}")
+            return []
+
+    def _parse_501_game(self, game: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Parse individual 501 game for turn-by-turn QP calculation."""
+        try:
+            turns = game.get("turns", [])
+            if not turns:
+                return None
+
+            players = {}
+
+            for turn in turns:
+                home_player = turn.get("home", {})
+                away_player = turn.get("away", {})
+
+                for player_data in [home_player, away_player]:
+                    if not player_data:
+                        continue
+
+                    name = player_data.get("name")
+                    if not name:
+                        continue
+
+                    # Normalize whitespace
+                    name = " ".join(name.split())
+
+                    if name not in players:
+                        players[name] = {
+                            "name": name,
+                            "total_turn_qp": 0,
+                        }
+
+                    turn_score = player_data.get("turn_score", 0)
+                    if turn_score is not None:
+                        try:
+                            score = int(turn_score)
+                            turn_qp = self._calculate_501_turn_qp(score)
+                            players[name]["total_turn_qp"] += turn_qp
+                        except (ValueError, TypeError):
+                            pass
+
+            return {
+                "game_name": "501 SIDO",
+                "winner_index": game.get("winner_index"),
+                "players": list(players.values()),
+            }
+
+        except Exception as e:
+            self.logger.error(f"Error parsing 501 game: {e}")
+            return None
+
+    def _calculate_501_turn_qp(self, turn_score: int) -> int:
+        """Calculate QP for a single 501 turn based on score.
+
+        Turn Score QPs:
+        1: 95-115
+        2: 116-131
+        3: 132-147
+        4: 148-163
+        5: 164-180
+        """
+        if 164 <= turn_score <= 180:
+            return 5
+        elif 148 <= turn_score <= 163:
+            return 4
+        elif 132 <= turn_score <= 147:
+            return 3
+        elif 116 <= turn_score <= 131:
+            return 2
+        elif 95 <= turn_score <= 115:
+            return 1
+        return 0
 
     def calculate_501_qp(
         self, total_score: int, checkout_score: Optional[int] = None
