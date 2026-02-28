@@ -372,6 +372,10 @@ class DartConnectURLFetcher:
                     if not name:
                         continue
 
+                    # Normalize whitespace (DartConnect sometimes has
+                    # trailing spaces in first names, e.g. "Lee  Kimbel")
+                    name = " ".join(name.split())
+
                     # Initialize player if not seen before
                     if name not in players:
                         players[name] = {
