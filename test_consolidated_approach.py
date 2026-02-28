@@ -12,6 +12,7 @@ from pathlib import Path
 import json
 from typing import Dict, Any, List
 import logging
+import pytest
 
 from src.config import Config
 from src.data_processor import DataProcessor
@@ -131,6 +132,12 @@ def save_test_files(test_dir: Path) -> Dict[str, Path]:
     dart_501_data.to_csv(files['dart_501'], index=False)
     
     return files
+
+
+@pytest.fixture
+def test_files(tmp_path):
+    """Pytest fixture that creates sample test data files in a temporary directory."""
+    return save_test_files(tmp_path)
 
 
 def test_url_processing_capability():

@@ -417,11 +417,13 @@ class DartConnectURLFetcher:
 
         Args:
             turn_score: Turn score string like "T20, S20" or "SB, DB, S19"
+                        Supports xN multiplier: "SBx2", "DBx3", "S20x2"
+                        Supports bare bull format: "B", "Bx2"
 
         Returns:
             Tuple of (marks, bulls) where:
             - marks = number of marks scored (hits on 15-20)
-            - bulls = number of bulls scored (SB=1, DB=2)
+            - bulls = number of bull marks scored (SB=1, DB=2 per dart)
         """
         if not turn_score:
             return (0, 0)
@@ -433,30 +435,31 @@ class DartConnectURLFetcher:
         darts = [d.strip() for d in turn_score.split(",")]
 
         for dart in darts:
-            # Count bulls
-            if "SB" in dart:
-                bulls += 1
-            elif "DB" in dart:
-                bulls += 2
+            # Determine xN multiplier (e.g., "SBx2" → 2, "T20x3" → 3)
+            multiplier = 1
+            if "x" in dart:
+                try:
+                    multiplier = int(dart.split("x")[1])
+                except (ValueError, IndexError):
+                    pass
+
+            # Count bulls: SB (single bull=1 mark), DB (double bull=2 marks),
+            # or bare B (single bull=1 mark)
+            if dart.startswith("SB"):
+                bulls += 1 * multiplier
+            elif dart.startswith("DB"):
+                bulls += 2 * multiplier
+            elif dart.startswith("B"):
+                # Bare "B" without S/D prefix — treat as single bull
+                bulls += 1 * multiplier
             # Count marks on cricket numbers (15-20)
             elif any(num in dart for num in ["15", "16", "17", "18", "19", "20"]):
-                # Count multiplier (T=3, D=2, S=1)
                 if dart.startswith("T"):
-                    marks += 3
+                    marks += 3 * multiplier
                 elif dart.startswith("D"):
-                    marks += 2
+                    marks += 2 * multiplier
                 elif dart.startswith("S"):
-                    marks += 1
-                # Handle format like "S20x2" (2 single 20s)
-                if "x" in dart:
-                    multiplier = int(dart.split("x")[1])
-                    # We already counted 1, so add the rest
-                    if dart.startswith("T"):
-                        marks += 3 * (multiplier - 1)
-                    elif dart.startswith("D"):
-                        marks += 2 * (multiplier - 1)
-                    elif dart.startswith("S"):
-                        marks += multiplier - 1
+                    marks += 1 * multiplier
 
         return (marks, bulls)
 
