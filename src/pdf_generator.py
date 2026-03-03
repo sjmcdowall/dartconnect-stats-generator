@@ -501,10 +501,70 @@ class PDFGenerator:
         table.setStyle(TableStyle(style))
         return table
 
+    def _build_disambiguation_map(self, all_names: List[str]) -> Dict[str, str]:
+        """Build a map of full_name -> display_name that disambiguates collisions.
+
+        Normally names display as 'First L.' but when two players share the same
+        first name and last initial (e.g. Ryan McCollum and Ryan Matuczinski),
+        we use enough of the last name to tell them apart (e.g. 'Ryan Mc.' vs 'Ryan Ma.').
+        """
+        from collections import defaultdict
+
+        display_map: Dict[str, str] = {}
+
+        # Group names by their default short form (first name + last initial)
+        short_groups: Dict[str, List[str]] = defaultdict(list)
+        for full_name in all_names:
+            parts = full_name.split()
+            if len(parts) > 1:
+                short = f"{parts[0]} {parts[-1][0]}."
+            else:
+                short = full_name
+            short_groups[short].append(full_name)
+
+        for short, group in short_groups.items():
+            if len(group) == 1:
+                # No collision — use default short form
+                display_map[group[0]] = short
+            else:
+                # Collision — use enough of the last name to disambiguate
+                last_names = [name.split()[-1] for name in group]
+                for full_name, last_name in zip(group, last_names):
+                    first_name = full_name.split()[0]
+                    # Find the minimum prefix length that makes this unique
+                    for length in range(2, len(last_name) + 1):
+                        prefix = last_name[:length]
+                        if sum(1 for ln in last_names if ln[:length] == prefix) == 1:
+                            display_map[full_name] = f"{first_name} {prefix}."
+                            break
+                    else:
+                        # Last names are identical — fall back to full last name
+                        display_map[full_name] = f"{first_name} {last_name}"
+
+        return display_map
+
     def _create_special_qp_register(self, division: str) -> Table:
         """Create the Special Quality Point Register box with actual achievements."""
         # Extract achievements from data
         achievements = self._extract_special_achievements(division)
+
+        # Build disambiguation map from ALL players in the division so that
+        # even if only one "Ryan M." has an achievement, the reader can tell
+        # which Ryan it is.
+        all_division_names: set = set()
+        df = (
+            self.enhanced_data.get("raw_data")
+            if hasattr(self, "enhanced_data") and isinstance(self.enhanced_data, dict)
+            else None
+        )
+        if df is not None and "player_name" in df.columns and "Division" in df.columns:
+            all_division_names = set(df[df["Division"] == division]["player_name"].unique())
+        # Ensure achievement holders are included even if cross-ref missed them
+        for key in ("perfect_180s", "six_bulls", "nine_hits"):
+            all_division_names.update(achievements[key].keys())
+        if achievements["highest_out"]:
+            all_division_names.add(achievements["highest_out"][0])
+        disambig = self._build_disambiguation_map(list(all_division_names))
 
         qp_data = []
 
@@ -522,7 +582,7 @@ class PDFGenerator:
         if achievements["perfect_180s"]:
             names = ", ".join(
                 [
-                    self._format_name(name, achievements["perfect_180s"][name])
+                    self._format_name(name, achievements["perfect_180s"][name], disambig)
                     for name in sorted(achievements["perfect_180s"].keys())
                 ]
             )
@@ -534,7 +594,7 @@ class PDFGenerator:
             qp_data.append(
                 [
                     Paragraph(
-                        f"{int(score)} OUT - {self._format_name_simple(player)}",
+                        f"{int(score)} OUT - {self._format_name_simple(player, disambig)}",
                         achievement_style,
                     )
                 ]
@@ -544,7 +604,7 @@ class PDFGenerator:
         if achievements["six_bulls"]:
             names = ", ".join(
                 [
-                    self._format_name(name, achievements["six_bulls"][name])
+                    self._format_name(name, achievements["six_bulls"][name], disambig)
                     for name in sorted(achievements["six_bulls"].keys())
                 ]
             )
@@ -554,7 +614,7 @@ class PDFGenerator:
         if achievements["nine_hits"]:
             names = ", ".join(
                 [
-                    self._format_name(name, achievements["nine_hits"][name])
+                    self._format_name(name, achievements["nine_hits"][name], disambig)
                     for name in sorted(achievements["nine_hits"].keys())
                 ]
             )
@@ -651,30 +711,39 @@ class PDFGenerator:
 
         return achievements
 
-    def _format_name(self, full_name: str, count: int) -> str:
-        """Format player name for achievement display (first name + last initial + count if > 1)."""
-        # Extract first name and last initial
-        parts = full_name.split()
-        if not parts:
-            return full_name
+    def _format_name(self, full_name: str, count: int, disambig: Dict[str, str] = None) -> str:
+        """Format player name for achievement display (first name + last initial + count if > 1).
 
-        first_name = parts[0]
-        # Get last initial if there's a last name
-        display_name = f"{first_name} {parts[-1][0]}." if len(parts) > 1 else first_name
+        Uses the disambiguation map when provided to resolve collisions like
+        two players both mapping to 'Ryan M.'
+        """
+        if disambig and full_name in disambig:
+            display_name = disambig[full_name]
+        else:
+            parts = full_name.split()
+            if not parts:
+                return full_name
+            first_name = parts[0]
+            display_name = f"{first_name} {parts[-1][0]}." if len(parts) > 1 else first_name
 
         # Add count if more than 1
         if count > 1:
             return f"{display_name}({count})"
         return display_name
 
-    def _format_name_simple(self, full_name: str) -> str:
-        """Format player name to first name + last initial."""
+    def _format_name_simple(self, full_name: str, disambig: Dict[str, str] = None) -> str:
+        """Format player name to first name + last initial.
+
+        Uses the disambiguation map when provided to resolve collisions.
+        """
+        if disambig and full_name in disambig:
+            return disambig[full_name]
+
         parts = full_name.split()
         if not parts:
             return full_name
 
         first_name = parts[0]
-        # Get last initial if there's a last name
         return f"{first_name} {parts[-1][0]}." if len(parts) > 1 else first_name
 
     def _create_individual_footer(self) -> List:
