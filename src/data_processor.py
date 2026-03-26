@@ -148,6 +148,8 @@ COMMON_FEMALE_NAMES = {
     "shannon",
     "misty",
     "desiree",
+    "brenda",
+    "erika",
 }
 
 # Unisex names to avoid guessing (removed casey, chris, lee since we have manual classifications)
