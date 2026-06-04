@@ -321,73 +321,90 @@ class DartConnectExporter:
                 raise RuntimeError("Could not find Login button")
             login_btn.click()
 
-            # 2) Navigate to Competition Organizer and click Manage League
+            # 2) Navigate to Tournaments / Leagues and click Manage League for WSSNDL
             time.sleep(3)
 
-            # Dismiss any modal if present
-            try:
-                dismiss = driver.find_element(
-                    By.XPATH,
-                    "//button[contains(., 'Dismiss') or contains(., 'Got it') or contains(., 'Ok')]",
-                )
-                if dismiss.is_displayed():
-                    dismiss.click()
-                    time.sleep(1)
-            except Exception:
-                pass
+            # Dismiss any modal if present (post-login)
+            self._dismiss_modal(driver)
 
-            # Click Competition Organizer in the top nav
-            comp_clicked = False
+            # Navigate to the Tournaments / Leagues organize page
+            # (previously "Competition Organizer", now "Tournaments / Leagues" -> /organize)
+            org_navigated = False
             for by, sel in [
+                (By.LINK_TEXT, "Tournaments / Leagues"),
+                (By.XPATH, "//a[contains(., 'Tournaments / Leagues')]"),
                 (By.LINK_TEXT, "Competition Organizer"),
                 (By.XPATH, "//a[contains(., 'Competition Organizer')]"),
             ]:
                 try:
-                    comp = driver.find_element(by, sel)
-                    comp.click()
-                    comp_clicked = True
-                    break
+                    el = driver.find_element(by, sel)
+                    if el.is_displayed():
+                        el.click()
+                        org_navigated = True
+                        time.sleep(2)
+                        break
                 except Exception:
                     continue
-            if not comp_clicked:
-                self.logger.debug("Could not click Competition Organizer; continuing")
-            time.sleep(1)
 
-            # In 'My Leagues' table, click Manage League
+            if not org_navigated:
+                # Fall back to direct URL
+                self.logger.debug("Nav link not found, navigating to /organize directly")
+                driver.get("https://my.dartconnect.com/organize")
+                time.sleep(3)
+
+            # Dump page for debug
+            if self.logger.level <= logging.DEBUG:
+                organizer_file = Path("debug_organizer_page.html")
+                with open(organizer_file, "w", encoding="utf-8") as f:
+                    f.write(driver.page_source)
+                self.logger.debug(f"Dumped organizer HTML to {organizer_file}")
+
+            # In 'My Leagues' table, prefer the WSSNDL row; fall back to first Manage League
             manage_clicked = False
-            # Look for the wire:click button for Manage League
-            manage_selectors = [
-                (By.XPATH, "//button[contains(@wire:click, 'loginLeaguePortal')]"),
-                (By.XPATH, "//button[.//span[contains(text(), 'Manage League')]]"),
-                (By.XPATH, "//button[contains(., 'Manage League')]"),
-                (By.LINK_TEXT, "Manage League"),
-                (By.XPATH, "//a[contains(., 'Manage League')]"),
-            ]
+            wssndl_keywords = ["winston", "wssndl", "sunday night"]
 
-            for by, sel in manage_selectors:
+            # First try: row-specific click for WSSNDL
+            for kw in wssndl_keywords:
                 try:
-                    ml = driver.find_element(by, sel)
+                    ml = driver.find_element(
+                        By.XPATH,
+                        f"//tr[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{kw}')]"
+                        f"//a[contains(., 'Manage League')]",
+                    )
+                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", ml)
+                    time.sleep(0.5)
                     ml.click()
                     manage_clicked = True
+                    self.logger.debug(f"Clicked Manage League for WSSNDL row (keyword: '{kw}')")
                     break
                 except Exception:
                     continue
+
+            # Second try: any Manage League link/button
             if not manage_clicked:
-                self.logger.error(
-                    "Manage League link not found - staying on Competition Organizer page"
-                )
-                # Don't use direct URL as it redirects back to dashboard
-                # Instead, dump the page content to see what's available
-                if self.logger.level <= logging.DEBUG:
-                    organizer_file = Path("debug_organizer_page.html")
-                    with open(organizer_file, "w", encoding="utf-8") as f:
-                        f.write(driver.page_source)
-                    self.logger.debug(
-                        f"Dumped Competition Organizer HTML to {organizer_file}"
-                    )
+                for by, sel in [
+                    (By.LINK_TEXT, "Manage League"),
+                    (By.XPATH, "//a[contains(., 'Manage League')]"),
+                    (By.XPATH, "//button[contains(., 'Manage League')]"),
+                    (By.XPATH, "//button[contains(@wire:click, 'loginLeaguePortal')]"),
+                ]:
+                    try:
+                        ml = driver.find_element(by, sel)
+                        ml.click()
+                        manage_clicked = True
+                        self.logger.debug(f"Clicked Manage League via fallback selector: {sel}")
+                        break
+                    except Exception:
+                        continue
+
+            if not manage_clicked:
+                self.logger.error("Manage League link not found")
 
             # 3) Wait for league portal to fully load (handle "Please wait a moment..." screen)
             self._wait_for_league_portal_load(driver, wait)
+
+            # Dismiss any modal/notification that appeared after portal load (e.g. "Introducing League Portal Notifications!")
+            self._dismiss_modal(driver)
 
             # 4) Check Match Log for errors before proceeding
             has_errors, error_messages = self._check_match_log_for_errors(driver, wait)
@@ -702,6 +719,22 @@ class DartConnectExporter:
             if driver:
                 driver.quit()
                 self.logger.debug("Browser closed")
+
+    def _dismiss_modal(self, driver) -> None:
+        """Dismiss any blocking modal/notification dialog (best-effort)."""
+        try:
+            btn = driver.find_element(
+                By.XPATH,
+                "//button[contains(., 'Ok, Got it') or contains(., 'Got it')"
+                " or contains(., 'Dismiss') or contains(., 'Close')"
+                " or (normalize-space(.)='Ok') or (normalize-space(.)='OK')]",
+            )
+            if btn.is_displayed():
+                btn.click()
+                self.logger.debug(f"Dismissed modal: '{btn.text.strip()}'")
+                time.sleep(1)
+        except Exception:
+            pass  # No modal present — that's fine
 
     def _check_match_log_for_errors(self, driver, wait) -> Tuple[bool, List[str]]:
         """Check Match Log page for any errors in the DartConnect system.
