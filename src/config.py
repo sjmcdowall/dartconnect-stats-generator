@@ -67,6 +67,11 @@ class Config:
                 "calculate_trends": True,
                 "rolling_window_games": 10,
             },
+            "eligibility": {
+                "qualify_multiplier": 1.5,
+                "default_rounds": 2,
+                "divisions": {},
+            },
         }
 
     def _merge_configs(

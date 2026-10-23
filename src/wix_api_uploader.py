@@ -414,7 +414,7 @@ class WixAPIUploader:
         individual_pdf: Path,
         overall_pdf: Path,
         week_number: int,
-        season_name: str = "SEASON 75 - 2026 Spring",
+        season_name: str = "SEASON 76 - 2026 Fall",
     ) -> bool:
         """
         Complete workflow: upload PDFs to weekly folder and Current/ folder, then publish.

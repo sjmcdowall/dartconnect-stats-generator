@@ -1,5 +1,5 @@
 #!/bin/bash
-# Weekly Statistics Update Script - Season 75 (Spring/Summer 2026)
+# Weekly Statistics Update Script - Season 76 (Fall/Winter 2026)
 #
 # Usage:
 #   ./weekly.sh           # Full workflow: download + reports + upload to Wix
@@ -9,9 +9,9 @@
 
 set -o pipefail
 
-# Season 75 directories
-DATA_DIR="data/season75"
-OUTPUT_DIR="output/season75"
+# Season 76 directories
+DATA_DIR="data/season76"
+OUTPUT_DIR="output/season76"
 
 # Use venv python if available
 if [ -f "venv/bin/python" ]; then
@@ -28,7 +28,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🎯 Season 75 Weekly Update - Spring/Summer 2026"
+echo "🎯 Season 76 Weekly Update - Fall/Winter 2026"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Parse arguments

@@ -196,6 +196,55 @@ class DataProcessor:
         self.logger = logging.getLogger(__name__)
         self.url_fetcher = DartConnectURLFetcher()
 
+    def _games_to_qualify_for_division(
+        self, division_name: str, observed_team_count: int
+    ) -> int:
+        """
+        Compute tournament games-to-qualify for a division.
+
+        Formula: int((teams - 1) * rounds * qualify_multiplier)
+
+        Rounds and optional pinned team counts come from config eligibility.* so
+        divisions can use different schedules (e.g. Winston double RR, Salem triple RR).
+        When teams is pinned in config, that value wins over the observed count so
+        early-season partial exports don't lower the threshold.
+        """
+        eligibility = self.config.get("eligibility", {}) or {}
+        multiplier = float(eligibility.get("qualify_multiplier", 1.5))
+        default_rounds = int(eligibility.get("default_rounds", 2))
+        division_cfg = (eligibility.get("divisions") or {}).get(
+            str(division_name).strip(), {}
+        ) or {}
+
+        rounds = int(division_cfg.get("rounds", default_rounds))
+        if division_cfg.get("teams") is not None:
+            num_teams = int(division_cfg["teams"])
+        else:
+            num_teams = int(observed_team_count)
+
+        if num_teams < 2 or rounds < 1:
+            self.logger.warning(
+                "Eligibility calc for %s: teams=%s rounds=%s — falling back to 0",
+                division_name,
+                num_teams,
+                rounds,
+            )
+            return 0
+
+        matches_per_team = (num_teams - 1) * rounds
+        games_to_qualify = int(matches_per_team * multiplier)
+        self.logger.info(
+            "Eligibility %s: %s teams × %s rounds = %s matches → qualify at %s "
+            "(multiplier %s)",
+            division_name,
+            num_teams,
+            rounds,
+            matches_per_team,
+            games_to_qualify,
+            multiplier,
+        )
+        return games_to_qualify
+
     def process_file(self, file_path: str) -> Dict[str, Any]:
         """
         Process DartConnect data file and return calculated statistics.
@@ -957,9 +1006,9 @@ class DataProcessor:
                 .unique()
             )
 
-            num_teams = len(division_teams)
-            matches_per_team = (num_teams - 1) * 2
-            games_to_qualify = int(matches_per_team * 1.5)
+            games_to_qualify = self._games_to_qualify_for_division(
+                division_clean, len(division_teams)
+            )
 
             teams_data = []
             for team_name in division_teams:
@@ -1180,12 +1229,10 @@ class DataProcessor:
             division_df = df[df["Division"] == division]
             division_teams = sorted(division_df["Team"].dropna().unique())
 
-            # Calculate games to qualify
-            # Round robin: each team plays every other team twice
-            # Games to qualify = (number of matches) × 1.5
-            num_teams = len(division_teams)
-            matches_per_team = (num_teams - 1) * 2
-            games_to_qualify = int(matches_per_team * 1.5)
+            # Games to qualify respects per-division rounds (double vs triple RR, etc.)
+            games_to_qualify = self._games_to_qualify_for_division(
+                division_clean, len(division_teams)
+            )
 
             teams_data = []
             for team_name in division_teams:
@@ -1489,12 +1536,10 @@ class DataProcessor:
             division_df = df[df["Division"] == division]
             division_teams = sorted(division_df["Team"].dropna().unique())
 
-            # Calculate games to qualify
-            # Round robin: each team plays every other team twice
-            # Games to qualify = (number of matches) × 1.5
-            num_teams = len(division_teams)
-            matches_per_team = (num_teams - 1) * 2
-            games_to_qualify = int(matches_per_team * 1.5)
+            # Games to qualify respects per-division rounds (double vs triple RR, etc.)
+            games_to_qualify = self._games_to_qualify_for_division(
+                division_clean, len(division_teams)
+            )
 
             teams_data = []
             for team_name in division_teams:

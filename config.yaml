@@ -37,13 +37,27 @@ league:
 
 # Season information for reports
 season:
-  number: '75th'  # e.g., '73rd', '74th', etc.
-  name: 'Spring/Summer 2026'  # e.g., 'Spring 2025', 'Fall/Winter 2025'
+  number: '76th'  # e.g., '73rd', '74th', etc.
+  name: 'Fall/Winter 2026'  # e.g., 'Spring 2025', 'Fall/Winter 2025'
   # Note: Week number is automatically calculated from match dates in the CSV
   # The first match date is considered Week 1
 
 # Directory settings (update each season)
 directories:
-  data: 'data/season75'
-  output: 'output/season75'
-  wix_folder: 'SEASON 75 - 2026 Spring'  # Wix Media Manager folder name
+  data: 'data/season76'
+  output: 'output/season76'
+  wix_folder: 'SEASON 76 - 2026 Fall'  # Wix Media Manager folder name
+
+# Tournament eligibility (per-division schedule)
+# games_to_qualify = int((teams - 1) * rounds * qualify_multiplier)
+# Season 76: Winston double RR (9 teams → 16 matches → 24), Salem triple RR (6 → 15 → 22)
+eligibility:
+  qualify_multiplier: 1.5
+  default_rounds: 2
+  divisions:
+    Winston:
+      rounds: 2
+      teams: 9          # pin so early-season partial exports don't undercount
+    Salem:
+      rounds: 3
+      teams: 6

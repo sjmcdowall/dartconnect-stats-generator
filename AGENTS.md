@@ -30,13 +30,13 @@ league:
   contact_info: 'board@wssndl.com'
 
 season:
-  number: '75th'              # Increment from previous (74th → 75th)
-  name: 'Spring/Summer 2026'  # Season name (Spring/Summer or Fall/Winter + year)
+  number: '76th'              # Increment from previous (75th → 76th)
+  name: 'Fall/Winter 2026'   # Season name (Spring/Summer or Fall/Winter + year)
 
 directories:
-  data: 'data/season75'       # Update season number
-  output: 'output/season75'   # Update season number
-  wix_folder: 'SEASON 75 - 2026 Spring'  # Wix Media Manager folder
+  data: 'data/season76'       # Update season number
+  output: 'output/season76'   # Update season number
+  wix_folder: 'SEASON 76 - 2026 Fall'  # Wix Media Manager folder
 ```
 
 ### 2. Create Season Directories
@@ -126,13 +126,15 @@ After initial setup, the weekly process is simple:
 
 ```
 data/
-  season74/           # Previous season data
-  season75/           # Current season data
+  season74/           # Older season data
+  season75/           # Previous season data
+  season76/           # Current season data
   archive/            # Old/backup files
 
 output/
-  season74/           # Previous season reports
-  season75/           # Current season reports
+  season74/           # Older season reports
+  season75/           # Previous season reports
+  season76/           # Current season reports
 ```
 
 ## Season History
@@ -141,6 +143,7 @@ output/
 |--------|-------------------|--------------|
 | 74     | Fall/Winter 2025  | season74/    |
 | 75     | Spring/Summer 2026| season75/    |
+| 76     | Fall/Winter 2026  | season76/    |
 
 ---
 
@@ -210,28 +213,28 @@ export DARTCONNECT_PASSWORD="your-password"
 #### Manual Commands
 ```bash
 # Auto-detect and process data files
-python main_consolidated.py data/season75/
+python main_consolidated.py data/season76/
 
 # Process specific file
-python main_consolidated.py data/season75/by_leg_export.csv
+python main_consolidated.py data/season76/by_leg_export.csv
 
 # Verbose logging for debugging
-python main_consolidated.py data/season75/ --verbose
+python main_consolidated.py data/season76/ --verbose
 
 # Custom output directory
-python main_consolidated.py data/season75/ -o output/season75/
+python main_consolidated.py data/season76/ -o output/season76/
 ```
 
 ### Automated Export Downloads
 ```bash
 # Download to current season directory
-python3 scripts/fetch_exports.py --headless -o data/season75
+python3 scripts/fetch_exports.py --headless -o data/season76
 
 # Download with browser visible (debugging)
-python3 scripts/fetch_exports.py -o data/season75
+python3 scripts/fetch_exports.py -o data/season76
 
 # Assisted mode: Opens portal, waits for manual export click
-python3 scripts/fetch_exports.py --assist -o data/season75
+python3 scripts/fetch_exports.py --assist -o data/season76
 
 # Check credentials
 python3 scripts/fetch_exports.py --check-creds
@@ -303,7 +306,9 @@ The application evaluates data quality after processing:
 - Division headers use color coding (Green/Winston, Blue/Salem)
 
 ### Player Eligibility
-- Must play 18 games to qualify for tournament
+- Per-division threshold from schedule: `int((teams - 1) × rounds × 1.5)`
+- Configured in `config.yaml` under `eligibility.divisions` (Season 76: Winston 9×2 → 24, Salem 6×3 → 22)
+- Do **not** assume double round-robin for every division — Salem plays triple RR this season
 - Rookie indicators: `®` = 1st season, `®®` = 2nd season
 - Eligibility status shown as "QUALIFIED" (green) or "INELIGIBLE" (red)
 
