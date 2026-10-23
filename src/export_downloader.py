@@ -352,6 +352,32 @@ class DartConnectExporter:
                 driver.get("https://my.dartconnect.com/organize")
                 time.sleep(3)
 
+            # Oct 2026 DartConnect redesign: /organize is now a card dashboard.
+            # Click into "My Leagues" ("Go to leagues") to reach the leagues list.
+            self._dismiss_modal(driver)
+            for by, sel in [
+                (By.XPATH, "//*[self::a or self::button or self::div][.//span[normalize-space()='Go to leagues']][not(.//*[self::a or self::button][.//span[normalize-space()='Go to leagues']])]"),
+                (By.XPATH, "//span[normalize-space()='Go to leagues']"),
+                (By.XPATH, "//a[normalize-space()='My Leagues']"),
+                (By.XPATH, "//*[self::a or self::button][contains(., 'My Leagues')]"),
+            ]:
+                try:
+                    el = driver.find_element(by, sel)
+                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
+                    time.sleep(0.5)
+                    try:
+                        el.click()
+                    except Exception:
+                        driver.execute_script("arguments[0].click();", el)
+                    self.logger.info(f"Opened My Leagues via: {sel}")
+                    time.sleep(4)
+                    break
+                except Exception:
+                    continue
+            if self.logger.level <= logging.DEBUG:
+                with open(Path("debug_leagues_page.html"), "w", encoding="utf-8") as f:
+                    f.write(driver.page_source)
+
             # Dump page for debug
             if self.logger.level <= logging.DEBUG:
                 organizer_file = Path("debug_organizer_page.html")
@@ -368,14 +394,17 @@ class DartConnectExporter:
                 try:
                     ml = driver.find_element(
                         By.XPATH,
-                        f"//tr[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{kw}')]"
-                        f"//a[contains(., 'Manage League')]",
+                        f"//*[self::tr or self::li or self::article][contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{kw}')]"
+                        f"//*[self::a or self::button][contains(., 'Manage League')]",
                     )
                     driver.execute_script("arguments[0].scrollIntoView({block:'center'});", ml)
                     time.sleep(0.5)
-                    ml.click()
+                    try:
+                        ml.click()
+                    except Exception:
+                        driver.execute_script("arguments[0].click();", ml)
                     manage_clicked = True
-                    self.logger.debug(f"Clicked Manage League for WSSNDL row (keyword: '{kw}')")
+                    self.logger.info(f"Clicked Manage League for WSSNDL row (keyword: '{kw}')")
                     break
                 except Exception:
                     continue
@@ -399,6 +428,30 @@ class DartConnectExporter:
 
             if not manage_clicked:
                 self.logger.error("Manage League link not found")
+            else:
+                # Oct 2026 redesign: Manage League opens the league portal in a new tab
+                start_url = driver.current_url
+                # Oct 2026 redesign: confirm "Redirect to League Portal" modal
+                for _ in range(20):
+                    try:
+                        cont = driver.find_element(By.XPATH, "//button[contains(., 'Continue to League Portal')]")
+                        try:
+                            cont.click()
+                        except Exception:
+                            driver.execute_script("arguments[0].click();", cont)
+                        self.logger.info("Clicked 'Continue to League Portal'")
+                        break
+                    except Exception:
+                        time.sleep(0.5)
+                for _ in range(60):
+                    if len(driver.window_handles) > 1 or "league.dartconnect.com" in driver.current_url:
+                        break
+                    time.sleep(0.5)
+                self.logger.info(f"Handles after Manage League: {len(driver.window_handles)}; url {driver.current_url} (was {start_url})")
+                if len(driver.window_handles) > 1:
+                    driver.switch_to.window(driver.window_handles[-1])
+                    self.logger.info("Switched to league portal tab")
+                self.logger.info(f"League portal URL: {driver.current_url}")
 
             # 3) Wait for league portal to fully load (handle "Please wait a moment..." screen)
             self._wait_for_league_portal_load(driver, wait)
