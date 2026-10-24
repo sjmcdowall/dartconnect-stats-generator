@@ -17,11 +17,15 @@ a PROBABLE ERROR report when:
       latest date
   (f) the QPs in processed_results.json (what gets published) differ from a
       fresh in-process run
-  (g) a player's published Men/Women list (processed_results.json lookup and
-      the newest Individual-*.pdf) differs from a non-blank DartConnect M/F
-      (players keyed by email, else team+name)
-  WARNINGS (do not fail): every player whose gender came from first-name
-  inference (all DartConnect M/F rows blank), and conflicting DartConnect M/F
+  (g) gender (players keyed by email, else team+name). Expected gender =
+      league Players roster (players_roster.csv) > non-blank by-leg export
+      M/F > config/gender_overrides.yaml. Fails when:
+        - a player has NO gender from roster, export or override
+        - the roster conflicts with a non-blank export M/F
+        - the published Men/Women list (processed_results.json lookup and the
+          newest Individual-*.pdf) differs from the expected gender
+  WARNINGS (do not fail): counts and names by gender source, overrides that
+  are ignored because DartConnect has a value, conflicting export M/F rows
 
 Exit code 0 = pass, 1 = PROBABLE ERROR (do not upload), 2 = could not run.
 
@@ -46,7 +50,14 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from src.config import Config  # noqa: E402
-from src.data_processor import DataProcessor, PLACEHOLDER_NAMES  # noqa: E402
+from src.data_processor import (  # noqa: E402
+    DataProcessor,
+    PLACEHOLDER_NAMES,
+    ROSTER_FILENAME,
+    load_gender_overrides,
+    load_players_roster,
+    roster_gender_for,
+)
 from src.pdf_generator import build_gender_lookup  # noqa: E402
 
 
@@ -133,8 +144,12 @@ def pdf_gender_lists(pdf_path, names_by_division):
     return out
 
 
-def gender_checks(csv_path, pub_df, pdf_path):
-    """Return (errors, warnings, notes) for gender list integrity."""
+def gender_checks(csv_path, pub_df, pdf_path, roster_path=None):
+    """Return (errors, warnings, notes) for gender list integrity.
+
+    Expected gender per player (keyed by email, else team+name):
+    roster > non-blank export M/F > config/gender_overrides.yaml.
+    """
     errors, warnings, notes = [], [], []
     raw = pd.read_csv(csv_path, low_memory=False)
     raw = raw[~raw["First Name"].astype(str).str.strip().str.lower().isin(PLACEHOLDER_NAMES)]
@@ -144,25 +159,59 @@ def gender_checks(csv_path, pub_df, pdf_path):
     raw["player_name"] = first + " " + lastfi.str.split(",").str[0].str.strip()
     raw["mf"] = raw["M/F"].where(raw["M/F"].notna(), "").astype(str).str.strip().str.upper()
     raw["key"] = DataProcessor._player_key_series(raw)
+
+    roster_path = Path(roster_path) if roster_path else Path(csv_path).parent / ROSTER_FILENAME
+    roster = load_players_roster(roster_path)
+    if roster is None:
+        warnings.append(f"    Players roster not found at {roster_path} (run scripts/fetch_roster.py)")
+    overrides = load_gender_overrides()
+
     dc = {}
     for key, grp in raw.groupby("key"):
         vals = set(v for v in grp["mf"] if v)
-        dc[key] = {
+        name = grp["player_name"].iloc[0]
+        teams = set(grp["Team"].dropna())
+        email = grp["Email"].iloc[0] if "Email" in grp.columns else None
+        rset = roster_gender_for(roster, email, name, teams)
+        info = {
             "vals": vals,
-            "name": grp["player_name"].iloc[0],
-            "teams": set(grp["Team"].dropna()),
+            "roster": rset,
+            "override": overrides.get(key),
+            "name": name,
+            "teams": teams,
             "division": grp["Division"].dropna().iloc[0] if grp["Division"].notna().any() else "",
         }
+        if len(rset) > 1:
+            errors.append(f"(g) roster has multiple genders for {name} <{key}>: {sorted(rset)}")
         if len(vals) > 1:
-            warnings.append(f"    conflicting DartConnect M/F for {grp['player_name'].iloc[0]} <{key}>: {grp['mf'].value_counts().to_dict()}")
+            warnings.append(f"    conflicting by-leg export M/F for {name} <{key}>: {grp['mf'].value_counts().to_dict()}")
+        if len(rset) == 1 and vals and vals != rset:
+            errors.append(
+                f"(g) ROSTER/EXPORT CONFLICT: {name} <{key}>: roster {next(iter(rset))} "
+                f"vs export M/F {grp['mf'][grp['mf'] != ''].value_counts().to_dict()}"
+            )
+        if len(rset) == 1:
+            info["expected"], info["source"] = next(iter(rset)), "roster"
+        elif len(vals) == 1:
+            info["expected"], info["source"] = next(iter(vals)), "export"
+        elif not rset and not vals and info["override"]:
+            info["expected"], info["source"] = info["override"], "override"
+        else:
+            info["expected"], info["source"] = None, "none"
+        if info["override"] and info["source"] in ("roster", "export"):
+            warnings.append(
+                f"    override ignored for {name} <{key}>: {info['source']} gender is {info['expected']} "
+                f"(override {info['override']}{', same' if info['override'] == info['expected'] else ', DIFFERENT'})"
+            )
+        dc[key] = info
 
-    # (team, name) shared by >1 unique player with different DartConnect genders
+    # (team, name) shared by >1 unique player with different genders
     tn = {}
     for key, info in dc.items():
         for t in info["teams"]:
             tn.setdefault((t, info["name"]), []).append(key)
     for (t, n), keys in tn.items():
-        gset = set().union(*(dc[k]["vals"] for k in keys))
+        gset = set(dc[k]["expected"] for k in keys if dc[k]["expected"]) | set().union(*(dc[k]["vals"] for k in keys))
         if len(keys) > 1 and len(gset) > 1:
             errors.append(f"(g) identity collision: {n} ({t}) is {len(keys)} players with M/F {sorted(gset)}: {keys}")
 
@@ -175,43 +224,40 @@ def gender_checks(csv_path, pub_df, pdf_path):
         warnings.append("    pdftotext not found - PDF gender lists not checked")
 
     checked = 0
-    for key, info in dc.items():
-        if len(info["vals"]) != 1:
+    by_source = {}
+    for key, info in sorted(dc.items(), key=lambda kv: kv[1]["name"]):
+        by_source.setdefault(info["source"], []).append(info["name"])
+        want = info["expected"]
+        if want is None:
+            errors.append(
+                f"(g) NO GENDER for {info['name']} ({', '.join(sorted(info['teams']))}) <{key}>: "
+                f"not in roster, export M/F blank, no override"
+            )
             continue
-        want = next(iter(info["vals"]))
         for t in info["teams"]:
             got = lookup.get((t, info["name"]))
             checked += 1
             if got != want:
-                errors.append(f"(g) {info['name']} ({t}) <{key}>: DartConnect M/F={want} but published gender={got}")
+                errors.append(f"(g) {info['name']} ({t}) <{key}>: {info['source']} gender={want} but published gender={got}")
         if pdf is not None:
             got_pdf = pdf.get((info["division"], info["name"]))
             if got_pdf is not None and got_pdf != want:
                 where = "both lists" if got_pdf == "BOTH" else ("Women lists" if got_pdf == "F" else "Men lists")
-                errors.append(f"(g) {info['name']} <{key}>: DartConnect M/F={want} but on {where} in {Path(pdf_path).name}")
+                errors.append(f"(g) {info['name']} <{key}>: {info['source']} gender={want} but on {where} in {Path(pdf_path).name}")
 
-    inferred = []
     if "gender_source" in pub_df.columns:
-        src = pub_df.drop_duplicates(["Team", "player_name"])
-        for _, r in src[src["gender_source"] == "inferred"].iterrows():
-            inferred.append(f"    {r['player_name']} ({r['Team']}) <{r.get('player_key', '')}> -> {r['player_gender']} (no DartConnect M/F)")
-    else:
-        for key, info in dc.items():
-            if not info["vals"]:
-                for t in info["teams"]:
-                    g = lookup.get((t, info["name"]))
-                    if g:
-                        inferred.append(f"    {info['name']} ({t}) <{key}> -> {g} (no DartConnect M/F)")
-    if inferred:
-        warnings.append(f"  {len(inferred)} player(s) with INFERRED gender (all DartConnect M/F blank):")
-        warnings.extend(sorted(inferred))
-    unknown = [info["name"] for info in dc.values() if not info["vals"]
-               and not any(lookup.get((t, info["name"])) for t in info["teams"])]
-    if unknown:
-        warnings.append(f"  {len(unknown)} player(s) with NO gender (left off Men/Women lists): {', '.join(sorted(unknown))}")
+        pub_src = pub_df.drop_duplicates("player_key")["gender_source"].value_counts().to_dict()
+        bad = {k: v for k, v in pub_src.items() if k not in ("roster", "dartconnect", "override")}
+        if bad:
+            errors.append(f"(g) published results have players with gender_source {bad} (expected roster/dartconnect/override only)")
+
+    labels = {"roster": "ROSTER", "export": "EXPORT M/F only (not in roster)", "override": "OVERRIDE (config/gender_overrides.yaml)"}
+    for src in ("roster", "export", "override"):
+        names = by_source.get(src, [])
+        warnings.append(f"  Gender source {labels[src]}: {len(names)} player(s)" + (f": {', '.join(names)}" if names else ""))
     notes.append(
-        f"Gender: {sum(1 for i in dc.values() if i['vals'])} players with DartConnect M/F checked "
-        f"({checked} team entries), {len(inferred)} inferred, "
+        "Gender sources: " + ", ".join(f"{s}={len(by_source.get(s, []))}" for s in ("roster", "export", "override", "none"))
+        + f" | {checked} team entries checked vs published, "
         f"PDF lists {'checked: ' + Path(pdf_path).name if pdf else 'not checked'}"
     )
     return errors, warnings, notes
@@ -289,7 +335,9 @@ def main():
         with tempfile.TemporaryDirectory() as td:
             pth = Path(td) / csv_path.name
             raw[raw_d < latest].to_csv(pth, index=False)
-            prior_tbl = player_table(DataProcessor(config).process_file(str(pth)))
+            prior_proc = DataProcessor(config)
+            prior_proc.roster_path = csv_path.parent / ROSTER_FILENAME
+            prior_tbl = player_table(prior_proc.process_file(str(pth)))
     cur_tbl = player_table(cur)
 
     # (c)/(d)/(e) per-player checks on the latest date

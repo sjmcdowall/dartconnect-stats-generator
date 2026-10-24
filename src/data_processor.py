@@ -11,170 +11,80 @@ from urllib.parse import urlparse
 from .config import Config
 from .url_fetcher import DartConnectURLFetcher
 
-# Common name lists for gender inference
-COMMON_MALE_NAMES = {
-    "john",
-    "michael",
-    "david",
-    "james",
-    "robert",
-    "william",
-    "richard",
-    "thomas",
-    "charles",
-    "joseph",
-    "christopher",
-    "daniel",
-    "matthew",
-    "anthony",
-    "mark",
-    "donald",
-    "steven",
-    "paul",
-    "andrew",
-    "joshua",
-    "kenneth",
-    "kevin",
-    "brian",
-    "george",
-    "timothy",
-    "ronald",
-    "edward",
-    "jason",
-    "ryan",
-    "gary",
-    "nicholas",
-    "eric",
-    "stephen",
-    "larry",
-    "justin",
-    "scott",
-    "brandon",
-    "benjamin",
-    "adam",
-    "samuel",
-    "gregory",
-    "alexander",
-    "patrick",
-    "tyler",
-    "frank",
-    "peter",
-    "marc",
-    "marcus",
-    "matt",
-    "mike",
-    "jeff",
-    "jeffrey",
-    "steve",
-    "bryan",
-    "bruce",
-    "shaun",
-    "sean",
-    "ian",
-    "craig",
-    "barry",
-    "dave",
-    "shane",
-    "josh",
-    "lee",
-    "clifford",
-    "landon",
-    "blake",
-    "erston",
-    "chris",
-    "casey",
-    "bill",
-    "rodel",
-    "rick",
-    "robbie",
-    "martin",
-}
+GENDER_OVERRIDES_PATH = Path(__file__).resolve().parent.parent / "config" / "gender_overrides.yaml"
 
-COMMON_FEMALE_NAMES = {
-    "mary",
-    "patricia",
-    "jennifer",
-    "linda",
-    "elizabeth",
-    "barbara",
-    "susan",
-    "jessica",
-    "sarah",
-    "karen",
-    "nancy",
-    "lisa",
-    "betty",
-    "margaret",
-    "sandra",
-    "ashley",
-    "kimberly",
-    "emily",
-    "donna",
-    "michelle",
-    "carol",
-    "amanda",
-    "melissa",
-    "deborah",
-    "stephanie",
-    "rebecca",
-    "laura",
-    "sharon",
-    "cynthia",
-    "kathleen",
-    "amy",
-    "angela",
-    "rachel",
-    "heather",
-    "nicole",
-    "christine",
-    "julie",
-    "anna",
-    "maria",
-    "victoria",
-    "bonnie",
-    "bonny",
-    "samantha",
-    "megan",
-    "katherine",
-    "catherine",
-    "jenny",
-    "lindsay",
-    "lindsey",
-    "amber",
-    "beth",
-    "betsy",
-    "jade",
-    "sherrie",
-    "shannon",
-    "misty",
-    "desiree",
-    "brenda",
-    "erika",
-}
 
-# Unisex names to avoid guessing (removed casey, chris, lee since we have manual classifications)
-UNISEX_NAMES = {
-    "alex",
-    "sam",
-    "jordan",
-    "taylor",
-    "jamie",
-    "morgan",
-    "bailey",
-    "skyler",
-    "skye",
-    "cameron",
-    "devon",
-    "drew",
-    "parker",
-    "reese",
-    "riley",
-    "sydney",
-    "syd",
-    "avery",
-    "quinn",
-    "kyle",
-}
+def load_gender_overrides(path=None) -> Dict[str, str]:
+    """Load manual gender overrides as {player_key: 'M'|'F'}.
+
+    Keys match DataProcessor._player_key_series: lower-cased email, or
+    "name:<Player Name>|team:<Team>" for players without an email.
+    Missing file -> {}. Invalid values raise ValueError.
+    """
+    import yaml
+
+    path = Path(path) if path else GENDER_OVERRIDES_PATH
+    if not path.exists():
+        return {}
+    with open(path) as f:
+        data = yaml.safe_load(f) or {}
+    out = {}
+    for email, g in (data.get("by_email") or {}).items():
+        out[str(email).strip().lower()] = str(g).strip().upper()
+    for tn, g in (data.get("by_team_name") or {}).items():
+        team, _, name = str(tn).partition("|")
+        if not name:
+            raise ValueError(f"gender override key '{tn}' must be 'Team|Player Name'")
+        out["name:" + name.strip() + "|team:" + team.strip()] = str(g).strip().upper()
+    bad = {k: v for k, v in out.items() if v not in ("M", "F")}
+    if bad:
+        raise ValueError(f"gender overrides must be M or F: {bad}")
+    return out
+
+
+ROSTER_FILENAME = "players_roster.csv"
+
+
+def _norm(v) -> str:
+    return " ".join(str(v).split()).lower() if v is not None and not pd.isna(v) else ""
+
+
+def load_players_roster(path):
+    """Load the league-portal Players roster (scripts/fetch_roster.py).
+
+    Returns (by_email, by_team_name) mapping to sets of genders, or None if the
+    file is missing. by_email keys are lower-cased emails; by_team_name keys are
+    (team, player name), both lower-cased and whitespace-normalised.
+    """
+    path = Path(path)
+    if not path.exists():
+        return None
+    r = pd.read_csv(path, dtype=str, keep_default_na=False)
+    by_email, by_tn = {}, {}
+    for _, row in r.iterrows():
+        g = str(row.get("gender", "")).strip().upper()
+        if g not in ("M", "F"):
+            continue
+        email = _norm(row.get("email"))
+        if email:
+            by_email.setdefault(email, set()).add(g)
+        by_tn.setdefault((_norm(row.get("team")), _norm(row.get("player_name"))), set()).add(g)
+    return by_email, by_tn
+
+
+def roster_gender_for(roster, email, name, teams):
+    """Roster gender set for a player: by email, else by any team + name."""
+    if not roster:
+        return set()
+    by_email, by_tn = roster
+    e = _norm(email)
+    if e and e != "nan" and e in by_email:
+        return by_email[e]
+    out = set()
+    for t in teams:
+        out |= by_tn.get((_norm(t), _norm(name)), set())
+    return out
+
 
 # Placeholder names to exclude from reports
 PLACEHOLDER_NAMES = {"ghost", "placeholder", "test", "dummy"}
@@ -195,6 +105,9 @@ class DataProcessor:
         self.stats_config = config.get_statistics_config()
         self.logger = logging.getLogger(__name__)
         self.url_fetcher = DartConnectURLFetcher()
+        # Players roster (gender source). None -> <export dir>/players_roster.csv
+        self.roster_path = None
+        self._input_path = None
 
     def _games_to_qualify_for_division(
         self, division_name: str, observed_team_count: int
@@ -256,6 +169,7 @@ class DataProcessor:
             Dictionary containing processed data and statistics
         """
         self.logger.info(f"Processing file: {file_path}")
+        self._input_path = Path(file_path)
 
         # Load data
         df = self._load_data(file_path)
@@ -311,7 +225,7 @@ class DataProcessor:
 
     def _clean_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Clean and validate the data."""
-        # Preserve First Name column before mapping (needed for gender inference)
+        # Preserve First Name column before mapping (placeholder-player filtering)
         # Clean whitespace from First Name to ensure proper matching
         has_first_name = "First Name" in df.columns
         if has_first_name:
@@ -378,9 +292,8 @@ class DataProcessor:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        # Gender: a non-blank DartConnect M/F is authoritative. Players are keyed
-        # by email (fallback team+name), and first-name inference is used only
-        # when EVERY row for that player is blank.
+        # Gender: league Players roster > non-blank export M/F > manual override
+        # (players keyed by email, fallback team+name). No name inference.
         if "M/F" in df.columns and "player_name" in df.columns:
             df = self._resolve_player_gender(df)
         if "_first_name_original" in df.columns:
@@ -439,31 +352,39 @@ class DataProcessor:
             return email.where(valid, fallback)
         return fallback
 
-    @staticmethod
-    def _infer_gender_from_first_name(first_name) -> tuple:
-        """Return (gender, confidence) from a first name, or (None, None)."""
-        if first_name is None or pd.isna(first_name):
-            return None, None
-        n = str(first_name).strip().lower()
-        if not n or n in UNISEX_NAMES:
-            return None, None
-        if n in COMMON_MALE_NAMES:
-            return "M", "high"
-        if n in COMMON_FEMALE_NAMES:
-            return "F", "high"
-        if len(n) >= 3 and n.endswith("a"):
-            return "F", "low"
-        return None, None
-
     def _resolve_player_gender(self, df: pd.DataFrame) -> pd.DataFrame:
         """Resolve one gender per unique player.
 
-        Adds columns: mf_dartconnect (raw DartConnect value), player_key,
-        player_gender (M/F/blank) and gender_source (dartconnect/inferred/unknown).
-        Non-blank DartConnect M/F values are never overwritten; blank M/F rows
-        are filled with the player's resolved gender for compatibility.
+        Adds columns: mf_dartconnect (raw by-leg export M/F), player_key,
+        player_gender (M/F/blank) and gender_source
+        (roster/dartconnect/override/unknown).
+
+        Precedence (players keyed by email, else team + name):
+          1. league-portal Players roster (data/<season>/players_roster.csv)
+          2. non-blank by-leg export M/F (conflict -> most recent)
+          3. manual override (config/gender_overrides.yaml) - only when 1 and 2
+             are both blank
+        First-name inference was removed (Oct 2026): a player with none of the
+        above gets no gender (left off Men/Women lists) and sanity_check.py
+        hard-fails.
+        Non-blank export M/F values are never overwritten; blank M/F rows are
+        filled with the player's resolved gender for compatibility.
         """
         df = df.copy()
+        overrides = load_gender_overrides()
+        roster_path = self.roster_path
+        if roster_path is None and self._input_path is not None:
+            roster_path = self._input_path.parent / ROSTER_FILENAME
+        roster = load_players_roster(roster_path) if roster_path else None
+        if roster is None:
+            self.logger.warning(
+                f"⚠️  No Players roster at {roster_path}; gender falls back to export M/F, then overrides"
+            )
+        else:
+            self.logger.info(
+                f"👥 Players roster: {len(roster[0])} emails, {len(roster[1])} team+name entries from {roster_path}"
+            )
+
         mf = df["M/F"].where(df["M/F"].notna(), "").astype(str).str.strip().str.upper()
         df["mf_dartconnect"] = mf
         df["player_key"] = self._player_key_series(df)
@@ -475,62 +396,96 @@ class DataProcessor:
             else pd.Series(pd.NaT, index=df.index)
         )
 
-        conflicts, filled, inferences, unknown = [], [], [], []
+        conflicts, filled, unknown = [], [], []
+        applied, ignored, roster_conflicts, roster_multi = [], [], [], []
+        counts = {}
         for key, idx in df.groupby("player_key").groups.items():
             vals = df.loc[idx, "mf_dartconnect"]
             nonblank = vals[vals != ""]
             name = df.loc[idx, "player_name"].iloc[0]
+            email = df.loc[idx, "Email"].iloc[0] if "Email" in df.columns else None
+            teams = (
+                sorted(set(df.loc[idx, "Team"].dropna().astype(str)))
+                if "Team" in df.columns
+                else []
+            )
+
+            export_g = None
             if len(nonblank):
                 uniq = sorted(nonblank.unique())
                 if len(uniq) > 1:
                     latest = dates.loc[nonblank.index].sort_values(ascending=False).index[0]
-                    gender = nonblank.loc[latest]
-                    conflicts.append((name, key, nonblank.value_counts().to_dict(), gender))
+                    export_g = nonblank.loc[latest]
+                    conflicts.append((name, key, nonblank.value_counts().to_dict(), export_g))
                 else:
-                    gender = uniq[0]
-                blank_idx = vals[vals == ""].index
-                if len(blank_idx):
-                    filled.append((name, len(blank_idx), gender))
-                    df.loc[blank_idx, "M/F"] = gender
-                df.loc[idx, "player_gender"] = gender
-                df.loc[idx, "gender_source"] = "dartconnect"
+                    export_g = uniq[0]
+
+            rset = roster_gender_for(roster, email, name, teams)
+            roster_g = None
+            if len(rset) == 1:
+                roster_g = next(iter(rset))
+            elif len(rset) > 1:
+                roster_multi.append((name, key, sorted(rset)))
+
+            if roster_g:
+                gender, source = roster_g, "roster"
+                if export_g and set(nonblank.unique()) != {roster_g}:
+                    roster_conflicts.append((name, key, nonblank.value_counts().to_dict(), roster_g))
+            elif export_g:
+                gender, source = export_g, "dartconnect"
+            elif key in overrides:
+                gender, source = overrides[key], "override"
+                applied.append((name, key, gender))
+            else:
+                unknown.append((name, key))
+                counts["unknown"] = counts.get("unknown", 0) + 1
                 continue
 
-            first = None
-            if "_first_name_original" in df.columns:
-                firsts = df.loc[idx, "_first_name_original"].dropna()
-                first = firsts.iloc[0] if len(firsts) else None
-            if first is None:
-                first = str(name).split()[0] if str(name).split() else None
-            gender, conf = self._infer_gender_from_first_name(first)
-            if gender:
-                df.loc[idx, "player_gender"] = gender
-                df.loc[idx, "gender_source"] = "inferred"
-                df.loc[idx, "M/F"] = gender
-                inferences.append((name, key, first, gender, conf))
-            else:
-                unknown.append((name, key, first))
+            if source in ("roster", "dartconnect") and key in overrides:
+                ignored.append((name, key, overrides[key], gender, source))
+            blank_idx = vals[vals == ""].index
+            if len(blank_idx):
+                if source == "dartconnect":
+                    filled.append((name, len(blank_idx), gender))
+                df.loc[blank_idx, "M/F"] = gender
+            df.loc[idx, "player_gender"] = gender
+            df.loc[idx, "gender_source"] = source
+            counts[source] = counts.get(source, 0) + 1
 
+        self.logger.info(f"👥 Gender sources (unique players): {counts}")
         if filled:
             self.logger.info(
-                f"🔧 Filled blank M/F rows from the player's DartConnect value for {len(filled)} player(s):"
+                f"🔧 Filled blank M/F rows from the player's DartConnect export value for {len(filled)} player(s):"
             )
             for name, n, g in filled:
                 self.logger.info(f"  • {name}: {n} blank row(s) → {g}")
-        for name, key, counts, g in conflicts:
+        for name, key, cnts, g in conflicts:
             self.logger.warning(
-                f"⚠️  Conflicting DartConnect M/F for {name} <{key}>: {counts} → using most recent '{g}'"
+                f"⚠️  Conflicting DartConnect M/F for {name} <{key}>: {cnts} → most recent '{g}'"
             )
-        if inferences:
+        for name, key, cnts, g in roster_conflicts:
+            self.logger.warning(
+                f"⚠️  ROSTER/EXPORT CONFLICT for {name} <{key}>: export M/F {cnts} vs roster '{g}' → using roster"
+            )
+        for name, key, gs in roster_multi:
+            self.logger.warning(f"⚠️  Roster has multiple genders for {name} <{key}>: {gs} (ignored)")
+        if applied:
             self.logger.info(
-                f"🔍 Inferred gender for {len(inferences)} player(s) with NO DartConnect M/F:"
+                f"📝 Applied manual gender override for {len(applied)} player(s) with no roster/export M/F:"
             )
-            for name, key, first, g, conf in inferences:
-                icon = "✓" if conf == "high" else "~"
-                self.logger.info(f"  {icon} {name} <{key}> (first: {first}) → {g} ({conf})")
-        for name, key, first in unknown:
+            for name, key, g in applied:
+                self.logger.info(f"  • {name} <{key}> → {g} (config/gender_overrides.yaml)")
+        for name, key, og, g, src in ignored:
+            self.logger.info(
+                f"  (gender override ignored for {name} <{key}>: {src} has '{g}', override '{og}')"
+            )
+        unused = set(overrides) - set(df["player_key"].unique())
+        for key in sorted(unused):
+            self.logger.info(f"  (gender override for <{key}> matched no player in this export)")
+        for name, key in unknown:
             self.logger.warning(
-                f"⚠️  No gender for {name} <{key}> (first: {first}); not on Men/Women lists"
+                f"⚠️  No gender for {name} <{key}> (not in roster, export M/F blank, no override); "
+                f"not on Men/Women lists - add to config/gender_overrides.yaml or fix in DartConnect"
             )
         return df
 

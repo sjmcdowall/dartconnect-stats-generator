@@ -250,214 +250,7 @@ class DartConnectExporter:
             driver = webdriver.Chrome(service=service, options=options)
             wait = WebDriverWait(driver, 20)
 
-            # 1) Login at my.dartconnect.com
-            self.logger.info("Opening My DartConnect login page...")
-            driver.get(self.LOGIN_URL)
-
-            # Find email/username field
-            def find_email_input():
-                candidates = [
-                    (By.CSS_SELECTOR, "input[type='email']"),
-                    (By.CSS_SELECTOR, "input[name*='email']"),
-                    (By.CSS_SELECTOR, "input[id*='email']"),
-                    (By.CSS_SELECTOR, "input[placeholder*='Email']"),
-                    (By.CSS_SELECTOR, "input[type='text']"),
-                ]
-                for by, sel in candidates:
-                    try:
-                        el = driver.find_element(by, sel)
-                        if el.is_displayed():
-                            return el
-                    except Exception:
-                        continue
-                return None
-
-            email_el = find_email_input()
-            if not email_el:
-                # The site might load via JS; wait briefly and retry
-                time.sleep(2)
-                email_el = find_email_input()
-            if not email_el:
-                raise RuntimeError(
-                    "Could not locate email/username input on login page"
-                )
-            email_el.clear()
-            email_el.send_keys(self.email)
-
-            # Password field
-            pwd_el = None
-            for by, sel in [
-                (By.CSS_SELECTOR, "input[type='password']"),
-                (By.CSS_SELECTOR, "input[name*='password']"),
-                (By.CSS_SELECTOR, "input[id*='password']"),
-            ]:
-                try:
-                    pwd_el = driver.find_element(by, sel)
-                    if pwd_el.is_displayed():
-                        break
-                except Exception:
-                    continue
-            if not pwd_el:
-                raise RuntimeError("Could not locate password input on login page")
-            pwd_el.clear()
-            pwd_el.send_keys(self.password)
-
-            # Click Login button
-            login_btn = None
-            for by, sel in [
-                (By.XPATH, "//button[contains(., 'Login')]"),
-                (
-                    By.XPATH,
-                    "//input[@type='submit' and (contains(@value,'Login') or contains(@value,'Sign'))]",
-                ),
-            ]:
-                try:
-                    login_btn = driver.find_element(by, sel)
-                    if login_btn.is_displayed():
-                        break
-                except Exception:
-                    continue
-            if not login_btn:
-                raise RuntimeError("Could not find Login button")
-            login_btn.click()
-
-            # 2) Navigate to Tournaments / Leagues and click Manage League for WSSNDL
-            time.sleep(3)
-
-            # Dismiss any modal if present (post-login)
-            self._dismiss_modal(driver)
-
-            # Navigate to the Tournaments / Leagues organize page
-            # (previously "Competition Organizer", now "Tournaments / Leagues" -> /organize)
-            org_navigated = False
-            for by, sel in [
-                (By.LINK_TEXT, "Tournaments / Leagues"),
-                (By.XPATH, "//a[contains(., 'Tournaments / Leagues')]"),
-                (By.LINK_TEXT, "Competition Organizer"),
-                (By.XPATH, "//a[contains(., 'Competition Organizer')]"),
-            ]:
-                try:
-                    el = driver.find_element(by, sel)
-                    if el.is_displayed():
-                        el.click()
-                        org_navigated = True
-                        time.sleep(2)
-                        break
-                except Exception:
-                    continue
-
-            if not org_navigated:
-                # Fall back to direct URL
-                self.logger.debug("Nav link not found, navigating to /organize directly")
-                driver.get("https://my.dartconnect.com/organize")
-                time.sleep(3)
-
-            # Oct 2026 DartConnect redesign: /organize is now a card dashboard.
-            # Click into "My Leagues" ("Go to leagues") to reach the leagues list.
-            self._dismiss_modal(driver)
-            for by, sel in [
-                (By.XPATH, "//*[self::a or self::button or self::div][.//span[normalize-space()='Go to leagues']][not(.//*[self::a or self::button][.//span[normalize-space()='Go to leagues']])]"),
-                (By.XPATH, "//span[normalize-space()='Go to leagues']"),
-                (By.XPATH, "//a[normalize-space()='My Leagues']"),
-                (By.XPATH, "//*[self::a or self::button][contains(., 'My Leagues')]"),
-            ]:
-                try:
-                    el = driver.find_element(by, sel)
-                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
-                    time.sleep(0.5)
-                    try:
-                        el.click()
-                    except Exception:
-                        driver.execute_script("arguments[0].click();", el)
-                    self.logger.info(f"Opened My Leagues via: {sel}")
-                    time.sleep(4)
-                    break
-                except Exception:
-                    continue
-            if self.logger.level <= logging.DEBUG:
-                with open(Path("debug_leagues_page.html"), "w", encoding="utf-8") as f:
-                    f.write(driver.page_source)
-
-            # Dump page for debug
-            if self.logger.level <= logging.DEBUG:
-                organizer_file = Path("debug_organizer_page.html")
-                with open(organizer_file, "w", encoding="utf-8") as f:
-                    f.write(driver.page_source)
-                self.logger.debug(f"Dumped organizer HTML to {organizer_file}")
-
-            # In 'My Leagues' table, prefer the WSSNDL row; fall back to first Manage League
-            manage_clicked = False
-            wssndl_keywords = ["winston", "wssndl", "sunday night"]
-
-            # First try: row-specific click for WSSNDL
-            for kw in wssndl_keywords:
-                try:
-                    ml = driver.find_element(
-                        By.XPATH,
-                        f"//*[self::tr or self::li or self::article][contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{kw}')]"
-                        f"//*[self::a or self::button][contains(., 'Manage League')]",
-                    )
-                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", ml)
-                    time.sleep(0.5)
-                    try:
-                        ml.click()
-                    except Exception:
-                        driver.execute_script("arguments[0].click();", ml)
-                    manage_clicked = True
-                    self.logger.info(f"Clicked Manage League for WSSNDL row (keyword: '{kw}')")
-                    break
-                except Exception:
-                    continue
-
-            # Second try: any Manage League link/button
-            if not manage_clicked:
-                for by, sel in [
-                    (By.LINK_TEXT, "Manage League"),
-                    (By.XPATH, "//a[contains(., 'Manage League')]"),
-                    (By.XPATH, "//button[contains(., 'Manage League')]"),
-                    (By.XPATH, "//button[contains(@wire:click, 'loginLeaguePortal')]"),
-                ]:
-                    try:
-                        ml = driver.find_element(by, sel)
-                        ml.click()
-                        manage_clicked = True
-                        self.logger.debug(f"Clicked Manage League via fallback selector: {sel}")
-                        break
-                    except Exception:
-                        continue
-
-            if not manage_clicked:
-                self.logger.error("Manage League link not found")
-            else:
-                # Oct 2026 redesign: Manage League opens the league portal in a new tab
-                start_url = driver.current_url
-                # Oct 2026 redesign: confirm "Redirect to League Portal" modal
-                for _ in range(20):
-                    try:
-                        cont = driver.find_element(By.XPATH, "//button[contains(., 'Continue to League Portal')]")
-                        try:
-                            cont.click()
-                        except Exception:
-                            driver.execute_script("arguments[0].click();", cont)
-                        self.logger.info("Clicked 'Continue to League Portal'")
-                        break
-                    except Exception:
-                        time.sleep(0.5)
-                for _ in range(60):
-                    if len(driver.window_handles) > 1 or "league.dartconnect.com" in driver.current_url:
-                        break
-                    time.sleep(0.5)
-                self.logger.info(f"Handles after Manage League: {len(driver.window_handles)}; url {driver.current_url} (was {start_url})")
-                if len(driver.window_handles) > 1:
-                    driver.switch_to.window(driver.window_handles[-1])
-                    self.logger.info("Switched to league portal tab")
-                self.logger.info(f"League portal URL: {driver.current_url}")
-
-            # 3) Wait for league portal to fully load (handle "Please wait a moment..." screen)
-            self._wait_for_league_portal_load(driver, wait)
-
-            # Dismiss any modal/notification that appeared after portal load (e.g. "Introducing League Portal Notifications!")
-            self._dismiss_modal(driver)
+            self._open_league_portal(driver, wait)
 
             # 4) Check Match Log for errors before proceeding
             has_errors, error_messages = self._check_match_log_for_errors(driver, wait)
@@ -772,6 +565,338 @@ class DartConnectExporter:
             if driver:
                 driver.quit()
                 self.logger.debug("Browser closed")
+
+    def _open_league_portal(self, driver, wait) -> None:
+        """Log in at my.dartconnect.com and open the WSSNDL league portal (read-only navigation)."""
+        # 1) Login at my.dartconnect.com
+        self.logger.info("Opening My DartConnect login page...")
+        driver.get(self.LOGIN_URL)
+
+        # Find email/username field
+        def find_email_input():
+            candidates = [
+                (By.CSS_SELECTOR, "input[type='email']"),
+                (By.CSS_SELECTOR, "input[name*='email']"),
+                (By.CSS_SELECTOR, "input[id*='email']"),
+                (By.CSS_SELECTOR, "input[placeholder*='Email']"),
+                (By.CSS_SELECTOR, "input[type='text']"),
+            ]
+            for by, sel in candidates:
+                try:
+                    el = driver.find_element(by, sel)
+                    if el.is_displayed():
+                        return el
+                except Exception:
+                    continue
+            return None
+
+        email_el = find_email_input()
+        if not email_el:
+            # The site might load via JS; wait briefly and retry
+            time.sleep(2)
+            email_el = find_email_input()
+        if not email_el:
+            raise RuntimeError(
+                "Could not locate email/username input on login page"
+            )
+        email_el.clear()
+        email_el.send_keys(self.email)
+
+        # Password field
+        pwd_el = None
+        for by, sel in [
+            (By.CSS_SELECTOR, "input[type='password']"),
+            (By.CSS_SELECTOR, "input[name*='password']"),
+            (By.CSS_SELECTOR, "input[id*='password']"),
+        ]:
+            try:
+                pwd_el = driver.find_element(by, sel)
+                if pwd_el.is_displayed():
+                    break
+            except Exception:
+                continue
+        if not pwd_el:
+            raise RuntimeError("Could not locate password input on login page")
+        pwd_el.clear()
+        pwd_el.send_keys(self.password)
+
+        # Click Login button
+        login_btn = None
+        for by, sel in [
+            (By.XPATH, "//button[contains(., 'Login')]"),
+            (
+                By.XPATH,
+                "//input[@type='submit' and (contains(@value,'Login') or contains(@value,'Sign'))]",
+            ),
+        ]:
+            try:
+                login_btn = driver.find_element(by, sel)
+                if login_btn.is_displayed():
+                    break
+            except Exception:
+                continue
+        if not login_btn:
+            raise RuntimeError("Could not find Login button")
+        login_btn.click()
+
+        # 2) Navigate to Tournaments / Leagues and click Manage League for WSSNDL
+        time.sleep(3)
+
+        # Dismiss any modal if present (post-login)
+        self._dismiss_modal(driver)
+
+        # Navigate to the Tournaments / Leagues organize page
+        # (previously "Competition Organizer", now "Tournaments / Leagues" -> /organize)
+        org_navigated = False
+        for by, sel in [
+            (By.LINK_TEXT, "Tournaments / Leagues"),
+            (By.XPATH, "//a[contains(., 'Tournaments / Leagues')]"),
+            (By.LINK_TEXT, "Competition Organizer"),
+            (By.XPATH, "//a[contains(., 'Competition Organizer')]"),
+        ]:
+            try:
+                el = driver.find_element(by, sel)
+                if el.is_displayed():
+                    el.click()
+                    org_navigated = True
+                    time.sleep(2)
+                    break
+            except Exception:
+                continue
+
+        if not org_navigated:
+            # Fall back to direct URL
+            self.logger.debug("Nav link not found, navigating to /organize directly")
+            driver.get("https://my.dartconnect.com/organize")
+            time.sleep(3)
+
+        # Oct 2026 DartConnect redesign: /organize is now a card dashboard.
+        # Click into "My Leagues" ("Go to leagues") to reach the leagues list.
+        self._dismiss_modal(driver)
+        for by, sel in [
+            (By.XPATH, "//*[self::a or self::button or self::div][.//span[normalize-space()='Go to leagues']][not(.//*[self::a or self::button][.//span[normalize-space()='Go to leagues']])]"),
+            (By.XPATH, "//span[normalize-space()='Go to leagues']"),
+            (By.XPATH, "//a[normalize-space()='My Leagues']"),
+            (By.XPATH, "//*[self::a or self::button][contains(., 'My Leagues')]"),
+        ]:
+            try:
+                el = driver.find_element(by, sel)
+                driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
+                time.sleep(0.5)
+                try:
+                    el.click()
+                except Exception:
+                    driver.execute_script("arguments[0].click();", el)
+                self.logger.info(f"Opened My Leagues via: {sel}")
+                time.sleep(4)
+                break
+            except Exception:
+                continue
+        if self.logger.level <= logging.DEBUG:
+            with open(Path("debug_leagues_page.html"), "w", encoding="utf-8") as f:
+                f.write(driver.page_source)
+
+        # Dump page for debug
+        if self.logger.level <= logging.DEBUG:
+            organizer_file = Path("debug_organizer_page.html")
+            with open(organizer_file, "w", encoding="utf-8") as f:
+                f.write(driver.page_source)
+            self.logger.debug(f"Dumped organizer HTML to {organizer_file}")
+
+        # In 'My Leagues' table, prefer the WSSNDL row; fall back to first Manage League
+        manage_clicked = False
+        wssndl_keywords = ["winston", "wssndl", "sunday night"]
+
+        # First try: row-specific click for WSSNDL
+        for kw in wssndl_keywords:
+            try:
+                ml = driver.find_element(
+                    By.XPATH,
+                    f"//*[self::tr or self::li or self::article][contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{kw}')]"
+                    f"//*[self::a or self::button][contains(., 'Manage League')]",
+                )
+                driver.execute_script("arguments[0].scrollIntoView({block:'center'});", ml)
+                time.sleep(0.5)
+                try:
+                    ml.click()
+                except Exception:
+                    driver.execute_script("arguments[0].click();", ml)
+                manage_clicked = True
+                self.logger.info(f"Clicked Manage League for WSSNDL row (keyword: '{kw}')")
+                break
+            except Exception:
+                continue
+
+        # Second try: any Manage League link/button
+        if not manage_clicked:
+            for by, sel in [
+                (By.LINK_TEXT, "Manage League"),
+                (By.XPATH, "//a[contains(., 'Manage League')]"),
+                (By.XPATH, "//button[contains(., 'Manage League')]"),
+                (By.XPATH, "//button[contains(@wire:click, 'loginLeaguePortal')]"),
+            ]:
+                try:
+                    ml = driver.find_element(by, sel)
+                    ml.click()
+                    manage_clicked = True
+                    self.logger.debug(f"Clicked Manage League via fallback selector: {sel}")
+                    break
+                except Exception:
+                    continue
+
+        if not manage_clicked:
+            self.logger.error("Manage League link not found")
+        else:
+            # Oct 2026 redesign: Manage League opens the league portal in a new tab
+            start_url = driver.current_url
+            # Oct 2026 redesign: confirm "Redirect to League Portal" modal
+            for _ in range(20):
+                try:
+                    cont = driver.find_element(By.XPATH, "//button[contains(., 'Continue to League Portal')]")
+                    try:
+                        cont.click()
+                    except Exception:
+                        driver.execute_script("arguments[0].click();", cont)
+                    self.logger.info("Clicked 'Continue to League Portal'")
+                    break
+                except Exception:
+                    time.sleep(0.5)
+            for _ in range(60):
+                if len(driver.window_handles) > 1 or "league.dartconnect.com" in driver.current_url:
+                    break
+                time.sleep(0.5)
+            self.logger.info(f"Handles after Manage League: {len(driver.window_handles)}; url {driver.current_url} (was {start_url})")
+            if len(driver.window_handles) > 1:
+                driver.switch_to.window(driver.window_handles[-1])
+                self.logger.info("Switched to league portal tab")
+            self.logger.info(f"League portal URL: {driver.current_url}")
+
+        # 3) Wait for league portal to fully load (handle "Please wait a moment..." screen)
+        self._wait_for_league_portal_load(driver, wait)
+
+        # Dismiss any modal/notification that appeared after portal load (e.g. "Introducing League Portal Notifications!")
+        self._dismiss_modal(driver)
+
+    ROSTER_COLUMNS = [
+        "player_name", "first_name", "last_name", "email", "team", "division",
+        "gender", "status", "member_level", "dc_member_id",
+    ]
+
+    def download_players_roster(self, output_dir: str) -> Optional[Path]:
+        """Save the league portal Players-tab roster (with M/F) as players_roster.csv.
+
+        STRICTLY READ-ONLY: logs in, opens the league portal, clicks the
+        Players tab, and captures the JSON the page itself loads
+        (POST /api/league/getPlayers - a query, no changes) from Chrome's
+        network log. Nothing is clicked except navigation tabs.
+        """
+        if not SELENIUM_AVAILABLE:
+            self.logger.error("Selenium not installed. pip install selenium webdriver-manager")
+            return None
+        import csv
+        import json as _json
+
+        out = Path(output_dir).resolve() / "players_roster.csv"
+        driver = None
+        try:
+            options = webdriver.ChromeOptions()
+            if self.headless:
+                options.add_argument("--headless=new")
+            options.add_argument("--window-size=1400,900")
+            options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
+            wait = WebDriverWait(driver, 20)
+
+            self._open_league_portal(driver, wait)
+            if "league.dartconnect.com" not in driver.current_url:
+                raise RuntimeError(f"Not in league portal (url {driver.current_url})")
+
+            tab = None
+            for _ in range(30):
+                self._dismiss_modal(driver)
+                tabs = [
+                    e for e in driver.find_elements(By.XPATH, "//a[normalize-space()='Players']")
+                    if e.is_displayed()
+                ]
+                if tabs:
+                    tab = tabs[0]
+                    break
+                time.sleep(1)
+            if tab is None:
+                raise RuntimeError("Players tab not found in league portal")
+            driver.get_log("performance")  # discard earlier network events
+            driver.execute_script("arguments[0].click();", tab)
+            self.logger.info("Opened Players tab; waiting for roster data...")
+
+            payload = None
+            deadline = time.time() + 45
+            while payload is None and time.time() < deadline:
+                time.sleep(1)
+                for entry in driver.get_log("performance"):
+                    msg = _json.loads(entry["message"])["message"]
+                    if msg.get("method") != "Network.loadingFinished":
+                        continue
+                    rid = msg["params"]["requestId"]
+                    try:
+                        body = driver.execute_cdp_cmd("Network.getResponseBody", {"requestId": rid})["body"]
+                    except Exception:
+                        continue
+                    if '"rows"' not in body or '"gender"' not in body:
+                        continue
+                    data = _json.loads(body)
+                    if isinstance(data, dict) and data.get("status") == "OK" and "rows" in (data.get("payload") or {}):
+                        payload = data["payload"]
+                        break
+            if payload is None:
+                raise RuntimeError("Players roster data (api/league/getPlayers) not captured")
+
+            rows = payload["rows"]
+            total = payload.get("record_count")
+            if total is not None and int(total) != len(rows):
+                raise RuntimeError(f"Roster is paged: got {len(rows)} of {total} players")
+
+            def clean(v):
+                return " ".join(str(v).split()) if v is not None else ""
+
+            out.parent.mkdir(parents=True, exist_ok=True)
+            tmp = out.with_suffix(".csv.tmp")
+            with open(tmp, "w", newline="", encoding="utf-8") as f:
+                w = csv.DictWriter(f, fieldnames=self.ROSTER_COLUMNS)
+                w.writeheader()
+                for r in rows:
+                    first, last = clean(r.get("player_first_name")), clean(r.get("player_last_name"))
+                    w.writerow({
+                        "player_name": f"{first} {last}".strip(),
+                        "first_name": first,
+                        "last_name": last,
+                        "email": clean(r.get("dc_player_email")).lower(),
+                        "team": clean(r.get("team_name")),
+                        "division": clean(r.get("division")),
+                        "gender": clean(r.get("gender")).upper(),
+                        "status": clean(r.get("status")),
+                        "member_level": clean(r.get("member_level")),
+                        "dc_member_id": clean(r.get("player_dc_member_id")),
+                    })
+            tmp.replace(out)
+            genders = {}
+            for r in rows:
+                g = clean(r.get("gender")).upper() or "blank"
+                genders[g] = genders.get(g, 0) + 1
+            self.logger.info(
+                f"✅ Saved {len(rows)} roster players to {out} (gender: {genders}; "
+                f"hidden by portal filter: {payload.get('hidden')})"
+            )
+            return out
+        except Exception as e:
+            self.logger.error(f"❌ Roster download failed: {e}")
+            return None
+        finally:
+            if driver:
+                try:
+                    driver.quit()
+                except Exception:
+                    pass
 
     def _dismiss_modal(self, driver) -> None:
         """Dismiss any blocking modal/notification dialog (best-effort)."""

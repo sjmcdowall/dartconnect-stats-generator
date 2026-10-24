@@ -4,7 +4,7 @@
 # Usage:
 #   ./weekly.sh           # Full workflow: download + reports + upload to Wix
 #   ./weekly.sh --reports # Reports only (skip download)
-#   ./weekly.sh --download # Download only (skip reports & upload)
+#   ./weekly.sh --download # Download export + Players roster only (skip reports & upload)
 #   ./weekly.sh --no-upload # Download + reports, skip Wix upload
 
 set -o pipefail
@@ -61,6 +61,15 @@ if $DOWNLOAD; then
         exit 1
     fi
     echo -e "${GREEN}✅ Download complete${NC}"
+
+    # Step 1b: Refresh the league-portal Players roster (authoritative M/F; read-only)
+    echo -e "\n${BLUE}👥 Step 1b: Refreshing league Players roster (gender source)...${NC}"
+    if $PYTHON scripts/fetch_roster.py --headless -o "$DATA_DIR"; then
+        echo -e "${GREEN}✅ Roster refreshed: $DATA_DIR/players_roster.csv${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Roster refresh failed - using existing $DATA_DIR/players_roster.csv if present${NC}"
+        echo -e "${YELLOW}   (sanity check hard-fails if any player ends up with no gender)${NC}"
+    fi
 fi
 
 # Step 2: Generate reports
