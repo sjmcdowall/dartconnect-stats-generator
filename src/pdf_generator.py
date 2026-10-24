@@ -22,6 +22,31 @@ import logging
 from .config import Config
 
 
+def build_gender_lookup(df: pd.DataFrame, logger=None) -> Dict:
+    """Map (team, player_name) -> 'M'/'F' from processed raw_data.
+
+    Uses the resolved per-player `player_gender` column (DartConnect M/F wins,
+    inference only when all DartConnect values are blank). A (team, name) that
+    resolves to more than one gender is ambiguous and is left off both lists.
+    """
+    if df is None or len(df) == 0 or "player_name" not in df.columns:
+        return {}
+    col = "player_gender" if "player_gender" in df.columns else "M/F"
+    team = df["Team"] if "Team" in df.columns else pd.Series("", index=df.index)
+    vals = df[col].where(df[col].notna(), "").astype(str).str.strip().str.upper()
+    tmp = pd.DataFrame({"team": team, "name": df["player_name"], "g": vals})
+    tmp = tmp[tmp["g"].isin(["M", "F"])]
+    lookup = {}
+    for (t, n), grp in tmp.groupby(["team", "name"]):
+        uniq = grp["g"].unique()
+        if len(uniq) == 1:
+            lookup[(t, n)] = uniq[0]
+        elif logger:
+            logger.error(f"Ambiguous gender for {n} ({t}): {sorted(uniq)} - left off gender lists")
+    return lookup
+
+
+
 class PDFGenerator:
     """Generates PDF reports from processed DartConnect statistics."""
 
@@ -272,17 +297,18 @@ class PDFGenerator:
             )
             return content
 
-        # Separate players by gender (from raw_data)
+        # Separate players by gender, keyed per (team, player) - never by
+        # display name alone, so name collisions cannot leak across players.
         df = data.get("raw_data", pd.DataFrame())
-        player_genders = (
-            df[["player_name", "M/F"]]
-            .drop_duplicates()
-            .set_index("player_name")["M/F"]
-            .to_dict()
-        )
-
-        women_players = [p for p in all_players if player_genders.get(p["name"]) == "F"]
-        men_players = [p for p in all_players if player_genders.get(p["name"]) == "M"]
+        gender_lookup = build_gender_lookup(df, self.logger)
+        women_players, men_players = [], []
+        for team in team_stats:
+            for p in team["players"]:
+                g = gender_lookup.get((team["name"], p["name"]))
+                if g == "F":
+                    women_players.append(p)
+                elif g == "M":
+                    men_players.append(p)
 
         # Helper to format and sort rankings
         def get_rankings(players, category):

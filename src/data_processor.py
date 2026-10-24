@@ -378,21 +378,13 @@ class DataProcessor:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        # Normalize gender per player (use most recent value)
-        if (
-            "M/F" in df.columns
-            and "player_name" in df.columns
-            and "game_date" in df.columns
-        ):
-            df = self._normalize_player_gender(df)
-
-        # Infer missing gender from first names
-        if (
-            "M/F" in df.columns
-            and "player_name" in df.columns
-            and "_first_name_original" in df.columns
-        ):
-            df = self._infer_missing_gender(df)
+        # Gender: a non-blank DartConnect M/F is authoritative. Players are keyed
+        # by email (fallback team+name), and first-name inference is used only
+        # when EVERY row for that player is blank.
+        if "M/F" in df.columns and "player_name" in df.columns:
+            df = self._resolve_player_gender(df)
+        if "_first_name_original" in df.columns:
+            df = df.drop(columns=["_first_name_original"])
 
         self.logger.info(f"Cleaned data: {len(df)} rows remaining")
         return df
@@ -431,174 +423,115 @@ class DataProcessor:
 
         return column_mapping
 
-    def _normalize_player_gender(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Normalize gender per player by using the most recent non-empty value.
+    @staticmethod
+    def _player_key_series(df: pd.DataFrame) -> pd.Series:
+        """Unique player key: lower-cased email, else team + display name."""
+        name = df["player_name"].astype(str).str.strip()
+        team = (
+            df["Team"].astype(str).str.strip()
+            if "Team" in df.columns
+            else pd.Series("", index=df.index)
+        )
+        fallback = "name:" + name + "|team:" + team
+        if "Email" in df.columns:
+            email = df["Email"].astype(str).str.strip().str.lower()
+            valid = df["Email"].notna() & (email != "") & (email != "nan")
+            return email.where(valid, fallback)
+        return fallback
 
-        This handles cases where a player's gender was incorrectly recorded in
-        earlier games but corrected in later games. We take the gender from the
-        most recent game as the authoritative value.
+    @staticmethod
+    def _infer_gender_from_first_name(first_name) -> tuple:
+        """Return (gender, confidence) from a first name, or (None, None)."""
+        if first_name is None or pd.isna(first_name):
+            return None, None
+        n = str(first_name).strip().lower()
+        if not n or n in UNISEX_NAMES:
+            return None, None
+        if n in COMMON_MALE_NAMES:
+            return "M", "high"
+        if n in COMMON_FEMALE_NAMES:
+            return "F", "high"
+        if len(n) >= 3 and n.endswith("a"):
+            return "F", "low"
+        return None, None
+
+    def _resolve_player_gender(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Resolve one gender per unique player.
+
+        Adds columns: mf_dartconnect (raw DartConnect value), player_key,
+        player_gender (M/F/blank) and gender_source (dartconnect/inferred/unknown).
+        Non-blank DartConnect M/F values are never overwritten; blank M/F rows
+        are filled with the player's resolved gender for compatibility.
         """
-        if df.empty or "M/F" not in df.columns or "player_name" not in df.columns:
-            return df
+        df = df.copy()
+        mf = df["M/F"].where(df["M/F"].notna(), "").astype(str).str.strip().str.upper()
+        df["mf_dartconnect"] = mf
+        df["player_key"] = self._player_key_series(df)
+        df["player_gender"] = ""
+        df["gender_source"] = "unknown"
+        dates = (
+            pd.to_datetime(df["game_date"], errors="coerce")
+            if "game_date" in df.columns
+            else pd.Series(pd.NaT, index=df.index)
+        )
 
-        # Ensure game_date is datetime
-        if "game_date" not in df.columns:
-            return df
+        conflicts, filled, inferences, unknown = [], [], [], []
+        for key, idx in df.groupby("player_key").groups.items():
+            vals = df.loc[idx, "mf_dartconnect"]
+            nonblank = vals[vals != ""]
+            name = df.loc[idx, "player_name"].iloc[0]
+            if len(nonblank):
+                uniq = sorted(nonblank.unique())
+                if len(uniq) > 1:
+                    latest = dates.loc[nonblank.index].sort_values(ascending=False).index[0]
+                    gender = nonblank.loc[latest]
+                    conflicts.append((name, key, nonblank.value_counts().to_dict(), gender))
+                else:
+                    gender = uniq[0]
+                blank_idx = vals[vals == ""].index
+                if len(blank_idx):
+                    filled.append((name, len(blank_idx), gender))
+                    df.loc[blank_idx, "M/F"] = gender
+                df.loc[idx, "player_gender"] = gender
+                df.loc[idx, "gender_source"] = "dartconnect"
+                continue
 
-        # Track corrections
-        corrections = []
+            first = None
+            if "_first_name_original" in df.columns:
+                firsts = df.loc[idx, "_first_name_original"].dropna()
+                first = firsts.iloc[0] if len(firsts) else None
+            if first is None:
+                first = str(name).split()[0] if str(name).split() else None
+            gender, conf = self._infer_gender_from_first_name(first)
+            if gender:
+                df.loc[idx, "player_gender"] = gender
+                df.loc[idx, "gender_source"] = "inferred"
+                df.loc[idx, "M/F"] = gender
+                inferences.append((name, key, first, gender, conf))
+            else:
+                unknown.append((name, key, first))
 
-        # For each player, find their most recent gender value
-        for player in df["player_name"].unique():
-            player_mask = df["player_name"] == player
-            player_df = df[player_mask].copy()
-
-            # Get all non-empty gender values
-            gender_values = player_df["M/F"].dropna()
-            gender_values = gender_values[gender_values.str.strip() != ""]
-
-            if len(gender_values) == 0:
-                continue  # No gender data for this player - will be handled by inference
-
-            # Check if there are inconsistencies OR missing values for some rows
-            unique_genders = gender_values.unique()
-            has_missing = len(gender_values) < len(
-                player_df
-            )  # Some rows missing gender
-
-            if len(unique_genders) > 1 or has_missing:
-                # Sort by date (most recent first) and get the latest gender
-                player_df_sorted = player_df.sort_values("game_date", ascending=False)
-                latest_gender = None
-
-                for idx, row in player_df_sorted.iterrows():
-                    gender = row.get("M/F", "")
-                    if pd.notna(gender) and str(gender).strip() != "":
-                        latest_gender = str(gender).strip()
-                        break
-
-                if latest_gender:
-                    # Count how many records will be changed
-                    old_genders = player_df["M/F"].value_counts().to_dict()
-                    corrections.append(
-                        {
-                            "player": player,
-                            "old_values": old_genders,
-                            "new_value": latest_gender,
-                            "records_updated": len(
-                                player_df[player_df["M/F"] != latest_gender]
-                            ),
-                        }
-                    )
-
-                    # Update all records for this player
-                    df.loc[player_mask, "M/F"] = latest_gender
-
-        # Log corrections
-        if corrections:
+        if filled:
             self.logger.info(
-                f"🔧 Normalized gender for {len(corrections)} player(s) with inconsistent values:"
+                f"🔧 Filled blank M/F rows from the player's DartConnect value for {len(filled)} player(s):"
             )
-            for correction in corrections:
-                old_vals_str = ", ".join(
-                    [f"{k}({v})" for k, v in correction["old_values"].items()]
-                )
-                self.logger.info(
-                    f"  • {correction['player']}: {old_vals_str} → {correction['new_value']} "
-                    f"({correction['records_updated']} records updated)"
-                )
-
-        return df
-
-    def _infer_missing_gender(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Infer gender for players with missing M/F data based on first name.
-
-        Uses common name lists to make educated guesses. Conservative approach:
-        only infers when confident, avoids unisex names.
-        """
-        if (
-            df.empty
-            or "M/F" not in df.columns
-            or "_first_name_original" not in df.columns
-        ):
-            return df
-
-        # Track inferences
-        inferences = []
-
-        # Find players with missing gender
-        for player in df["player_name"].unique():
-            player_mask = df["player_name"] == player
-            player_df = df[player_mask]
-
-            # Check if all rows for this player have missing gender
-            gender_values = player_df["M/F"].dropna()
-            gender_values = gender_values[gender_values.str.strip() != ""]
-
-            if len(gender_values) > 0:
-                continue  # Player already has gender data
-
-            # Get first name
-            first_name = player_df["_first_name_original"].iloc[0]
-            if pd.isna(first_name) or str(first_name).strip() == "":
-                continue
-
-            first_name_lower = str(first_name).strip().lower()
-
-            # Skip unisex names
-            if first_name_lower in UNISEX_NAMES:
-                continue
-
-            # Infer gender based on name lists
-            inferred_gender = None
-            confidence = "unknown"
-
-            if first_name_lower in COMMON_MALE_NAMES:
-                inferred_gender = "M"
-                confidence = "high"
-            elif first_name_lower in COMMON_FEMALE_NAMES:
-                inferred_gender = "F"
-                confidence = "high"
-            elif len(first_name_lower) >= 3 and first_name_lower.endswith("a"):
-                # Simple heuristic: names ending in 'a' often female
-                inferred_gender = "F"
-                confidence = "low"
-
-            if inferred_gender:
-                inferences.append(
-                    {
-                        "player": player,
-                        "first_name": first_name,
-                        "inferred_gender": inferred_gender,
-                        "confidence": confidence,
-                        "records_updated": len(player_df),
-                    }
-                )
-
-                # Update all records for this player
-                df.loc[player_mask, "M/F"] = inferred_gender
-
-        # Log inferences
+            for name, n, g in filled:
+                self.logger.info(f"  • {name}: {n} blank row(s) → {g}")
+        for name, key, counts, g in conflicts:
+            self.logger.warning(
+                f"⚠️  Conflicting DartConnect M/F for {name} <{key}>: {counts} → using most recent '{g}'"
+            )
         if inferences:
-            high_conf = [i for i in inferences if i["confidence"] == "high"]
-            low_conf = [i for i in inferences if i["confidence"] == "low"]
-
             self.logger.info(
-                f"🔍 Inferred gender for {len(inferences)} player(s) with missing data "
-                f"({len(high_conf)} high confidence, {len(low_conf)} low confidence):"
+                f"🔍 Inferred gender for {len(inferences)} player(s) with NO DartConnect M/F:"
             )
-
-            for inference in inferences:
-                conf_icon = "✓" if inference["confidence"] == "high" else "~"
-                self.logger.info(
-                    f"  {conf_icon} {inference['player']} (first: {inference['first_name']}) → {inference['inferred_gender']} "
-                    f"({inference['records_updated']} records)"
-                )
-
-        # Clean up temporary column
-        if "_first_name_original" in df.columns:
-            df = df.drop(columns=["_first_name_original"])
-
+            for name, key, first, g, conf in inferences:
+                icon = "✓" if conf == "high" else "~"
+                self.logger.info(f"  {icon} {name} <{key}> (first: {first}) → {g} ({conf})")
+        for name, key, first in unknown:
+            self.logger.warning(
+                f"⚠️  No gender for {name} <{key}> (first: {first}); not on Men/Women lists"
+            )
         return df
 
     def _calculate_statistics(self, df: pd.DataFrame) -> Dict[str, Any]:

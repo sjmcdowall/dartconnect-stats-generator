@@ -17,6 +17,11 @@ a PROBABLE ERROR report when:
       latest date
   (f) the QPs in processed_results.json (what gets published) differ from a
       fresh in-process run
+  (g) a player's published Men/Women list (processed_results.json lookup and
+      the newest Individual-*.pdf) differs from a non-blank DartConnect M/F
+      (players keyed by email, else team+name)
+  WARNINGS (do not fail): every player whose gender came from first-name
+  inference (all DartConnect M/F rows blank), and conflicting DartConnect M/F
 
 Exit code 0 = pass, 1 = PROBABLE ERROR (do not upload), 2 = could not run.
 
@@ -29,6 +34,8 @@ import argparse
 import json
 import logging
 import re
+import shutil
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -39,7 +46,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from src.config import Config  # noqa: E402
-from src.data_processor import DataProcessor  # noqa: E402
+from src.data_processor import DataProcessor, PLACEHOLDER_NAMES  # noqa: E402
+from src.pdf_generator import build_gender_lookup  # noqa: E402
 
 
 def qp_501_turn(v):
@@ -83,17 +91,144 @@ def player_table(results):
     return out
 
 
+def results_raw_df(results):
+    raw = results.get("raw_data")
+    if isinstance(raw, dict):
+        return pd.DataFrame.from_dict(raw, orient="index")
+    if isinstance(raw, list):
+        return pd.DataFrame(raw)
+    return raw if isinstance(raw, pd.DataFrame) else pd.DataFrame()
+
+
+def pdf_gender_lists(pdf_path, names_by_division):
+    """Parse an Individual PDF: {(division, name): 'F'|'M'} for the
+    Singles/All Events/Quality Points blocks (Women block, then Men block)."""
+    exe = shutil.which("pdftotext") or (
+        "/opt/homebrew/bin/pdftotext" if Path("/opt/homebrew/bin/pdftotext").exists() else None
+    )
+    if not exe:
+        return None
+    # -layout keeps table rows on one line; plain mode interleaves columns.
+    text = subprocess.run([exe, "-layout", str(pdf_path), "-"], capture_output=True, text=True).stdout
+    out, div, mode = {}, None, None
+    for line in text.splitlines():
+        m = re.match(r"^\s*(\w[\w ]*?) Division\s*$", line)
+        if m and m.group(1) in names_by_division:
+            div, mode = m.group(1), None
+            continue
+        if "Singles - Women" in line:
+            mode = "F"
+            continue
+        if "Singles - Men" in line:
+            mode = "M"
+            continue
+        if "Ratings - " in line:
+            mode = None
+        if not (div and mode):
+            continue
+        for name in names_by_division[div]:
+            if re.search(r"(?<!\w)" + re.escape(name) + r"(?!\w)", line):
+                prev = out.get((div, name))
+                out[(div, name)] = mode if prev in (None, mode) else "BOTH"
+    return out
+
+
+def gender_checks(csv_path, pub_df, pdf_path):
+    """Return (errors, warnings, notes) for gender list integrity."""
+    errors, warnings, notes = [], [], []
+    raw = pd.read_csv(csv_path, low_memory=False)
+    raw = raw[~raw["First Name"].astype(str).str.strip().str.lower().isin(PLACEHOLDER_NAMES)]
+    raw = raw[raw["First Name"].notna() & raw["Date"].notna()].copy()
+    first = raw["First Name"].astype(str).str.strip()
+    lastfi = raw["Last Name, FI"].astype(str)
+    raw["player_name"] = first + " " + lastfi.str.split(",").str[0].str.strip()
+    raw["mf"] = raw["M/F"].where(raw["M/F"].notna(), "").astype(str).str.strip().str.upper()
+    raw["key"] = DataProcessor._player_key_series(raw)
+    dc = {}
+    for key, grp in raw.groupby("key"):
+        vals = set(v for v in grp["mf"] if v)
+        dc[key] = {
+            "vals": vals,
+            "name": grp["player_name"].iloc[0],
+            "teams": set(grp["Team"].dropna()),
+            "division": grp["Division"].dropna().iloc[0] if grp["Division"].notna().any() else "",
+        }
+        if len(vals) > 1:
+            warnings.append(f"    conflicting DartConnect M/F for {grp['player_name'].iloc[0]} <{key}>: {grp['mf'].value_counts().to_dict()}")
+
+    # (team, name) shared by >1 unique player with different DartConnect genders
+    tn = {}
+    for key, info in dc.items():
+        for t in info["teams"]:
+            tn.setdefault((t, info["name"]), []).append(key)
+    for (t, n), keys in tn.items():
+        gset = set().union(*(dc[k]["vals"] for k in keys))
+        if len(keys) > 1 and len(gset) > 1:
+            errors.append(f"(g) identity collision: {n} ({t}) is {len(keys)} players with M/F {sorted(gset)}: {keys}")
+
+    lookup = build_gender_lookup(pub_df)
+    names_by_div = {}
+    for info in dc.values():
+        names_by_div.setdefault(info["division"], set()).add(info["name"])
+    pdf = pdf_gender_lists(pdf_path, names_by_div) if pdf_path else None
+    if pdf_path and pdf is None:
+        warnings.append("    pdftotext not found - PDF gender lists not checked")
+
+    checked = 0
+    for key, info in dc.items():
+        if len(info["vals"]) != 1:
+            continue
+        want = next(iter(info["vals"]))
+        for t in info["teams"]:
+            got = lookup.get((t, info["name"]))
+            checked += 1
+            if got != want:
+                errors.append(f"(g) {info['name']} ({t}) <{key}>: DartConnect M/F={want} but published gender={got}")
+        if pdf is not None:
+            got_pdf = pdf.get((info["division"], info["name"]))
+            if got_pdf is not None and got_pdf != want:
+                where = "both lists" if got_pdf == "BOTH" else ("Women lists" if got_pdf == "F" else "Men lists")
+                errors.append(f"(g) {info['name']} <{key}>: DartConnect M/F={want} but on {where} in {Path(pdf_path).name}")
+
+    inferred = []
+    if "gender_source" in pub_df.columns:
+        src = pub_df.drop_duplicates(["Team", "player_name"])
+        for _, r in src[src["gender_source"] == "inferred"].iterrows():
+            inferred.append(f"    {r['player_name']} ({r['Team']}) <{r.get('player_key', '')}> -> {r['player_gender']} (no DartConnect M/F)")
+    else:
+        for key, info in dc.items():
+            if not info["vals"]:
+                for t in info["teams"]:
+                    g = lookup.get((t, info["name"]))
+                    if g:
+                        inferred.append(f"    {info['name']} ({t}) <{key}> -> {g} (no DartConnect M/F)")
+    if inferred:
+        warnings.append(f"  {len(inferred)} player(s) with INFERRED gender (all DartConnect M/F blank):")
+        warnings.extend(sorted(inferred))
+    unknown = [info["name"] for info in dc.values() if not info["vals"]
+               and not any(lookup.get((t, info["name"])) for t in info["teams"])]
+    if unknown:
+        warnings.append(f"  {len(unknown)} player(s) with NO gender (left off Men/Women lists): {', '.join(sorted(unknown))}")
+    notes.append(
+        f"Gender: {sum(1 for i in dc.values() if i['vals'])} players with DartConnect M/F checked "
+        f"({checked} team entries), {len(inferred)} inferred, "
+        f"PDF lists {'checked: ' + Path(pdf_path).name if pdf else 'not checked'}"
+    )
+    return errors, warnings, notes
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("input", help="by-leg export CSV or data directory")
     ap.add_argument("--config", default=str(ROOT / "config.yaml"))
     ap.add_argument("--results", help="processed_results.json to cross-check")
     ap.add_argument("--log", help="run log from main_consolidated.py to scan")
+    ap.add_argument("--pdf", help="Individual PDF to check (default: newest Individual-*.pdf next to --results)")
     ap.add_argument("--min-ratio", type=float, default=0.25)
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.ERROR, format="%(levelname)s %(name)s: %(message)s")
-    errors, notes = [], []
+    errors, notes, warnings = [], [], []
 
     try:
         csv_path = find_csv(Path(args.input))
@@ -200,17 +335,35 @@ def main():
             for k in sorted(diff)[:10]:
                 errors.append(f"      {k[1]} ({k[0]}): published {pub.get(k, {}).get('qps')} vs fresh {cur_tbl.get(k, {}).get('qps')}")
 
+    # (g) gender lists
+    pub_df = cur["raw_data"]
+    pdf_path = Path(args.pdf) if args.pdf else None
+    if args.results and Path(args.results).exists():
+        pub_df = results_raw_df(json.load(open(args.results)))
+        if pdf_path is None:
+            pdfs = sorted(Path(args.results).parent.glob("Individual-*.pdf"), key=lambda f: f.stat().st_mtime)
+            pdf_path = pdfs[-1] if pdfs else None
+    g_err, g_warn, g_notes = gender_checks(csv_path, pub_df, pdf_path)
+    errors.extend(g_err)
+    warnings.extend(g_warn)
+    notes.extend(g_notes)
+
     print("=" * 72)
     for n in notes:
         print(n)
     print("-" * 72)
+    if warnings:
+        print("⚠️  WARNINGS (not blocking):")
+        for w in warnings:
+            print(w)
+        print("-" * 72)
     if errors:
         print("❌ PROBABLE ERROR — DO NOT PUBLISH. Sanity check found:")
         for e in errors:
             print(e)
         print("=" * 72)
         return 1
-    print("✅ SANITY CHECK PASSED (a-f clean)")
+    print("✅ SANITY CHECK PASSED (a-g clean)")
     print("=" * 72)
     return 0
 
