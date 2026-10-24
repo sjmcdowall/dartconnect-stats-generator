@@ -4,8 +4,19 @@
 # Usage:
 #   ./weekly.sh           # Full workflow: download + reports + upload to Wix
 #   ./weekly.sh --reports # Reports only (skip download)
-#   ./weekly.sh --download # Download export + Players roster only (skip reports & upload)
+#   ./weekly.sh --download # Download export (+ roster if needed) only (skip reports & upload)
 #   ./weekly.sh --no-upload # Download + reports, skip Wix upload
+#   ./weekly.sh --refresh-roster # Force a Players-roster refresh (combinable, see below)
+#
+# Flags can be combined, e.g.:
+#   ./weekly.sh --download --refresh-roster   # export + forced roster refresh
+#   ./weekly.sh --reports --no-upload         # reports + sanity check only
+#   ./weekly.sh --refresh-roster --reports --no-upload  # roster refresh (no export
+#                                             # download) + reports, no upload
+#
+# Players roster (gender source) is cached at $DATA_DIR/players_roster.csv and
+# is only re-fetched (read-only) when there is no roster for this season, the
+# fresh export has a player not in the cache, or --refresh-roster is given.
 
 set -o pipefail
 
@@ -31,18 +42,37 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "🎯 Season 76 Weekly Update - Fall/Winter 2026"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# Parse arguments
+# Parse arguments (combinable)
 DOWNLOAD=true
 REPORTS=true
 UPLOAD=true
+REFRESH_ROSTER=false
+MODE=""
 
-if [[ "$1" == "--reports" ]]; then
+for arg in "$@"; do
+    case "$arg" in
+        --reports|--download)
+            if [ -n "$MODE" ] && [ "$MODE" != "$arg" ]; then
+                echo -e "${RED}❌ --reports and --download are mutually exclusive${NC}"
+                exit 2
+            fi
+            MODE="$arg"
+            ;;
+        --no-upload)      UPLOAD=false ;;
+        --refresh-roster) REFRESH_ROSTER=true ;;
+        -h|--help)        sed -n '2,19p' "$0"; exit 0 ;;
+        *)
+            echo -e "${RED}❌ Unknown option: $arg${NC}"
+            sed -n '2,19p' "$0"
+            exit 2
+            ;;
+    esac
+done
+
+if [[ "$MODE" == "--reports" ]]; then
     DOWNLOAD=false
-    UPLOAD=true
-elif [[ "$1" == "--download" ]]; then
+elif [[ "$MODE" == "--download" ]]; then
     REPORTS=false
-    UPLOAD=false
-elif [[ "$1" == "--no-upload" ]]; then
     UPLOAD=false
 fi
 
@@ -61,13 +91,29 @@ if $DOWNLOAD; then
         exit 1
     fi
     echo -e "${GREEN}✅ Download complete${NC}"
+fi
 
-    # Step 1b: Refresh the league-portal Players roster (authoritative M/F; read-only)
-    echo -e "\n${BLUE}👥 Step 1b: Refreshing league Players roster (gender source)...${NC}"
-    if $PYTHON scripts/fetch_roster.py --headless -o "$DATA_DIR"; then
-        echo -e "${GREEN}✅ Roster refreshed: $DATA_DIR/players_roster.csv${NC}"
+# Step 1b: League-portal Players roster (authoritative M/F; read-only, cached).
+# Runs after a download (refreshes only on a cache miss / new player) or when
+# --refresh-roster forces it.
+if $DOWNLOAD || $REFRESH_ROSTER; then
+    echo -e "\n${BLUE}👥 Step 1b: Players roster (gender source)...${NC}"
+    ROSTER_ARGS=(--headless -o "$DATA_DIR")
+    if $REFRESH_ROSTER; then
+        ROSTER_ARGS+=(--force)
+    fi
+    if [ "${ROSTER_DRY_RUN:-0}" = "1" ]; then
+        ROSTER_ARGS+=(--dry-run)   # test hook: log the decision, no network
+    fi
+    $PYTHON scripts/fetch_roster.py "${ROSTER_ARGS[@]}"
+    ROSTER_RC=$?
+    if [ $ROSTER_RC -eq 0 ]; then
+        echo -e "${GREEN}✅ Roster ready: $DATA_DIR/players_roster.csv${NC}"
+    elif [ $ROSTER_RC -eq 3 ]; then
+        echo -e "${YELLOW}⚠️  Roster refresh failed - keeping cached $DATA_DIR/players_roster.csv${NC}"
+        echo -e "${YELLOW}   (sanity check hard-fails if any player ends up with no gender)${NC}"
     else
-        echo -e "${YELLOW}⚠️  Roster refresh failed - using existing $DATA_DIR/players_roster.csv if present${NC}"
+        echo -e "${YELLOW}⚠️  Roster refresh failed and no cached roster for this season${NC}"
         echo -e "${YELLOW}   (sanity check hard-fails if any player ends up with no gender)${NC}"
     fi
 fi

@@ -90,6 +90,33 @@ def roster_gender_for(roster, email, name, teams):
 PLACEHOLDER_NAMES = {"ghost", "placeholder", "test", "dummy"}
 
 
+def export_players_missing_from_roster(csv_path, roster_path):
+    """Export players with no row in the cached roster (used by the roster cache).
+
+    A player counts as present if their email is in the roster, or (team, name)
+    matches a roster row - the same identity rules roster_gender_for() uses.
+    Returns a sorted list of (name, team, email) tuples; raises if the roster
+    file is missing.
+    """
+    r = pd.read_csv(roster_path, dtype=str, keep_default_na=False)
+    emails = {_norm(e) for e in r.get("email", []) if _norm(e)}
+    tns = {(_norm(t), _norm(n)) for t, n in zip(r.get("team", []), r.get("player_name", []))}
+    raw = pd.read_csv(csv_path, dtype=str, keep_default_na=False, low_memory=False)
+    missing = set()
+    for _, row in raw.iterrows():
+        first = " ".join(str(row.get("First Name", "")).split())
+        if not first or not str(row.get("Date", "")).strip() or first.lower() in PLACEHOLDER_NAMES:
+            continue
+        last = str(row.get("Last Name, FI", "")).split(",")[0].strip()
+        name = f"{first} {last}".strip()
+        team = str(row.get("Team", "")).strip()
+        email = _norm(row.get("Email", ""))
+        if (email and email in emails) or (_norm(team), _norm(name)) in tns:
+            continue
+        missing.add((name, team, email))
+    return sorted(missing)
+
+
 class DataProcessor:
     """Processes DartConnect league data and calculates statistics."""
 
