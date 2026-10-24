@@ -831,6 +831,8 @@ class DataProcessor:
             "cricket_qp_data": [],
             "501_qp_data": [],
             "enhanced_statistics": {},
+            "failed_urls": [],
+            "url_qp_totals": {},
         }
 
         if "report_url" not in df.columns:
@@ -864,12 +866,25 @@ class DataProcessor:
                     games_501 = self.url_fetcher.extract_501_stats(game_data)
                     if games_501:
                         enhanced_data["501_qp_data"].extend(games_501)
+
+                    # Per-report QP total (used by the pre-publish sanity check)
+                    enhanced_data["url_qp_totals"][url] = sum(
+                        p.get("total_qp", 0)
+                        for g in (cricket_games or [])
+                        for p in g.get("players", [])
+                    ) + sum(
+                        p.get("total_turn_qp", 0)
+                        for g in (games_501 or [])
+                        for p in g.get("players", [])
+                    )
                 else:
                     enhanced_data["urls_failed"] += 1
+                    enhanced_data["failed_urls"].append(url)
 
             except Exception as e:
                 self.logger.error(f"Failed to process URL {url}: {e}")
                 enhanced_data["urls_failed"] += 1
+                enhanced_data["failed_urls"].append(url)
 
         # Enhanced quality point calculations for Cricket games
         if enhanced_data["cricket_qp_data"]:
@@ -889,6 +904,12 @@ class DataProcessor:
             f"{enhanced_data['urls_processed']} successful, "
             f"{enhanced_data['urls_failed']} failed"
         )
+        if enhanced_data["failed_urls"]:
+            self.logger.warning(
+                f"⚠️  {len(enhanced_data['failed_urls'])} match report(s) could not be "
+                f"fetched/parsed; their QPs will use CSV fallback (Hi Turn / DO): "
+                + ", ".join(enhanced_data["failed_urls"])
+            )
 
         return enhanced_data
 
@@ -1726,15 +1747,99 @@ class DataProcessor:
                 player_name, enhanced_data
             )
             total_qps += self._calculate_501_do_qps_from_csv(player_df)
+            # Per-game fallback: games whose recap failed have no turn data,
+            # so use CSV Hi Turn for those legs (DO already counted above).
+            total_qps += self._fallback_qps_for_failed_games(
+                player_df, player_name, enhanced_data, include_501=True
+            )
         else:
-            # Fallback: CSV Hi Turn + DO
+            # Fallback: CSV Hi Turn + DO for every leg
             total_qps += self._calculate_501_qps_from_csv(player_df)
+            # Cricket legs of failed games still need a fallback
+            total_qps += self._fallback_qps_for_failed_games(
+                player_df, player_name, enhanced_data, include_501=False
+            )
 
         # Cricket QPs from enhanced data
         if enhanced_data:
             total_qps += self._get_cricket_qps_for_player(player_name, enhanced_data)
 
         return total_qps
+
+    @staticmethod
+    def _hi_turn_501_qp(hi_turn: float) -> int:
+        if 164 <= hi_turn <= 180:
+            return 5
+        if 148 <= hi_turn <= 163:
+            return 4
+        if 132 <= hi_turn <= 147:
+            return 3
+        if 116 <= hi_turn <= 131:
+            return 2
+        if 95 <= hi_turn <= 115:
+            return 1
+        return 0
+
+    @staticmethod
+    def _hi_turn_cricket_qp(marks: float) -> int:
+        """Marks-only cricket QP from the CSV best-turn marks (5H=1 ... 9H=5)."""
+        if marks >= 9:
+            return 5
+        if marks >= 5:
+            return int(marks) - 4
+        return 0
+
+    def _fallback_qps_for_failed_games(
+        self,
+        player_df,
+        player_name: str,
+        enhanced_data: Dict,
+        include_501: bool,
+    ) -> int:
+        """CSV-derived QPs for legs whose recap URL failed to fetch/parse.
+
+        501: Hi Turn -> turn QP (checkout QPs come from DO separately).
+        Cricket: Hi Turn (best-turn marks) -> marks-only QP.
+        Legs with no usable Hi Turn are recorded as missing, never silently 0.
+        """
+        if not enhanced_data or "report_url" not in player_df.columns:
+            return 0
+        failed = set(enhanced_data.get("failed_urls") or [])
+        if not failed:
+            return 0
+        rows = player_df[player_df["report_url"].isin(failed)]
+        if rows.empty:
+            return 0
+
+        fallback_log = enhanced_data.setdefault("qp_fallback", {})
+        missing_log = enhanced_data.setdefault("qp_missing_legs", [])
+        total = 0
+        for _, row in rows.iterrows():
+            game = row.get("game_name")
+            if game == "501 SIDO" and not include_501:
+                continue
+            if game not in ("501 SIDO", "Cricket"):
+                continue
+            hi_turn = pd.to_numeric(row.get("Hi Turn"), errors="coerce")
+            if pd.isna(hi_turn):
+                missing_log.append(
+                    {"player": player_name, "game": game, "url": row.get("report_url")}
+                )
+                self.logger.warning(
+                    f"QP MISSING: {player_name} {game} leg in {row.get('report_url')} "
+                    f"has no recap data and no CSV Hi Turn"
+                )
+                continue
+            qp = (
+                self._hi_turn_501_qp(hi_turn)
+                if game == "501 SIDO"
+                else self._hi_turn_cricket_qp(hi_turn)
+            )
+            total += qp
+            entry = fallback_log.setdefault(player_name, {"legs": 0, "qps": 0})
+            entry["legs"] += 1
+            entry["qps"] += qp
+        return total
 
     def _calculate_501_qps_from_csv(self, player_df) -> int:
         """Calculate 501 QPs using Hi Turn and DO columns from CSV."""

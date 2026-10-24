@@ -283,19 +283,24 @@ class DartConnectURLFetcher:
     ) -> Optional[Dict[str, Any]]:
         """Extract game data from the HTML page's data-page attribute."""
         try:
-            # Find the data-page attribute
-            pattern = r'data-page="([^"]+)"'
-            match = re.search(pattern, html_content)
+            page_data = None
 
-            if not match:
-                self.logger.warning("Could not find data-page attribute in HTML")
-                return None
-
-            # Decode HTML entities
-            json_data = html.unescape(match.group(1))
-
-            # Parse JSON
-            page_data = json.loads(json_data)
+            # New format (Oct 2026+): Inertia page JSON lives inside
+            # <script data-page="app" type="application/json">{...}</script>
+            script_match = re.search(
+                r'<script[^>]*\bdata-page="[^"]*"[^>]*>(.*?)</script>',
+                html_content,
+                re.DOTALL,
+            )
+            if script_match and script_match.group(1).strip():
+                page_data = json.loads(script_match.group(1).strip())
+            else:
+                # Legacy format: HTML-escaped JSON in the data-page attribute
+                attr_match = re.search(r'data-page="([^"]+)"', html_content)
+                if not attr_match:
+                    self.logger.warning("Could not find data-page JSON in HTML")
+                    return None
+                page_data = json.loads(html.unescape(attr_match.group(1)))
 
             # Extract the props which contain the game data
             if "props" in page_data:

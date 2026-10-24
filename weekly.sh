@@ -66,13 +66,31 @@ fi
 # Step 2: Generate reports
 if $REPORTS; then
     echo -e "\n${BLUE}📊 Step 2: Generating reports...${NC}"
-    $PYTHON main_consolidated.py "$DATA_DIR" -o "$OUTPUT_DIR"
+    mkdir -p "$OUTPUT_DIR/logs"
+    REPORT_LOG="$OUTPUT_DIR/logs/weekly-$(date +%Y%m%d-%H%M%S).log"
+    $PYTHON main_consolidated.py "$DATA_DIR" -o "$OUTPUT_DIR" 2>&1 | tee "$REPORT_LOG"
     
     if [ $? -ne 0 ]; then
         echo -e "${RED}❌ Report generation failed${NC}"
         exit 1
     fi
     echo -e "${GREEN}✅ Reports generated${NC}"
+fi
+
+# Step 2b: Pre-publish sanity check (always runs before any upload)
+if $REPORTS || $UPLOAD; then
+    echo -e "\n${BLUE}🔎 Step 2b: Pre-publish sanity check...${NC}"
+    SANITY_ARGS=(--results "$OUTPUT_DIR/processed_results.json")
+    if [ -n "$REPORT_LOG" ]; then
+        SANITY_ARGS+=(--log "$REPORT_LOG")
+    fi
+    $PYTHON scripts/sanity_check.py "$DATA_DIR" "${SANITY_ARGS[@]}"
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}❌ Sanity check found a PROBABLE ERROR - aborting before Wix upload${NC}"
+        echo -e "${YELLOW}Reports are available locally in $OUTPUT_DIR for inspection${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}✅ Sanity check passed${NC}"
 fi
 
 # Step 3: Upload to Wix
